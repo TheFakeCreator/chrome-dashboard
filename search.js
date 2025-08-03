@@ -177,9 +177,10 @@ export function setupSearch() {
     let raw = searchInput.value.trim();
     if (!raw) return;
 
+
     // Command parsing
-    // Syntax: /g images cats
-    // Providers: /g (Google), /b (Bing), /ddg (DuckDuckGo), /yt (YouTube), /gh (GitHub)
+    // Syntax: /g images cats, /u youtube.com
+    // Providers: /g (Google), /b (Bing), /ddg (DuckDuckGo), /yt (YouTube), /gh (GitHub), /u (URL)
     // Filters: images, videos
     let engine = document.querySelector('.custom-dropdown[data-name="search-engine"] input[type="hidden"]').value;
     let filter = document.querySelector('.custom-dropdown[data-name="search-filter"] input[type="hidden"]').value;
@@ -190,7 +191,8 @@ export function setupSearch() {
       '/b': 'bing',
       '/ddg': 'duckduckgo',
       '/yt': 'youtube',
-      '/gh': 'github'
+      '/gh': 'github',
+      '/u': 'url'
     };
     const filterMap = {
       'images': 'images',
@@ -198,44 +200,89 @@ export function setupSearch() {
     };
 
     // Detect provider command
-    const providerMatch = raw.match(/^\/(g|b|ddg|yt|gh)\b/i);
+    const providerMatch = raw.match(/^\/(g|b|ddg|yt|gh|u)\b/i);
     if (providerMatch) {
       engine = providerMap[providerMatch[0].toLowerCase()];
       query = query.replace(providerMatch[0], '').trim();
     }
 
-    // Detect filter command
-    const filterMatch = query.match(/\b(images|videos)\b/i);
-    if (filterMatch) {
-      filter = filterMap[filterMatch[0].toLowerCase()];
-      query = query.replace(filterMatch[0], '').trim();
+    // If no command is used and input looks like a URL, open it directly
+    if (!providerMatch) {
+      // Check if raw is a valid domain (e.g., youtube.com, www.youtube.com, google.com)
+      const urlPattern = /^(?:https?:\/\/)?(?:www\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(?:\/[\w\-\.~:\/?#\[\]@!$&'()*+,;=]*)?$/;
+      if (urlPattern.test(raw)) {
+        let siteUrl = raw.match(/^https?:\/\//) ? raw : `https://${raw}`;
+        window.open(siteUrl, '_blank');
+        // Track the search if tracking is enabled
+        const trackingEnabled = localStorage.getItem('dashboard-tracking') !== 'false';
+        if (trackingEnabled) {
+          userTracker.trackSearch(raw, 'url');
+        }
+        searchInput.value = '';
+        suggestionsBox.style.display = 'none';
+        return;
+      }
+    }
+
+    // Detect filter command (not for /u)
+    if (engine !== 'url') {
+      const filterMatch = query.match(/\b(images|videos)\b/i);
+      if (filterMatch) {
+        filter = filterMap[filterMatch[0].toLowerCase()];
+        query = query.replace(filterMatch[0], '').trim();
+      }
     }
 
     let url = '';
-    switch (engine) {
-      case 'google':
-        url = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
-        if (filter === 'images') url += '&tbm=isch';
-        if (filter === 'videos') url += '&tbm=vid';
-        break;
-      case 'bing':
-        url = `https://www.bing.com/search?q=${encodeURIComponent(query)}`;
-        if (filter === 'images') url += '&scope=images';
-        if (filter === 'videos') url += '&scope=video';
-        break;
-      case 'duckduckgo':
-        url = `https://duckduckgo.com/?q=${encodeURIComponent(query)}`;
-        if (filter === 'images') url += '&iax=images&ia=images';
-        if (filter === 'videos') url += '&iax=videos&ia=videos';
-        break;
-      case 'youtube':
-        url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
-        break;
-      case 'github':
-        url = `https://github.com/search?q=${encodeURIComponent(query)}`;
-        break;
-      default:
-        url = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+    if (engine === 'url') {
+      // Direct URL search: open the site, optionally with search if query is present
+      let site = query.split(' ')[0];
+      let siteUrl = site.match(/^https?:\/\//) ? site : `https://${site}`;
+      let searchQuery = query.slice(site.length).trim();
+      if (searchQuery) {
+        // Try to append search query for common sites
+        if (/youtube\.com/i.test(site)) {
+          url = `${siteUrl}/results?search_query=${encodeURIComponent(searchQuery)}`;
+        } else if (/github\.com/i.test(site)) {
+          url = `${siteUrl}/search?q=${encodeURIComponent(searchQuery)}`;
+        } else if (/duckduckgo\.com/i.test(site)) {
+          url = `${siteUrl}/?q=${encodeURIComponent(searchQuery)}`;
+        } else if (/google\.com/i.test(site)) {
+          url = `${siteUrl}/search?q=${encodeURIComponent(searchQuery)}`;
+        } else if (/bing\.com/i.test(site)) {
+          url = `${siteUrl}/search?q=${encodeURIComponent(searchQuery)}`;
+        } else {
+          url = siteUrl;
+        }
+      } else {
+        url = siteUrl;
+      }
+    } else {
+      switch (engine) {
+        case 'google':
+          url = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+          if (filter === 'images') url += '&tbm=isch';
+          if (filter === 'videos') url += '&tbm=vid';
+          break;
+        case 'bing':
+          url = `https://www.bing.com/search?q=${encodeURIComponent(query)}`;
+          if (filter === 'images') url += '&scope=images';
+          if (filter === 'videos') url += '&scope=video';
+          break;
+        case 'duckduckgo':
+          url = `https://duckduckgo.com/?q=${encodeURIComponent(query)}`;
+          if (filter === 'images') url += '&iax=images&ia=images';
+          if (filter === 'videos') url += '&iax=videos&ia=videos';
+          break;
+        case 'youtube':
+          url = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+          break;
+        case 'github':
+          url = `https://github.com/search?q=${encodeURIComponent(query)}`;
+          break;
+        default:
+          url = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
+      }
     }
     window.open(url, '_blank');
     

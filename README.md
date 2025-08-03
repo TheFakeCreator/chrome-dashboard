@@ -36,33 +36,35 @@ A modern, modular new tab dashboard for Chrome with:
 - Edit sections, cards, and settings directly in the dashboard UI.
 - Modify CSS or JS modules for advanced customization.
 
-
 ## Project Structure
 ```
 chrome-dashboard/
-├── base.css
-├── header.css
-├── search.css
-├── sections.css
-├── modal.css
-├── settings.css
-├── responsive.css
-├── form.css
-├── card-popup.css
-├── main.js
-├── settings.js
-├── clock.js
-├── weather.js
-├── search.js
+├── stylesheets/
+│   ├── base.css
+│   ├── card-popup.css
+│   ├── form.css
+│   ├── header.css
+│   ├── modal.css
+│   ├── responsive.css
+│   ├── search.css
+│   ├── sections.css
+│   ├── settings.css
+│   ├── style.css
 ├── ai.js
-├── modal.js
-├── sections.js
-├── tabGroups.js
-├── newtab.html
-├── manifest.json
+├── clock.js
+├── COPILOT.md
 ├── icon128.png
-├── .gitignore
-└── README.md
+├── main.js
+├── manifest.json
+├── modal.js
+├── newtab.html
+├── README.md
+├── script.js
+├── search.js
+├── sections.js
+├── settings.js
+├── tabGroups.js
+├── weather.js
 ```
 
 ## Contributing

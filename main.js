@@ -39,6 +39,22 @@ document.addEventListener('DOMContentLoaded', () => {
   if (modal) modal.classList.add('hidden');
   if (modalOverlay) modalOverlay.classList.add('hidden');
 
+  // Keyboard shortcut to focus search input: / or Ctrl+K
+  document.addEventListener('keydown', function(e) {
+    // Focus search on "/" (ignore if typing in input/textarea)
+    if (e.key === '/' && !e.ctrlKey && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+      e.preventDefault();
+      const searchInput = document.getElementById('search-input');
+      if (searchInput) searchInput.focus();
+    }
+    // Focus search on Ctrl+K
+    if (e.key.toLowerCase() === 'k' && e.ctrlKey) {
+      e.preventDefault();
+      const searchInput = document.getElementById('search-input');
+      if (searchInput) searchInput.focus();
+    }
+  });
+
   // Sections rendering
   renderSections();
   // Tab groups rendering

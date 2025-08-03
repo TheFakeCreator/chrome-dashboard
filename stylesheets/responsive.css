@@ -1,0 +1,19 @@
+@media (max-width: 700px) {
+  #main-container {
+    padding: 12px 2px;
+  }
+  #grid-sections {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .section {
+    padding: 12px 6px 8px 6px;
+  }
+  #add-section-btn {
+    width: 44px;
+    height: 44px;
+    font-size: 1.5rem;
+    bottom: 16px;
+    right: 16px;
+  }
+}

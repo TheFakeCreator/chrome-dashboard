@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "Modern Dashboard New Tab",
+  "description": "A modern, customizable new tab page with search, AI chat, modular sections, and tab groups.",
+  "version": "1.0.0",
+  "chrome_url_overrides": {
+    "newtab": "newtab.html"
+  },
+  "permissions": ["storage"],
+  "host_permissions": ["<all_urls>"]
+}

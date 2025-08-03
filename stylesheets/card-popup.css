@@ -1,0 +1,21 @@
+#card-popup-menu button.card-popup-btn {
+  background: none;
+  color: #eaeaea;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 18px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+  text-align: left;
+  margin: 0 8px;
+  outline: none;
+}
+#card-popup-menu button.card-popup-btn:hover {
+  background: #23262f;
+  color: #3b82f6;
+}
+#card-popup-menu button.card-popup-btn:active {
+  background: #181a20;
+  color: #10b981;
+}

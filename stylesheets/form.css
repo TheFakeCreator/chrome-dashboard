@@ -1,0 +1,21 @@
+input, select, button {
+  font-size: 1rem;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  background: #23262f;
+  color: #eaeaea;
+}
+input:focus, select:focus {
+  background: #2c2f38;
+}
+button {
+  background: #3b82f6;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+button:hover {
+  background: #2563eb;
+}

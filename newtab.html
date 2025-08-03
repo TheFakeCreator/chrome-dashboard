@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modern Dashboard New Tab</title>
+  <link rel="stylesheet" href="/stylesheets/base.css">
+  <link rel="stylesheet" href="/stylesheets/header.css">
+  <link rel="stylesheet" href="/stylesheets/search.css">
+  <link rel="stylesheet" href="/stylesheets/sections.css">
+  <link rel="stylesheet" href="/stylesheets/modal.css">
+  <link rel="stylesheet" href="/stylesheets/settings.css">
+  <link rel="stylesheet" href="/stylesheets/responsive.css">
+  <link rel="stylesheet" href="/stylesheets/form.css">
+  <link rel="stylesheet" href="/stylesheets/card-popup.css">
+</head>
+<body>
+  <div id="main-container">
+    <header>
+      <h1 id="welcome">Welcome, Sanskar 👋</h1>
+      <div id="clock"></div>
+      <div id="date-weather">
+        <span id="location"></span>
+        <span id="date"></span>
+        <span id="weather"></span>
+      </div>
+      <button id="settings-btn" title="Settings">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a0a0a0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09A1.65 1.65 0 0 0 9 3.09V3a2 2 0 0 1 4 0v.09c.38.16.7.46 1 1.51a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82c.16.38.46.7 1.51 1H21a2 2 0 0 1 0 4h-.09c-.16.38-.46.7-1.51 1z"/></svg>
+      </button>
+    </header>
+    <section id="search-section">
+      <form id="search-form">
+        <input type="text" id="search-input" placeholder="Search..." autocomplete="off">
+        <select id="search-engine">
+          <option value="google">Google</option>
+          <option value="bing">Bing</option>
+          <option value="duckduckgo">DuckDuckGo</option>
+          <option value="youtube">YouTube</option>
+          <option value="github">GitHub</option>
+        </select>
+        <select id="search-filter">
+          <option value="">All</option>
+          <option value="images">Images</option>
+          <option value="videos">Videos</option>
+        </select>
+        <button type="submit">Search</button>
+      </form>
+    </section>
+    <section id="ai-section">
+      <form id="ai-form">
+        <div class="ai-inner">
+          <input type="text" id="ai-input" placeholder="Ask AI..." autocomplete="off">
+          <select id="ai-platform">
+            <option value="chatgpt">ChatGPT</option>
+            <option value="gemini">Gemini</option>
+            <option value="claude">Claude</option>
+          </select>
+          <button type="submit">Ask</button>
+        </div>
+      </form>
+    </section>
+    <div id="grid-sections"></div>
+    <button id="add-section-btn" title="Add New Section">+</button>
+    <section id="tab-groups-section">
+      <h2>Tab Groups</h2>
+      <div id="tab-groups-list"></div>
+      <button id="add-tab-group-btn">+ Add Tab Group</button>
+    </section>
+  </div>
+  <div id="modal-overlay" class="hidden"></div>
+  <div id="modal" class="hidden"></div>
+  <script type="module" src="main.js"></script>
+</body>
+</html>

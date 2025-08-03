@@ -1,0 +1,61 @@
+#search-section, #ai-section {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+#search-form, #ai-form {
+  display: flex;
+  gap: 8px;
+  background: #23262f;
+  padding: 12px 18px;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+}
+/* AI Search Bar with Gradient Border */
+#ai-form {
+  position: relative;
+  background: transparent;
+  padding: 2px;
+  border-radius: 15px;
+  background: linear-gradient(45deg, 
+    #ff006e, 
+    #ff4081, 
+    #9c27b0, 
+    #673ab7, 
+    #3f51b5, 
+    #2196f3, 
+    #00bcd4, 
+    #4caf50, 
+    #8bc34a, 
+    #cddc39, 
+    #ffeb3b, 
+    #ffc107, 
+    #ff9800, 
+    #ff5722,
+    #ff006e
+  );
+  background-size: 400% 400%;
+  animation: aiGradient 4s ease infinite;
+  box-shadow: 0 0 20px rgba(255, 0, 110, 0.3), 0 2px 12px rgba(0,0,0,0.12);
+}
+.no-ai-gradient {
+  background: #23262f !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.12) !important;
+  animation: none !important;
+}
+#ai-form .ai-inner {
+  background: #23262f;
+  border-radius: 12px;
+  padding: 12px 18px;
+  display: flex;
+  gap: 8px;
+  position: relative;
+  z-index: 1;
+}
+@keyframes aiGradient {
+  0% { background-position: 0% 50%; }
+  25% { background-position: 100% 50%; }
+  50% { background-position: 100% 100%; }
+  75% { background-position: 0% 100%; }
+  100% { background-position: 0% 50%; }
+}

@@ -1,0 +1,47 @@
+header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 32px;
+  position: relative;
+}
+#welcome {
+  font-size: 2.2rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+#clock {
+  position: static;
+  margin: 0 auto 18px auto;
+  font-size: 2.1rem;
+  font-weight: 600;
+  letter-spacing: 2.5px;
+  color: #3b82f6;
+  background: linear-gradient(90deg, #23262f 60%, #181a20 100%);
+  padding: 12px 32px;
+  border-radius: 16px;
+  box-shadow: 0 2px 18px rgba(59,130,246,0.12), 0 1.5px 8px rgba(0,0,0,0.10);
+  text-shadow: 0 0 8px #3b82f6, 0 0 2px #23262f;
+  transition: color 0.2s, box-shadow 0.2s;
+  z-index: 1003;
+}
+#date-weather {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 24px;
+  margin: 0 auto 12px auto;
+  font-size: 1.1rem;
+  color: #a0a0a0;
+}
+#date-weather span {
+  background: #23262f;
+  padding: 8px 18px;
+  border-radius: 10px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+  font-weight: 500;
+  letter-spacing: 1px;
+  color: #a0a0a0;
+  min-width: 120px;
+  text-align: center;
+}

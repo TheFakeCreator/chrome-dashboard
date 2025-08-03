@@ -1,0 +1,137 @@
+#grid-sections {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+  margin: 32px 0;
+}
+.section {
+  background: #23262f;
+  border-radius: 14px;
+  padding: 18px 14px 14px 14px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+  position: relative;
+  animation: fadeIn 0.5s;
+}
+.section-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  margin-bottom: 12px;
+  gap: 8px;
+  background: #23262f;
+  border-radius: 6px;
+  padding: 2px 6px;
+  cursor: pointer;
+  color: #a0a0a0;
+  font-size: 1.2rem;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.section-menu:hover {
+  background: #2c2f38;
+  color: #fff;
+}
+.section-title {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+.section-menu {
+  background: #23262f;
+  border-radius: 6px;
+  padding: 2px 6px;
+  cursor: pointer;
+  color: #a0a0a0;
+  font-size: 1.2rem;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.section-menu:hover {
+  background: #2c2f38;
+  color: #fff;
+}
+.section-add-btn {
+  color: #fff;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  font-size: 1.2rem;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.card {
+  background: #181a20;
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.08);
+  position: relative;
+  animation: fadeIn 0.5s;
+}
+.card-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+.card-name {
+  font-size: 1rem;
+  font-weight: 400;
+  flex: 1;
+  max-width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+a.card-name{
+    text-decoration: none;
+    color: #727272;
+}
+.card-menu {
+  top: 8px;
+  right: 8px;
+  border-radius: 6px;
+  padding: 2px 6px;
+  cursor: pointer;
+  color: #a0a0a0;
+  font-size: 1.2rem;
+  transition: background 0.2s;
+}
+.card-menu:hover {
+  background: #2c2f38;
+  color: #fff;
+}
+#add-section-btn {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  background: #10b981;
+  color: #fff;
+  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  font-size: 2.2rem;
+  border: none;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+  cursor: pointer;
+  z-index: 10;
+  transition: background 0.2s;
+}
+#add-section-btn:hover {
+  background: #059669;
+}

@@ -4,7 +4,7 @@ export function setupAIChat() {
   aiForm.addEventListener('submit', function(e) {
     e.preventDefault();
     const query = document.getElementById('ai-input').value.trim();
-    const platform = document.getElementById('ai-platform').value;
+    const platform = document.querySelector('.custom-dropdown[data-name="ai-platform"] input[type="hidden"]').value;
     if (!query) return;
     navigator.clipboard.writeText(query).then(() => {
       let url = '';

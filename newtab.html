@@ -13,6 +13,9 @@
   <link rel="stylesheet" href="/stylesheets/responsive.css">
   <link rel="stylesheet" href="/stylesheets/form.css">
   <link rel="stylesheet" href="/stylesheets/card-popup.css">
+  <link rel="stylesheet" href="/stylesheets/customDropdown.css">
+  <script src="customDropdown.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
   <div id="main-container">
@@ -36,30 +39,45 @@
     <section id="search-section">
       <form id="search-form">
         <input type="text" id="search-input" placeholder="Search..." autocomplete="off">
-        <select id="search-engine">
-          <option value="google">Google</option>
-          <option value="bing">Bing</option>
-          <option value="duckduckgo">DuckDuckGo</option>
-          <option value="youtube">YouTube</option>
-          <option value="github">GitHub</option>
-        </select>
-        <select id="search-filter">
-          <option value="">All</option>
-          <option value="images">Images</option>
-          <option value="videos">Videos</option>
-        </select>
-        <button type="submit">Search</button>
+        <div id="search-suggestions" class="suggestions-dropdown" style="display:none;"></div>
+        <div class="custom-dropdown" data-name="search-engine">
+          <input type="hidden" name="search-engine" value="google">
+          <div class="dropdown-selected">Google</div>
+          <div class="dropdown-options">
+            <div class="dropdown-option selected" data-value="google">Google</div>
+            <div class="dropdown-option" data-value="bing">Bing</div>
+            <div class="dropdown-option" data-value="duckduckgo">DuckDuckGo</div>
+            <div class="dropdown-option" data-value="youtube">YouTube</div>
+            <div class="dropdown-option" data-value="github">GitHub</div>
+          </div>
+        </div>
+        <div class="custom-dropdown" data-name="search-filter">
+          <input type="hidden" name="search-filter" value="">
+          <div class="dropdown-selected">All</div>
+          <div class="dropdown-options">
+            <div class="dropdown-option selected" data-value="">All</div>
+            <div class="dropdown-option" data-value="images">Images</div>
+            <div class="dropdown-option" data-value="videos">Videos</div>
+          </div>
+        </div>
+        <button type="submit" id="search-btn" title="Search" style="display: flex; align-items: center; justify-content: center; padding: 0 16px;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a0a0a0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </button>
       </form>
     </section>
     <section id="ai-section">
       <form id="ai-form">
         <div class="ai-inner">
           <input type="text" id="ai-input" placeholder="Ask AI..." autocomplete="off">
-          <select id="ai-platform">
-            <option value="chatgpt">ChatGPT</option>
-            <option value="gemini">Gemini</option>
-            <option value="claude">Claude</option>
-          </select>
+          <div class="custom-dropdown" data-name="ai-platform">
+            <input type="hidden" name="ai-platform" value="chatgpt">
+            <div class="dropdown-selected">ChatGPT</div>
+            <div class="dropdown-options">
+              <div class="dropdown-option selected" data-value="chatgpt">ChatGPT</div>
+              <div class="dropdown-option" data-value="gemini">Gemini</div>
+              <div class="dropdown-option" data-value="claude">Claude</div>
+            </div>
+          </div>
           <button type="submit">Ask</button>
         </div>
       </form>

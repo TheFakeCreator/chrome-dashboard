@@ -1,0 +1,25 @@
+{
+  "name": "chrome-dashboard",
+  "version": "1.0.0",
+  "description": "A modern, modular new tab dashboard for Chrome with:\r - Customizable sections and cards\r - Weather, clock, and location\r - AI search bar with gradient border\r - Tab groups\r - Responsive design\r - Modular CSS and JS",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TheFakeCreator/chrome-dashboard.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/TheFakeCreator/chrome-dashboard/issues"
+  },
+  "homepage": "https://github.com/TheFakeCreator/chrome-dashboard#readme",
+  "dependencies": {
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "googleapis": "^154.1.0"
+  }
+}

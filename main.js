@@ -1,5 +1,5 @@
 // Main entry point
-import { setAIGradientBorder, updateWelcome, setWelcomeVisibility, applyTheme } from './settings.js';
+import { setAIGradientBorder, updateWelcome, setWelcomeVisibility, applyTheme, applyCustomBackground } from './settings.js';
 import { getTimeString, getDateString, updateClock, userLocation } from './clock.js';
 import { updateWeather, getWeatherIcon } from './weather.js';
 import { setupSearch } from './search.js';
@@ -11,6 +11,17 @@ import { userTracker } from './tracking.js';
 
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Loading screen logic
+  const loadingScreen = document.getElementById('loading-screen');
+  if (loadingScreen) {
+    setTimeout(() => {
+      loadingScreen.style.transform = 'translateY(-100vh)';
+      loadingScreen.style.opacity = '0';
+      setTimeout(() => {
+        loadingScreen.style.display = 'none';
+      }, 800);
+    }, 900); // Simulate quick load, adjust as needed
+  }
   // Theme, welcome, AI border
   applyTheme(localStorage.getItem('dashboard-theme') || 'dark');
   updateWelcome(localStorage.getItem('dashboard-username') || 'Sanskar');
@@ -73,6 +84,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const dateFormat = localStorage.getItem('dashboard-dateFormat') || 'long';
       const trackingEnabled = localStorage.getItem('dashboard-tracking') !== 'false';
       const showVisitCounts = localStorage.getItem('dashboard-showVisitCounts') !== 'false';
+      
+      // Get tracking statistics
+      const trackingData = userTracker.getTrackingData();
+      const totalSearches = Object.values(trackingData.searches).reduce((sum, search) => sum + search.count, 0);
+      const totalWebsites = Object.keys(trackingData.websites).length;
+      const totalVisits = Object.values(trackingData.websites).reduce((sum, site) => sum + site.count, 0);
       showModal(`
         <h2>Extension Settings</h2>
         <form id="settings-form">
@@ -97,9 +114,9 @@ document.addEventListener('DOMContentLoaded', () => {
           </label>
           <label style="display:block;margin-bottom:12px;">Date Format:
             <select name="dateFormat">
-              <option value="long" ${dateFormat==='long'?'selected':''}>Weekday, Month Day, Year</option>
-              <option value="short" ${dateFormat==='short'?'selected':''}>MM/DD/YYYY</option>
-              <option value="iso" ${dateFormat==='iso'?'selected':''}>YYYY-MM-DD</option>
+              <option value="long" ${dateFormat==='long'?'selected':''}>Weekday, Month Day</option>
+              <option value="short" ${dateFormat==='short'?'selected':''}>Weekday, Mon Day</option>
+              <option value="iso" ${dateFormat==='iso'?'selected':''}>MM-DD</option>
             </select>
           </label>
           <label style="display:block;margin-bottom:12px;">
@@ -118,7 +135,34 @@ document.addEventListener('DOMContentLoaded', () => {
             <input type="checkbox" name="showVisitCounts" ${showVisitCounts ? 'checked' : ''}>
             Show visit counts on cards
           </label>
+          <label style="display:block;margin-bottom:12px;">Custom Background Image:
+            <input type="file" id="bg-image-input" accept="image/*" style="margin-left:8px;">
+            <button type="button" id="clear-bg-btn" style="margin-left:8px;">Clear</button>
+            <span id="bg-image-status" style="font-size:12px;color:#888;margin-left:8px;"></span>
+            <br>
+            <input type="text" id="bg-image-url" placeholder="Paste image URL here" style="margin-top:8px;width:70%;padding:4px 8px;border-radius:6px;border:none;background:#23262f;color:#eaeaea;">
+            <button type="button" id="set-bg-url-btn" style="margin-left:8px;">Set URL</button>
+          </label>
           <div style="margin-top:20px;padding-top:16px;border-top:1px solid #353945;">
+            <h3 style="margin-bottom:12px;font-size:1.1em;">Usage Statistics</h3>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;font-size:0.9em;">
+              <div style="background:#1a1d24;padding:8px 12px;border-radius:6px;">
+                <div style="color:#888;">Total Searches</div>
+                <div style="font-size:1.2em;font-weight:600;color:#3b82f6;">${totalSearches}</div>
+              </div>
+              <div style="background:#1a1d24;padding:8px 12px;border-radius:6px;">
+                <div style="color:#888;">Unique Websites</div>
+                <div style="font-size:1.2em;font-weight:600;color:#10b981;">${totalWebsites}</div>
+              </div>
+              <div style="background:#1a1d24;padding:8px 12px;border-radius:6px;">
+                <div style="color:#888;">Total Visits</div>
+                <div style="font-size:1.2em;font-weight:600;color:#f59e0b;">${totalVisits}</div>
+              </div>
+              <div style="background:#1a1d24;padding:8px 12px;border-radius:6px;">
+                <div style="color:#888;">Search History</div>
+                <div style="font-size:1.2em;font-weight:600;color:#8b5cf6;">${trackingData.searchHistory.length}</div>
+              </div>
+            </div>
             <h3 style="margin-bottom:12px;font-size:1.1em;">Data Management</h3>
             <div id="tracking-stats" style="margin-bottom:12px;font-size:0.9em;color:#888;"></div>
             <button type="button" id="export-data-btn" style="margin-right:8px;">Export Tracking Data</button>
@@ -161,6 +205,7 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('dashboard-aiGradient', aiGradient);
             localStorage.setItem('dashboard-tracking', trackingEnabled);
             localStorage.setItem('dashboard-showVisitCounts', showVisitCounts);
+            applyCustomBackground();
             applyTheme(theme);
             updateWelcome(username);
             setWelcomeVisibility(showWelcome);
@@ -168,58 +213,80 @@ document.addEventListener('DOMContentLoaded', () => {
             if (manualLocation) {
               window.userLocation = manualLocation;
             }
-            
             // Re-render sections to reflect tracking changes
             renderSections();
-            
             hideModal();
           });
-          
-          // Export data button
-          const exportBtn = document.getElementById('export-data-btn');
-          if (exportBtn) {
-            exportBtn.addEventListener('click', function() {
-              const trackingData = userTracker.exportData();
-              const dataStr = JSON.stringify(trackingData, null, 2);
-              const dataBlob = new Blob([dataStr], {type: 'application/json'});
-              const url = URL.createObjectURL(dataBlob);
-              const link = document.createElement('a');
-              link.href = url;
-              link.download = `chrome-dashboard-data-${new Date().toISOString().split('T')[0]}.json`;
-              link.click();
-              URL.revokeObjectURL(url);
-            });
+
+          // Custom background image logic
+          const bgInput = document.getElementById('bg-image-input');
+          const bgStatus = document.getElementById('bg-image-status');
+          const clearBgBtn = document.getElementById('clear-bg-btn');
+          const bgUrlInput = document.getElementById('bg-image-url');
+          const setBgUrlBtn = document.getElementById('set-bg-url-btn');
+          // Show status if already set
+          if (localStorage.getItem('dashboard-bgImage')) {
+            bgStatus.textContent = 'Custom background set.';
           }
-          
-          // Clear tracking data button
-          const clearBtn = document.getElementById('clear-tracking-btn');
-          if (clearBtn) {
-            clearBtn.addEventListener('click', function() {
-              if (confirm('Are you sure you want to clear all tracking data? This action cannot be undone.')) {
-                userTracker.clearAllData();
-                renderSections(); // Re-render to show empty "Visited Often" section
-                alert('All tracking data has been cleared.');
-              }
-            });
-          }
+          bgInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (file) {
+              const reader = new FileReader();
+              reader.onload = function(e) {
+                localStorage.setItem('dashboard-bgImage', e.target.result);
+                applyCustomBackground();
+                bgStatus.textContent = 'Custom background set.';
+              };
+              reader.readAsDataURL(file);
+            }
+          });
+          setBgUrlBtn.addEventListener('click', function() {
+            const url = bgUrlInput.value.trim();
+            if (url) {
+              localStorage.setItem('dashboard-bgImage', url);
+              applyCustomBackground();
+              bgStatus.textContent = 'Custom background set.';
+            }
+          });
+          clearBgBtn.addEventListener('click', function() {
+            localStorage.removeItem('dashboard-bgImage');
+            applyCustomBackground();
+            bgStatus.textContent = 'Custom background cleared.';
+            bgUrlInput.value = '';
+          });
         }
       }, 0);
     });
   }
 
   // Add more event listeners and initialization as needed
+  applyCustomBackground();
 });
 
 // Daily Quote logic
 function fetchDailyQuote() {
+  const today = new Date().toISOString().slice(0, 10);
+  const cachedQuote = localStorage.getItem('dashboard-quote');
+  const cachedDate = localStorage.getItem('dashboard-quote-date');
+  if (cachedQuote && cachedDate === today) {
+    try {
+      const data = JSON.parse(cachedQuote);
+      document.getElementById('quote-text').textContent = `"${data.content}"`;
+      document.getElementById('quote-author').textContent = `— ${data.author}`;
+      return;
+    } catch {}
+  }
   fetch('https://api.quotable.io/random')
     .then(res => res.json())
     .then(data => {
       document.getElementById('quote-text').textContent = `"${data.content}"`;
       document.getElementById('quote-author').textContent = `— ${data.author}`;
+      localStorage.setItem('dashboard-quote', JSON.stringify(data));
+      localStorage.setItem('dashboard-quote-date', today);
     })
     .catch(() => {
       document.getElementById('quote-text').textContent = '"The best way to get started is to quit talking and begin doing."';
       document.getElementById('quote-author').textContent = '— Walt Disney';
     });
 }
+

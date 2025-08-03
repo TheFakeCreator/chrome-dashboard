@@ -10,9 +10,6 @@ input, select, button {
 input:focus, select:focus {
   background: #2c2f38;
 }
-#search-input:focus, #ai-input:focus {
-  background: #23262f !important;
-}
 button {
   background: #3b82f6;
   color: #fff;

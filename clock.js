@@ -7,8 +7,13 @@ export { userLocation };
 
 export function getTimeString(now) {
   const timeFormat = localStorage.getItem('dashboard-timeFormat') || '24';
+  let timeStr;
   if (timeFormat === '12') {
-    return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+    // Remove AM/PM by splitting and taking only the time part
+    timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+    // Remove am/pm (last part after space)
+    timeStr = timeStr.replace(/\s*[APap][Mm]$/, '');
+    return timeStr;
   } else {
     return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
   }
@@ -17,11 +22,16 @@ export function getTimeString(now) {
 export function getDateString(now) {
   const dateFormat = localStorage.getItem('dashboard-dateFormat') || 'long';
   if (dateFormat === 'short') {
-    return now.toLocaleDateString([], { year: 'numeric', month: '2-digit', day: '2-digit' });
+    // Short weekday (Mon, Tue, etc.) and short month (Jan, Feb, etc.), no year, no leading zero
+    return now.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
   } else if (dateFormat === 'iso') {
-    return now.toISOString().slice(0, 10);
+    // MM-DD only, remove leading zero from day
+    const mmdd = now.toISOString().slice(5, 10);
+    const [mm, dd] = mmdd.split('-');
+    return `${mm}-${parseInt(dd, 10)}`;
   } else {
-    return now.toLocaleDateString([], { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    // Short weekday (Mon, Tue, etc.) and short month (Jan, Feb, etc.), no year, no leading zero
+    return now.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
   }
 }
 

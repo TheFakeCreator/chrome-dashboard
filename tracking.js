@@ -99,6 +99,21 @@ export class UserTracker {
     this.saveTrackingData(data);
   }
 
+  // Get recently visited websites
+  getRecentlyVisited(limit = 10) {
+    const data = this.getTrackingData();
+    return Object.values(data.websites)
+      .sort((a, b) => b.lastVisited - a.lastVisited)
+      .slice(0, limit)
+      .map(site => ({
+        name: site.title,
+        url: site.originalUrl,
+        icon: site.icon,
+        count: site.count,
+        lastVisited: site.lastVisited
+      }));
+  }
+
   // Get top searches for suggestions
   getTopSearches(limit = 10) {
     const data = this.getTrackingData();

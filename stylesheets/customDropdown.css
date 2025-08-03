@@ -5,7 +5,6 @@
   font-size: 1rem;
 }
 .custom-dropdown .dropdown-selected {
-  background: #23262f;
   color: #7b7b7b;
   padding: 8px 36px 8px 12px;
   cursor: pointer;
@@ -40,7 +39,7 @@
   border: 1px solid #353945;
   border-radius: 8px;
   box-shadow: 0 4px 16px rgba(0,0,0,0.18);
-  z-index: 10;
+  z-index: 100000;
   max-height: 220px;
   overflow-y: auto;
 }

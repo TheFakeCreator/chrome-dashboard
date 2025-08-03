@@ -213,11 +213,16 @@ export function setupSearch() {
       if (urlPattern.test(raw)) {
         let siteUrl = raw.match(/^https?:\/\//) ? raw : `https://${raw}`;
         window.open(siteUrl, '_blank');
-        // Track the search if tracking is enabled
+        
+        // Track both the search and the website visit if tracking is enabled
         const trackingEnabled = localStorage.getItem('dashboard-tracking') !== 'false';
         if (trackingEnabled) {
           userTracker.trackSearch(raw, 'url');
+          // Also track as a website visit
+          const siteName = raw.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0];
+          userTracker.trackWebsiteVisit(siteUrl, siteName, `https://www.google.com/s2/favicons?domain=${siteName}&sz=32`);
         }
+        
         searchInput.value = '';
         suggestionsBox.style.display = 'none';
         return;
@@ -256,6 +261,13 @@ export function setupSearch() {
         }
       } else {
         url = siteUrl;
+      }
+      
+      // Track website visit for /u command
+      const trackingEnabled = localStorage.getItem('dashboard-tracking') !== 'false';
+      if (trackingEnabled) {
+        const siteName = site.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0];
+        userTracker.trackWebsiteVisit(url, siteName, `https://www.google.com/s2/favicons?domain=${siteName}&sz=32`);
       }
     } else {
       switch (engine) {

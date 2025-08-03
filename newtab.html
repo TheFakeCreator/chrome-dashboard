@@ -18,6 +18,9 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+  <div id="loading-screen" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(30,32,40,0.45);backdrop-filter:blur(18px) saturate(180%);box-shadow:0 8px 32px 0 rgba(31,38,135,0.37);transition:transform 0.8s cubic-bezier(.77,0,.18,1), opacity 0.5s;">
+    
+  </div>
   <div id="main-container">
     <header>
       <h1 id="welcome">Welcome, Sanskar 👋</h1>
@@ -65,7 +68,7 @@
         </button>
       </form>
     </section>
-    <section id="ai-section">
+    <section id="ai-section" style="display: none;">
       <form id="ai-form">
         <div class="ai-inner">
           <input type="text" id="ai-input" placeholder="Ask AI..." autocomplete="off">

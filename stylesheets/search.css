@@ -12,6 +12,7 @@
   transition: background 0.2s;
   padding: 0 !important;
 }
+
 #search-btn:focus {
   outline: none;
 }
@@ -23,11 +24,14 @@
 #search-form, #ai-form {
   display: flex;
   gap: 8px;
-  background: #23262f;
+  background: rgba(35, 38, 47, 0.35);
   padding: 12px 18px;
   border-radius: 12px;
   box-shadow: 0 2px 12px rgba(0,0,0,0.12);
   position: relative;
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 0.1px solid rgba(255,255,255,0.07);
 }
 #search-engine, #search-filter, #ai-platform {
       color: #818181;
@@ -104,6 +108,12 @@
   background: transparent;
   border: none;
   outline: none;
+}
+
+#search-input:focus, #search-input:active{
+  background: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
 }
 
 .suggestion-item {

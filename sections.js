@@ -27,6 +27,7 @@ export function renderSections() {
   const grid = document.getElementById('grid-sections');
   grid.innerHTML = '';
   const sections = getSections();
+  updateVisitedOftenSection(sections);
   sections.forEach((section, idx) => {
     const secDiv = document.createElement('div');
     secDiv.className = 'section';
@@ -43,16 +44,27 @@ export function renderSections() {
     section.items.forEach((item, itemIdx) => {
       const card = document.createElement('div');
       card.className = 'card';
+      card.style.cursor = 'pointer';
       card.innerHTML = `
         <img class="card-icon" src="${item.icon}" alt="icon">
-        <a class="card-name" href="${item.url}" target="_blank">${item.name}</a>
+        <span class="card-name" style="cursor:pointer;">${item.name}</span>
         <span class="card-menu" title="Options">&#x22EE;</span>
       `;
       const img = card.querySelector('.card-icon');
       img.addEventListener('error', () => {
         img.src = `https://www.google.com/s2/favicons?domain=${item.url}`;
       });
-      card.querySelector('.card-menu').addEventListener('click', (e) => openCardMenu(e, idx, itemIdx));
+      // Make the whole card clickable except the menu
+      card.addEventListener('click', (e) => {
+        if (e.target.classList.contains('card-menu')) return;
+        window.open(item.url, '_blank');
+        incrementVisitCount(item.url, item.name, item.icon);
+        renderSections();
+      });
+      card.querySelector('.card-menu').addEventListener('click', (e) => {
+        e.stopPropagation();
+        openCardMenu(e, idx, itemIdx);
+      });
       cardsDiv.appendChild(card);
     });
     const addCard = document.createElement('div');
@@ -68,6 +80,28 @@ export function renderSections() {
     cardsDiv.appendChild(addCard);
     grid.appendChild(secDiv);
   });
+}
+
+// Track visit counts in localStorage
+function incrementVisitCount(url, name, icon) {
+  let visits = JSON.parse(localStorage.getItem('visitedCounts') || '{}');
+  if (!visits[url]) {
+    visits[url] = { count: 0, name, icon, url };
+  }
+  visits[url].count += 1;
+  localStorage.setItem('visitedCounts', JSON.stringify(visits));
+}
+
+// Update the 'Visited Often' section with top visited sites
+function updateVisitedOftenSection(sections) {
+  let visits = JSON.parse(localStorage.getItem('visitedCounts') || '{}');
+  let topSites = Object.values(visits)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 8); // Show top 8
+  let visitedSection = sections.find(s => s.key === 'visited');
+  if (visitedSection) {
+    visitedSection.items = topSites;
+  }
 }
 
 function openSectionMenu(e, sectionIdx) {

@@ -21,6 +21,9 @@ document.addEventListener('DOMContentLoaded', () => {
   updateClock();
   updateWeather();
 
+  // Daily Quote
+  fetchDailyQuote();
+
   // Search and AI chat
   setupSearch();
   setupAIChat();
@@ -127,3 +130,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Add more event listeners and initialization as needed
 });
+
+// Daily Quote logic
+function fetchDailyQuote() {
+  fetch('https://api.quotable.io/random')
+    .then(res => res.json())
+    .then(data => {
+      document.getElementById('quote-text').textContent = `"${data.content}"`;
+      document.getElementById('quote-author').textContent = `— ${data.author}`;
+    })
+    .catch(() => {
+      document.getElementById('quote-text').textContent = '"The best way to get started is to quit talking and begin doing."';
+      document.getElementById('quote-author').textContent = '— Walt Disney';
+    });
+}

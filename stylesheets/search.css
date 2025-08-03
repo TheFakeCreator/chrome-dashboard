@@ -96,6 +96,16 @@
   overflow-y: auto;
   margin-top: 0;
 }
+
+#search-input{
+  width: 100%;
+  font-size: 1rem;
+  color: #eaeaea;
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
 .suggestion-item {
   padding: 8px 16px;
   font-size: 15px;

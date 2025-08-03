@@ -7,6 +7,7 @@ import { setupAIChat } from './ai.js';
 import { showModal, hideModal } from './modal.js';
 import { getSections, saveSections, defaultSections, renderSections } from './sections.js';
 import { getTabGroups, saveTabGroups, renderTabGroups } from './tabGroups.js';
+import { userTracker } from './tracking.js';
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -70,6 +71,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const manualLocation = localStorage.getItem('dashboard-manualLocation') || '';
       const timeFormat = localStorage.getItem('dashboard-timeFormat') || '24';
       const dateFormat = localStorage.getItem('dashboard-dateFormat') || 'long';
+      const trackingEnabled = localStorage.getItem('dashboard-tracking') !== 'false';
+      const showVisitCounts = localStorage.getItem('dashboard-showVisitCounts') !== 'false';
       showModal(`
         <h2>Extension Settings</h2>
         <form id="settings-form">
@@ -107,12 +110,36 @@ document.addEventListener('DOMContentLoaded', () => {
             <input type="checkbox" name="aiGradient" ${localStorage.getItem('dashboard-aiGradient') !== 'false' ? 'checked' : ''}>
             Enable AI gradient border
           </label>
+          <label style="display:block;margin-bottom:12px;">
+            <input type="checkbox" name="trackingEnabled" ${trackingEnabled ? 'checked' : ''}>
+            Enable search and website tracking
+          </label>
+          <label style="display:block;margin-bottom:12px;">
+            <input type="checkbox" name="showVisitCounts" ${showVisitCounts ? 'checked' : ''}>
+            Show visit counts on cards
+          </label>
+          <div style="margin-top:20px;padding-top:16px;border-top:1px solid #353945;">
+            <h3 style="margin-bottom:12px;font-size:1.1em;">Data Management</h3>
+            <div id="tracking-stats" style="margin-bottom:12px;font-size:0.9em;color:#888;"></div>
+            <button type="button" id="export-data-btn" style="margin-right:8px;">Export Tracking Data</button>
+            <button type="button" id="clear-tracking-btn" style="background:#ef4444;">Clear All Tracking Data</button>
+          </div>
           <button type="submit">Save</button>
           <button type="button">Cancel</button>
         </form>
       `);
       setTimeout(() => {
         const settingsForm = document.getElementById('settings-form');
+        
+        // Show tracking statistics
+        const trackingStats = document.getElementById('tracking-stats');
+        if (trackingStats) {
+          const stats = userTracker.getStatistics();
+          trackingStats.innerHTML = `
+            <div>📊 Tracked: ${stats.totalUniqueSearches} unique searches (${stats.totalSearches} total), ${stats.totalUniqueWebsites} websites (${stats.totalVisits} visits)</div>
+          `;
+        }
+        
         if (settingsForm) {
           settingsForm.addEventListener('submit', function(e) {
             e.preventDefault();
@@ -123,6 +150,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const timeFormat = this.timeFormat.value;
             const dateFormat = this.dateFormat.value;
             const aiGradient = this.aiGradient.checked;
+            const trackingEnabled = this.trackingEnabled.checked;
+            const showVisitCounts = this.showVisitCounts.checked;
             localStorage.setItem('dashboard-theme', theme);
             localStorage.setItem('dashboard-username', username);
             localStorage.setItem('dashboard-showWelcome', showWelcome);
@@ -130,6 +159,8 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('dashboard-timeFormat', timeFormat);
             localStorage.setItem('dashboard-dateFormat', dateFormat);
             localStorage.setItem('dashboard-aiGradient', aiGradient);
+            localStorage.setItem('dashboard-tracking', trackingEnabled);
+            localStorage.setItem('dashboard-showVisitCounts', showVisitCounts);
             applyTheme(theme);
             updateWelcome(username);
             setWelcomeVisibility(showWelcome);
@@ -137,8 +168,40 @@ document.addEventListener('DOMContentLoaded', () => {
             if (manualLocation) {
               window.userLocation = manualLocation;
             }
+            
+            // Re-render sections to reflect tracking changes
+            renderSections();
+            
             hideModal();
           });
+          
+          // Export data button
+          const exportBtn = document.getElementById('export-data-btn');
+          if (exportBtn) {
+            exportBtn.addEventListener('click', function() {
+              const trackingData = userTracker.exportData();
+              const dataStr = JSON.stringify(trackingData, null, 2);
+              const dataBlob = new Blob([dataStr], {type: 'application/json'});
+              const url = URL.createObjectURL(dataBlob);
+              const link = document.createElement('a');
+              link.href = url;
+              link.download = `chrome-dashboard-data-${new Date().toISOString().split('T')[0]}.json`;
+              link.click();
+              URL.revokeObjectURL(url);
+            });
+          }
+          
+          // Clear tracking data button
+          const clearBtn = document.getElementById('clear-tracking-btn');
+          if (clearBtn) {
+            clearBtn.addEventListener('click', function() {
+              if (confirm('Are you sure you want to clear all tracking data? This action cannot be undone.')) {
+                userTracker.clearAllData();
+                renderSections(); // Re-render to show empty "Visited Often" section
+                alert('All tracking data has been cleared.');
+              }
+            });
+          }
         }
       }, 0);
     });

@@ -1,4 +1,6 @@
 // Search logic
+import { userTracker } from './tracking.js';
+
 export function setupSearch() {
 
   const searchForm = document.getElementById('search-form');
@@ -76,23 +78,9 @@ export function setupSearch() {
       ghostInput.textContent = '';
       ghostSuggestion = '';
     }
-    // DDG suggestions dropdown (unchanged)
-    if (abortController) abortController.abort();
-    abortController = new AbortController();
-    fetch(`https://duckduckgo.com/ac/?q=${encodeURIComponent(query.trim())}`, { signal: abortController.signal })
-      .then(res => res.json())
-      .then(data => {
-        if (searchInput.value.trim() !== lastQuery.trim()) return;
-        if (!Array.isArray(data) || data.length === 0) {
-          suggestionsBox.style.display = 'none';
-          return;
-        }
-        suggestionsBox.innerHTML = data.map(item => `<div class="suggestion-item">${item.phrase}</div>`).join('');
-        suggestionsBox.style.display = 'block';
-      })
-      .catch(() => {
-        suggestionsBox.style.display = 'none';
-      });
+    
+    // Combine user history with DDG suggestions
+    showSearchSuggestions(query);
   });
 
   // Tab to autocomplete ghost suggestion
@@ -109,7 +97,12 @@ export function setupSearch() {
   // Handle click on suggestion
   suggestionsBox.addEventListener('mousedown', function(e) {
     if (e.target.classList.contains('suggestion-item')) {
-      searchInput.value = e.target.textContent;
+      let suggestionText = e.target.textContent;
+      // Remove the clock emoji from history suggestions
+      if (e.target.classList.contains('history-suggestion')) {
+        suggestionText = suggestionText.replace('🕒 ', '');
+      }
+      searchInput.value = suggestionText;
       suggestionsBox.style.display = 'none';
       // Optionally, submit the form here
       // searchForm.dispatchEvent(new Event('submit'));
@@ -120,6 +113,64 @@ export function setupSearch() {
   searchInput.addEventListener('blur', function() {
     setTimeout(() => suggestionsBox.style.display = 'none', 100);
   });
+
+  // Function to show combined search suggestions
+  function showSearchSuggestions(query) {
+    if (query.length < 2) {
+      suggestionsBox.style.display = 'none';
+      return;
+    }
+
+    // Get user's search history suggestions only if tracking is enabled
+    const trackingEnabled = localStorage.getItem('dashboard-tracking') !== 'false';
+    const historySuggestions = trackingEnabled ? userTracker.getSearchSuggestions(query, 3) : [];
+    
+    // Get DDG suggestions
+    if (abortController) abortController.abort();
+    abortController = new AbortController();
+    
+    fetch(`https://duckduckgo.com/ac/?q=${encodeURIComponent(query.trim())}`, { signal: abortController.signal })
+      .then(res => res.json())
+      .then(data => {
+        if (searchInput.value.trim() !== lastQuery.trim()) return;
+        
+        let suggestions = [];
+        
+        // Add history suggestions first (marked with a different style)
+        if (historySuggestions.length > 0) {
+          suggestions = historySuggestions.map(suggestion => 
+            `<div class="suggestion-item history-suggestion" title="From your search history">🕒 ${suggestion}</div>`
+          );
+        }
+        
+        // Add DDG suggestions
+        if (Array.isArray(data) && data.length > 0) {
+          const ddgSuggestions = data.slice(0, 5).map(item => 
+            `<div class="suggestion-item">${item.phrase}</div>`
+          );
+          suggestions = suggestions.concat(ddgSuggestions);
+        }
+        
+        if (suggestions.length > 0) {
+          suggestionsBox.innerHTML = suggestions.join('');
+          suggestionsBox.style.display = 'block';
+        } else {
+          suggestionsBox.style.display = 'none';
+        }
+      })
+      .catch(() => {
+        // Fallback to just history suggestions
+        if (historySuggestions.length > 0) {
+          const suggestions = historySuggestions.map(suggestion => 
+            `<div class="suggestion-item history-suggestion" title="From your search history">🕒 ${suggestion}</div>`
+          );
+          suggestionsBox.innerHTML = suggestions.join('');
+          suggestionsBox.style.display = 'block';
+        } else {
+          suggestionsBox.style.display = 'none';
+        }
+      });
+  }
 
   searchForm.addEventListener('submit', function(e) {
     e.preventDefault();
@@ -187,6 +238,13 @@ export function setupSearch() {
         url = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
     }
     window.open(url, '_blank');
+    
+    // Track the search if tracking is enabled
+    const trackingEnabled = localStorage.getItem('dashboard-tracking') !== 'false';
+    if (trackingEnabled) {
+      userTracker.trackSearch(raw, engine);
+    }
+    
     searchInput.value = '';
     suggestionsBox.style.display = 'none';
   });

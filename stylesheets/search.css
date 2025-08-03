@@ -114,3 +114,13 @@
 .suggestion-item:hover, .suggestion-item.active {
   background: #393d4b;
 }
+.suggestion-item.history-suggestion {
+  background: #1a1d24;
+  border-left: 3px solid #3b82f6;
+  font-style: italic;
+  color: #b3b3b3;
+}
+.suggestion-item.history-suggestion:hover {
+  background: #393d4b;
+  color: #eaeaea;
+}

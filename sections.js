@@ -1,4 +1,5 @@
 // Sections logic
+import { userTracker } from './tracking.js';
 export const defaultSections = [
   { key: 'apps', name: 'App Drawer', items: [
     { name: 'Gmail', url: 'https://mail.google.com', icon: 'https://ssl.gstatic.com/ui/v1/icons/mail/rfr/gmail.ico' },
@@ -8,7 +9,7 @@ export const defaultSections = [
     { name: 'YouTube', url: 'https://youtube.com', icon: 'https://www.youtube.com/s/desktop/fe2e3e3e/img/favicon.ico' },
     { name: 'Reddit', url: 'https://reddit.com', icon: 'https://www.redditstatic.com/desktop2x/img/favicon/favicon.ico' }
   ] },
-  { key: 'visited', name: 'Visited Often', items: [
+  { key: 'visited', name: 'Frequently Visited', items: [
     { name: 'VS Code', url: 'https://vscode.dev', icon: 'https://code.visualstudio.com/favicon.ico' }
   ] },
   { key: 'bookmarks', name: 'Bookmarks', items: [] }
@@ -45,9 +46,17 @@ export function renderSections() {
       const card = document.createElement('div');
       card.className = 'card';
       card.style.cursor = 'pointer';
+      
+      // Check if we should show visit counts
+      const showVisitCounts = localStorage.getItem('dashboard-showVisitCounts') !== 'false';
+      const visitCountHtml = (showVisitCounts && item.count && item.count > 1) 
+        ? `<span class="card-visit-count">${item.count}</span>` 
+        : '';
+      
       card.innerHTML = `
         <img class="card-icon" src="${item.icon}" alt="icon">
         <span class="card-name" style="cursor:pointer;">${item.name}</span>
+        ${visitCountHtml}
         <span class="card-menu" title="Options">&#x22EE;</span>
       `;
       const img = card.querySelector('.card-icon');
@@ -58,8 +67,14 @@ export function renderSections() {
       card.addEventListener('click', (e) => {
         if (e.target.classList.contains('card-menu')) return;
         window.open(item.url, '_blank');
-        incrementVisitCount(item.url, item.name, item.icon);
-        renderSections();
+        
+        // Track website visit if tracking is enabled
+        const trackingEnabled = localStorage.getItem('dashboard-tracking') !== 'false';
+        if (trackingEnabled) {
+          userTracker.trackWebsiteVisit(item.url, item.name, item.icon);
+          // Re-render sections to update visit counts
+          setTimeout(() => renderSections(), 100);
+        }
       });
       card.querySelector('.card-menu').addEventListener('click', (e) => {
         e.stopPropagation();
@@ -82,22 +97,26 @@ export function renderSections() {
   });
 }
 
-// Track visit counts in localStorage
+// Track visit counts in localStorage (Legacy - replaced by userTracker)
 function incrementVisitCount(url, name, icon) {
-  let visits = JSON.parse(localStorage.getItem('visitedCounts') || '{}');
-  if (!visits[url]) {
-    visits[url] = { count: 0, name, icon, url };
-  }
-  visits[url].count += 1;
-  localStorage.setItem('visitedCounts', JSON.stringify(visits));
+  // This function is now handled by userTracker.trackWebsiteVisit()
+  // Keeping for backward compatibility
+  userTracker.trackWebsiteVisit(url, name, icon);
 }
 
 // Update the 'Visited Often' section with top visited sites
 function updateVisitedOftenSection(sections) {
-  let visits = JSON.parse(localStorage.getItem('visitedCounts') || '{}');
-  let topSites = Object.values(visits)
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 8); // Show top 8
+  // Use the new tracking system instead of legacy visitedCounts
+  const frequentlyVisited = userTracker.getFrequentlyVisited(8);
+  
+  // Convert to the format expected by the sections system
+  const topSites = frequentlyVisited.map(site => ({
+    name: site.title,
+    url: site.originalUrl,
+    icon: site.icon,
+    count: site.count // For potential display in UI
+  }));
+  
   let visitedSection = sections.find(s => s.key === 'visited');
   if (visitedSection) {
     visitedSection.items = topSites;

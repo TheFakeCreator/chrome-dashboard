@@ -3,15 +3,19 @@
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 24px;
   margin: 32px 0;
+  z-index: 2;
 }
 .section {
-  background: #23262f;
+  background: rgba(35, 38, 47, 0.55);
   border-radius: 14px;
   padding: 18px 14px 14px 14px;
   box-shadow: 0 2px 12px rgba(0,0,0,0.10);
   position: relative;
-  z-index: -1;
+  z-index: 2;
   animation: fadeIn 0.5s;
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.08);
 }
 .section-header {
   display: flex !important;
@@ -19,7 +23,6 @@
   justify-content: space-between !important;
   margin-bottom: 12px;
   gap: 8px;
-  background: #23262f;
   border-radius: 6px;
   padding: 2px 6px;
   cursor: pointer;
@@ -73,7 +76,7 @@
   gap: 12px;
 }
 .card {
-  background: #181a20;
+  background: rgba(24, 26, 32, 0.55);
   border-radius: 10px;
   padding: 10px 12px;
   display: flex;
@@ -82,7 +85,12 @@
   min-width: 0;
   box-shadow: 0 1px 6px rgba(0,0,0,0.08);
   position: relative;
+  z-index: auto;
   animation: fadeIn 0.5s;
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  border: 1px solid rgba(255,255,255,0.07);
+  cursor: pointer;
 }
 .card-icon {
   width: 32px;

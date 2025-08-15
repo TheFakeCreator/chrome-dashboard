@@ -268,9 +268,15 @@ function fetchDailyQuote() {
   const today = new Date().toISOString().slice(0, 10);
   const cachedQuote = localStorage.getItem('dashboard-quote');
   const cachedDate = localStorage.getItem('dashboard-quote-date');
-  if (cachedQuote && cachedDate === today) {
+  // If cached date is not today, clear cache so a new quote is fetched
+  if (cachedDate !== today) {
+    localStorage.removeItem('dashboard-quote');
+    localStorage.setItem('dashboard-quote-date', today);
+  }
+  const freshQuote = localStorage.getItem('dashboard-quote');
+  if (freshQuote && localStorage.getItem('dashboard-quote-date') === today) {
     try {
-      const data = JSON.parse(cachedQuote);
+      const data = JSON.parse(freshQuote);
       document.getElementById('quote-text').textContent = `"${data.content}"`;
       document.getElementById('quote-author').textContent = `— ${data.author}`;
       return;

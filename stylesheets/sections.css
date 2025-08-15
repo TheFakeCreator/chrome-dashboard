@@ -34,7 +34,6 @@
   justify-content: center;
 }
 .section-menu:hover {
-  background: #2c2f38;
   color: #fff;
 }
 .section-title {
@@ -42,7 +41,6 @@
   font-weight: 500;
 }
 .section-menu {
-  background: #23262f;
   border-radius: 6px;
   padding: 2px 6px;
   cursor: pointer;

@@ -15,85 +15,105 @@ export const defaultSections = [
   { key: 'bookmarks', name: 'Bookmarks', items: [] }
 ];
 
-export function getSections() {
-  const saved = localStorage.getItem('sections');
-  if (saved) return JSON.parse(saved);
-  localStorage.setItem('sections', JSON.stringify(defaultSections));
-  return JSON.parse(JSON.stringify(defaultSections));
+export function getSections(callback) {
+  if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+    chrome.storage.local.get(['sections'], (result) => {
+      if (result.sections) {
+        callback(result.sections);
+      } else {
+        chrome.storage.local.set({ sections: defaultSections }, () => {
+          callback(JSON.parse(JSON.stringify(defaultSections)));
+        });
+      }
+    });
+  } else {
+    // Fallback for non-extension environments
+    const saved = localStorage.getItem('sections');
+    if (saved) callback(JSON.parse(saved));
+    else {
+      localStorage.setItem('sections', JSON.stringify(defaultSections));
+      callback(JSON.parse(JSON.stringify(defaultSections)));
+    }
+  }
 }
-export function saveSections(sections) {
-  localStorage.setItem('sections', JSON.stringify(sections));
+export function saveSections(sections, callback) {
+  if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+    chrome.storage.local.set({ sections }, () => {
+      if (callback) callback();
+    });
+  } else {
+    localStorage.setItem('sections', JSON.stringify(sections));
+    if (callback) callback();
+  }
 }
 export function renderSections() {
   const grid = document.getElementById('grid-sections');
   grid.innerHTML = '';
-  const sections = getSections();
-  updateVisitedOftenSection(sections);
-  sections.forEach((section, idx) => {
-    const secDiv = document.createElement('div');
-    secDiv.className = 'section';
-    secDiv.setAttribute('data-key', section.key);
-    secDiv.innerHTML = `
-      <div class="section-header">
-        <span class="section-title">${section.name}</span>
-        <span class="section-menu" title="Section Options">&#x22EE;</span>
-      </div>
-      <div class="cards"></div>
-    `;
-    secDiv.querySelector('.section-menu').addEventListener('click', (e) => openSectionMenu(e, idx));
-    const cardsDiv = secDiv.querySelector('.cards');
-    section.items.forEach((item, itemIdx) => {
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.style.cursor = 'pointer';
-      
-      // Check if we should show visit counts
-      const showVisitCounts = localStorage.getItem('dashboard-showVisitCounts') !== 'false';
-      const visitCountHtml = (showVisitCounts && item.count && item.count > 1) 
-        ? `<span class="card-visit-count">${item.count}</span>` 
-        : '';
-      
-      card.innerHTML = `
-        <img class="card-icon" src="${item.icon}" alt="icon">
-        <span class="card-name" style="cursor:pointer;">${item.name}</span>
-        ${visitCountHtml}
-        <span class="card-menu" title="Options">&#x22EE;</span>
+  getSections((sections) => {
+    updateVisitedOftenSection(sections);
+    sections.forEach((section, idx) => {
+      const secDiv = document.createElement('div');
+      secDiv.className = 'section';
+      secDiv.setAttribute('data-key', section.key);
+      secDiv.innerHTML = `
+        <div class="section-header">
+          <span class="section-title">${section.name}</span>
+          <span class="section-menu" title="Section Options">&#x22EE;</span>
+        </div>
+        <div class="cards"></div>
       `;
-      const img = card.querySelector('.card-icon');
-      img.addEventListener('error', () => {
-        img.src = `https://www.google.com/s2/favicons?domain=${item.url}`;
+      secDiv.querySelector('.section-menu').addEventListener('click', (e) => openSectionMenu(e, idx));
+      const cardsDiv = secDiv.querySelector('.cards');
+      section.items.forEach((item, itemIdx) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.style.cursor = 'pointer';
+        // Check if we should show visit counts
+        const showVisitCounts = localStorage.getItem('dashboard-showVisitCounts') !== 'false';
+        const visitCountHtml = (showVisitCounts && item.count && item.count > 1) 
+          ? `<span class="card-visit-count">${item.count}</span>` 
+          : '';
+        card.innerHTML = `
+          <img class="card-icon" src="${item.icon}" alt="icon">
+          <span class="card-name" style="cursor:pointer;">${item.name}</span>
+          ${visitCountHtml}
+          <span class="card-menu" title="Options">&#x22EE;</span>
+        `;
+        const img = card.querySelector('.card-icon');
+        img.addEventListener('error', () => {
+          img.src = `https://www.google.com/s2/favicons?domain=${item.url}`;
+        });
+        // Make the whole card clickable except the menu
+        card.addEventListener('click', (e) => {
+          if (e.target.classList.contains('card-menu')) return;
+          window.open(item.url, '_blank');
+          // Track website visit if tracking is enabled
+          const trackingEnabled = localStorage.getItem('dashboard-tracking') !== 'false';
+          if (trackingEnabled) {
+            userTracker.trackWebsiteVisit(item.url, item.name, item.icon);
+            // Re-render sections to update visit counts
+            setTimeout(() => renderSections(), 100);
+          }
+        });
+        card.querySelector('.card-menu').addEventListener('click', (e) => {
+          e.stopPropagation();
+          openCardMenu(e, idx, itemIdx);
+        });
+        cardsDiv.appendChild(card);
       });
-      // Make the whole card clickable except the menu
-      card.addEventListener('click', (e) => {
-        if (e.target.classList.contains('card-menu')) return;
-        window.open(item.url, '_blank');
-        
-        // Track website visit if tracking is enabled
-        const trackingEnabled = localStorage.getItem('dashboard-tracking') !== 'false';
-        if (trackingEnabled) {
-          userTracker.trackWebsiteVisit(item.url, item.name, item.icon);
-          // Re-render sections to update visit counts
-          setTimeout(() => renderSections(), 100);
-        }
-      });
-      card.querySelector('.card-menu').addEventListener('click', (e) => {
-        e.stopPropagation();
-        openCardMenu(e, idx, itemIdx);
-      });
-      cardsDiv.appendChild(card);
+      const addCard = document.createElement('div');
+      addCard.className = 'card';
+      addCard.style.padding = '0';
+      addCard.style.aspectRatio = '1/1';
+      addCard.style.width = '52px';
+      addCard.style.height = '52px';
+      addCard.innerHTML = `
+        <button class="section-add-btn" title="Add Item" style="width:100%;height:100%;font-size:2.2em;display:flex;align-items:center;justify-content:center;border:none;background:none;color:inherit;cursor:pointer;">+</button>
+      `;
+      addCard.querySelector('button').addEventListener('click', () => openAddItemModal(idx));
+      cardsDiv.appendChild(addCard);
+      grid.appendChild(secDiv);
     });
-    const addCard = document.createElement('div');
-    addCard.className = 'card';
-    addCard.style.padding = '0';
-    addCard.style.aspectRatio = '1/1';
-    addCard.style.width = '52px';
-    addCard.style.height = '52px';
-    addCard.innerHTML = `
-      <button class="section-add-btn" title="Add Item" style="width:100%;height:100%;font-size:2.2em;display:flex;align-items:center;justify-content:center;border:none;background:none;color:inherit;cursor:pointer;">+</button>
-    `;
-    addCard.querySelector('button').addEventListener('click', () => openAddItemModal(idx));
-    cardsDiv.appendChild(addCard);
-    grid.appendChild(secDiv);
   });
 }
 
@@ -134,11 +154,13 @@ function openSectionMenu(e, sectionIdx) {
       const deleteBtn = document.getElementById('delete-section-btn');
       if (deleteBtn) {
         deleteBtn.addEventListener('click', () => {
-          const sections = getSections();
-          sections.splice(sectionIdx, 1);
-          saveSections(sections);
-          renderSections();
-          hideModal();
+          getSections((sections) => {
+            sections.splice(sectionIdx, 1);
+            saveSections(sections, () => {
+              renderSections();
+              hideModal();
+            });
+          });
         });
       }
     }, 0);
@@ -166,11 +188,13 @@ function openAddItemModal(sectionIdx) {
           const url = this.url.value.trim();
           const icon = this.icon.value.trim() || `https://www.google.com/s2/favicons?domain=${url}`;
           if (!name || !url) return;
-          const sections = getSections();
-          sections[sectionIdx].items.push({ name, url, icon });
-          saveSections(sections);
-          renderSections();
-          hideModal();
+          getSections((sections) => {
+            sections[sectionIdx].items.push({ name, url, icon });
+            saveSections(sections, () => {
+              renderSections();
+              hideModal();
+            });
+          });
         });
       }
     }, 0);
@@ -212,11 +236,13 @@ function openCardMenu(e, sectionIdx, itemIdx) {
     const deleteBtn = popup.querySelector('button[type="button"]');
     if (deleteBtn) {
       deleteBtn.addEventListener('click', () => {
-        const sections = getSections();
-        sections[sectionIdx].items.splice(itemIdx, 1);
-        saveSections(sections);
-        renderSections();
-        popup.remove();
+        getSections((sections) => {
+          sections[sectionIdx].items.splice(itemIdx, 1);
+          saveSections(sections, () => {
+            renderSections();
+            popup.remove();
+          });
+        });
       });
     }
   }, 0);
@@ -231,31 +257,33 @@ function openCardMenu(e, sectionIdx, itemIdx) {
 
 function openEditItemModal(sectionIdx, itemIdx) {
   import('./modal.js').then(({ showModal, hideModal }) => {
-    const sections = getSections();
-    const item = sections[sectionIdx].items[itemIdx];
-    showModal(`
-      <h2>Edit Item</h2>
-      <form id="edit-item-form">
-        <input type="text" name="name" value="${item.name}" required><br><br>
-        <input type="url" name="url" value="${item.url}" required><br><br>
-        <input type="url" name="icon" value="${item.icon}"><br><br>
-        <button type="submit">Save</button>
-        <button type="button">Cancel</button>
-      </form>
-    `);
-    setTimeout(() => {
-      const editForm = document.getElementById('edit-item-form');
-      if (editForm) {
-        editForm.addEventListener('submit', function(e) {
-          e.preventDefault();
-          item.name = this.name.value.trim();
-          item.url = this.url.value.trim();
-          item.icon = this.icon.value.trim() || `https://www.google.com/s2/favicons?domain=${item.url}`;
-          saveSections(sections);
-          renderSections();
-          hideModal();
-        });
-      }
-    }, 0);
+    getSections((sections) => {
+      const item = sections[sectionIdx].items[itemIdx];
+      showModal(`
+        <h2>Edit Item</h2>
+        <form id="edit-item-form">
+          <input type="text" name="name" value="${item.name}" required><br><br>
+          <input type="url" name="url" value="${item.url}" required><br><br>
+          <input type="url" name="icon" value="${item.icon}"><br><br>
+          <button type="submit">Save</button>
+          <button type="button">Cancel</button>
+        </form>
+      `);
+      setTimeout(() => {
+        const editForm = document.getElementById('edit-item-form');
+        if (editForm) {
+          editForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            item.name = this.name.value.trim();
+            item.url = this.url.value.trim();
+            item.icon = this.icon.value.trim() || `https://www.google.com/s2/favicons?domain=${item.url}`;
+            saveSections(sections, () => {
+              renderSections();
+              hideModal();
+            });
+          });
+        }
+      }, 0);
+    });
   });
 }

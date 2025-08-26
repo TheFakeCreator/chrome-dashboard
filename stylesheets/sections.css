@@ -96,6 +96,10 @@
   border-radius: 6px;
   object-fit: cover;
 }
+a.card-name {
+  text-decoration: none;
+  color: #727272;
+}
 .card-name {
   font-size: 1rem;
   font-weight: 400;
@@ -104,6 +108,19 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+}
+.card-name.scrolling-text {
+  will-change: transform;
+  animation: scrollTextX 6s linear infinite;
+}
+@keyframes scrollTextX {
+  0% { transform: translateX(0); }
+  10% { transform: translateX(0); }
+  90% { transform: translateX(var(--scroll-x, 0)); }
+  100% { transform: translateX(var(--scroll-x, 0)); }
 }
 a.card-name{
     text-decoration: none;

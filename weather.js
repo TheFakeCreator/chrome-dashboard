@@ -41,5 +41,4 @@ export function updateWeather() {
     }
     return;
   }
-  // ...existing code...
 }

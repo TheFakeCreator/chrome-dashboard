@@ -1,6 +1,26 @@
 document.addEventListener('DOMContentLoaded', () => {
   const btn = document.getElementById('add-bookmark-btn');
   const status = document.getElementById('status');
+
+  // Check if current tab is already bookmarked
+  if (chrome && chrome.tabs) {
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+      if (!tabs || tabs.length === 0) return;
+      const tab = tabs[0];
+      const url = tab.url;
+      chrome.storage.local.get('sections', function(data) {
+        let sections = data.sections || null;
+        if (!sections) return;
+        let bookmarksSection = sections.find(s => s.key === 'bookmarks');
+        if (!bookmarksSection) return;
+        if (bookmarksSection.items.some(item => item.url === url)) {
+          btn.textContent = 'Bookmarked';
+          btn.disabled = true;
+        }
+      });
+    });
+  }
+
   btn.addEventListener('click', () => {
     status.textContent = '';
     try {
@@ -49,12 +69,14 @@ document.addEventListener('DOMContentLoaded', () => {
                   return;
                 }
                 status.textContent = 'Bookmarked!';
-                console.log('Bookmarked:', {title, url, icon});
+                btn.textContent = 'Bookmarked';
+                btn.disabled = true;
                 setTimeout(() => { status.textContent = ''; }, 1200);
               });
             } else {
               status.textContent = 'Already Bookmarked';
-              console.log('Already Bookmarked:', url);
+              btn.textContent = 'Bookmarked';
+              btn.disabled = true;
               setTimeout(() => { status.textContent = ''; }, 1200);
             }
           });

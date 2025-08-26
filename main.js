@@ -28,8 +28,34 @@ document.addEventListener('DOMContentLoaded', () => {
   setWelcomeVisibility(localStorage.getItem('dashboard-showWelcome') !== 'false');
   setAIGradientBorder(localStorage.getItem('dashboard-aiGradient') !== 'false');
 
+  // Compact top bar logic
+  updateCompactTopBar(localStorage.getItem('dashboard-compactTopBar') === 'true');
+
+  // Hide time and search bar if option is set
+  if (localStorage.getItem('dashboard-hideTimeSearch') === 'true') {
+    const clock = document.getElementById('clock');
+    const searchSection = document.getElementById('search-section');
+    if (clock) clock.style.display = 'none';
+    if (searchSection) searchSection.style.display = 'none';
+  }
+  // Hide date-weather section if option is set
+  if (localStorage.getItem('dashboard-hideDateWeather') === 'true') {
+    const dateWeather = document.getElementById('date-weather');
+    if (dateWeather) dateWeather.style.display = 'none';
+  }
+  // Hide quote section if option is set
+  if (localStorage.getItem('dashboard-hideQuote') === 'true') {
+    const quote = document.getElementById('daily-quote');
+    if (quote) quote.style.display = 'none';
+  }
+
   // Clock and weather
-  setInterval(updateClock, 1000);
+  setInterval(() => {
+    updateClock();
+    if (localStorage.getItem('dashboard-compactTopBar') === 'true') {
+      updateCompactTopBar(true);
+    }
+  }, 1000);
   updateClock();
   updateWeather();
 
@@ -80,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const currentTheme = localStorage.getItem('dashboard-theme') || 'dark';
       const showWelcome = localStorage.getItem('dashboard-showWelcome') !== 'false';
       const manualLocation = localStorage.getItem('dashboard-manualLocation') || '';
-      const timeFormat = localStorage.getItem('dashboard-timeFormat') || '24';
+      const timeFormat = localStorage.getItem('dashboard-timeFormat') || '12';
       const dateFormat = localStorage.getItem('dashboard-dateFormat') || 'long';
       const trackingEnabled = localStorage.getItem('dashboard-tracking') !== 'false';
       const showVisitCounts = localStorage.getItem('dashboard-showVisitCounts') !== 'false';
@@ -134,6 +160,22 @@ document.addEventListener('DOMContentLoaded', () => {
           <label style="display:block;margin-bottom:12px;">
             <input type="checkbox" name="showVisitCounts" ${showVisitCounts ? 'checked' : ''}>
             Show visit counts on cards
+          </label>
+          <label style="display:block;margin-bottom:12px;">
+            <input type="checkbox" name="hideTimeSearch" ${localStorage.getItem('dashboard-hideTimeSearch') === 'true' ? 'checked' : ''}>
+            Hide time and search bar (show only app drawers)
+          </label>
+          <label style="display:block;margin-bottom:12px;">
+            <input type="checkbox" name="hideDateWeather" ${localStorage.getItem('dashboard-hideDateWeather') === 'true' ? 'checked' : ''}>
+            Hide temperature, date, and location section
+          </label>
+          <label style="display:block;margin-bottom:12px;">
+            <input type="checkbox" name="hideQuote" ${localStorage.getItem('dashboard-hideQuote') === 'true' ? 'checked' : ''}>
+            Hide daily quote
+          </label>
+          <label style="display:block;margin-bottom:12px;">
+            <input type="checkbox" name="compactTopBar" ${localStorage.getItem('dashboard-compactTopBar') === 'true' ? 'checked' : ''}>
+            Compact top bar (phone notification style)
           </label>
           <label style="display:block;margin-bottom:12px;">Custom Background Image:
             <input type="file" id="bg-image-input" accept="image/*" style="margin-left:8px;">
@@ -196,6 +238,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const aiGradient = this.aiGradient.checked;
             const trackingEnabled = this.trackingEnabled.checked;
             const showVisitCounts = this.showVisitCounts.checked;
+            const hideTimeSearch = this.hideTimeSearch.checked;
+            const hideDateWeather = this.hideDateWeather.checked;
+            const hideQuote = this.hideQuote.checked;
+            const compactTopBar = this.compactTopBar.checked;
             localStorage.setItem('dashboard-theme', theme);
             localStorage.setItem('dashboard-username', username);
             localStorage.setItem('dashboard-showWelcome', showWelcome);
@@ -205,16 +251,46 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('dashboard-aiGradient', aiGradient);
             localStorage.setItem('dashboard-tracking', trackingEnabled);
             localStorage.setItem('dashboard-showVisitCounts', showVisitCounts);
+            localStorage.setItem('dashboard-hideTimeSearch', hideTimeSearch);
+            localStorage.setItem('dashboard-hideDateWeather', hideDateWeather);
+            localStorage.setItem('dashboard-hideQuote', hideQuote);
+            localStorage.setItem('dashboard-compactTopBar', compactTopBar);
             applyCustomBackground();
             applyTheme(theme);
             updateWelcome(username);
             setWelcomeVisibility(showWelcome);
             setAIGradientBorder(aiGradient);
+            // Compact top bar logic
+            updateCompactTopBar(compactTopBar);
             if (manualLocation) {
               window.userLocation = manualLocation;
             }
             // Re-render sections to reflect tracking changes
             renderSections();
+            // Hide/show time and search bar
+            const clock = document.getElementById('clock');
+            const searchSection = document.getElementById('search-section');
+            if (hideTimeSearch) {
+              if (clock) clock.style.display = 'none';
+              if (searchSection) searchSection.style.display = 'none';
+            } else {
+              if (clock) clock.style.display = '';
+              if (searchSection) searchSection.style.display = '';
+            }
+            // Hide/show date-weather section
+            const dateWeather = document.getElementById('date-weather');
+            if (hideDateWeather) {
+              if (dateWeather) dateWeather.style.display = 'none';
+            } else {
+              if (dateWeather) dateWeather.style.display = '';
+            }
+            // Hide/show quote section
+            const quote = document.getElementById('daily-quote');
+            if (hideQuote) {
+              if (quote) quote.style.display = 'none';
+            } else {
+              if (quote) quote.style.display = '';
+            }
             hideModal();
           });
 
@@ -294,5 +370,67 @@ function fetchDailyQuote() {
       document.getElementById('quote-text').textContent = '"The best way to get started is to quit talking and begin doing."';
       document.getElementById('quote-author').textContent = '— Walt Disney';
     });
+}
+
+// Add this helper function at the end of the file
+function updateCompactTopBar(enabled) {
+  const clock = document.getElementById('clock');
+  const dateWeather = document.getElementById('date-weather');
+  const topBar = document.getElementById('compact-top-bar');
+  if (enabled) {
+    // Hide original elements
+    if (clock) clock.style.display = 'none';
+    if (dateWeather) dateWeather.style.display = 'none';
+    // Create compact bar if not exists
+    if (!topBar) {
+      const bar = document.createElement('div');
+      bar.id = 'compact-top-bar';
+      bar.style.display = 'flex';
+      bar.style.alignItems = 'center';
+      bar.style.justifyContent = 'space-between';
+      bar.style.background = 'rgba(24,26,32,0.95)';
+      bar.style.color = '#eaeaea';
+      bar.style.padding = '8px 18px';
+      bar.style.borderRadius = '12px';
+      bar.style.margin = '16px auto 8px auto';
+      bar.style.maxWidth = '420px';
+      bar.style.boxShadow = '0 2px 12px 0 rgba(31,38,135,0.18)';
+      bar.style.fontSize = '1.05em';
+      bar.style.gap = '18px';
+      // Get values
+      const time = clock ? clock.textContent : '';
+      const location = document.getElementById('location') ? document.getElementById('location').textContent : '';
+      const date = document.getElementById('date') ? document.getElementById('date').textContent : '';
+      const weather = document.getElementById('weather') ? document.getElementById('weather').textContent : '';
+      bar.innerHTML = `
+        <span style="font-weight:600;">${time}</span>
+        <span style="opacity:0.8;">${location}</span>
+        <span style="opacity:0.8;">${date}</span>
+        <span style="font-weight:600;">${weather}</span>
+      `;
+      // Insert at top of main-container
+      const main = document.getElementById('main-container');
+      if (main) main.insertBefore(bar, main.firstChild);
+    } else {
+      // Update values
+      const bar = topBar;
+      const time = clock ? clock.textContent : '';
+      const location = document.getElementById('location') ? document.getElementById('location').textContent : '';
+      const date = document.getElementById('date') ? document.getElementById('date').textContent : '';
+      const weather = document.getElementById('weather') ? document.getElementById('weather').textContent : '';
+      bar.innerHTML = `
+        <span style="font-weight:600;">${time}</span>
+        <span style="opacity:0.8;">${location}</span>
+        <span style="opacity:0.8;">${date}</span>
+        <span style="font-weight:600;">${weather}</span>
+      `;
+      bar.style.display = 'flex';
+    }
+  } else {
+    // Show original elements
+    if (clock) clock.style.display = '';
+    if (dateWeather) dateWeather.style.display = '';
+    if (topBar) topBar.style.display = 'none';
+  }
 }
 

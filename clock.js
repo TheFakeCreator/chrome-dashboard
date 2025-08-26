@@ -6,7 +6,7 @@ export function setUserLocation(loc) {
 export { userLocation };
 
 export function getTimeString(now) {
-  const timeFormat = localStorage.getItem('dashboard-timeFormat') || '24';
+  const timeFormat = localStorage.getItem('dashboard-timeFormat') || '12';
   let timeStr;
   if (timeFormat === '12') {
     // Remove AM/PM by splitting and taking only the time part

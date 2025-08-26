@@ -79,10 +79,28 @@ export function renderSections() {
           ${visitCountHtml}
           <span class="card-menu" title="Options">&#x22EE;</span>
         `;
+        // Always try best icon sources in order
+        const domain = new URL(item.url).origin;
+        const hostname = new URL(item.url).hostname;
+        const iconSources = [
+          `${domain}/apple-touch-icon.png`,
+          `${domain}/favicon.png`,
+          `https://logo.clearbit.com/${hostname}`,
+          `https://icons.duckduckgo.com/ip3/${hostname}.ico`,
+          `https://www.google.com/s2/favicons?domain=${item.url}`,
+          item.icon
+        ];
+        let iconIndex = 0;
         const img = card.querySelector('.card-icon');
-        img.addEventListener('error', () => {
-          img.src = `https://www.google.com/s2/favicons?domain=${item.url}`;
-        });
+        function tryNextIcon() {
+          if (iconIndex >= iconSources.length) return;
+          img.src = iconSources[iconIndex];
+          console.log('Trying icon:', iconSources[iconIndex], 'for', item.url);
+          iconIndex++;
+        }
+        img.addEventListener('error', tryNextIcon);
+        // Start with first icon
+        tryNextIcon();
         // Make the whole card clickable except the menu
         card.addEventListener('click', (e) => {
           if (e.target.classList.contains('card-menu')) return;

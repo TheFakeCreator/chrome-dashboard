@@ -14,7 +14,33 @@ A modern, modular new tab dashboard for Chrome with:
 - Ask AI (ChatGPT, Gemini, Claude)
 - Weather and location detection
 - Settings modal for personalization
+- Customizable dashboard with app and website drawers
+- High-quality favicon logic (tries apple-touch-icon, favicon.png, Clearbit, DuckDuckGo, Google, then custom icon)
+- Compact top bar option
+- Hide/show time, search, date, weather, and quote sections
+- Usage statistics and tracking
+- Custom background image support
 
+## Favicon Quality
+To ensure the best icon quality for all cards, the dashboard automatically tries:
+1. `apple-touch-icon.png` (high-res PNG, if available)
+2. `favicon.png` (sometimes high-res)
+3. Clearbit logo service (`https://logo.clearbit.com/{domain}`)
+4. DuckDuckGo favicon service
+5. Google favicon service
+6. The custom icon URL (if provided)
+
+## Troubleshooting Icon Quality
+- If an icon is not updating, it may be cached by your browser.
+- To clear cache:
+  - Press `Ctrl+Shift+Delete` (Windows) or `Cmd+Shift+Delete` (Mac) in Chrome, select "Cached images and files", and click "Clear data".
+  - Or, do a hard refresh with `Ctrl+F5` or `Shift+F5`.
+- After clearing cache or hard refreshing, icons should update to the best available quality.
+
+## Keeping Your Dashboard Up to Date
+- Refresh the dashboard after making changes to see updates.
+- If you manually update a card's icon, the new logic will automatically try the best sources for you.
+- For custom icons (e.g., Claude), use a direct high-res logo URL for best results.
 
 ## Getting Started
 

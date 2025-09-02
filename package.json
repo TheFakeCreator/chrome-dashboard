@@ -1,6 +1,6 @@
 {
   "name": "chrome-dashboard",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "A modern, modular new tab dashboard for Chrome with:\r - Customizable sections and cards\r - Weather, clock, and location\r - AI search bar with gradient border\r - Tab groups\r - Responsive design\r - Modular CSS and JS",
   "main": "main.js",
   "scripts": {

@@ -1,5 +1,9 @@
-// Sections logic
-import { userTracker } from './tracking.js';
+// Helper function to filter out unwanted URLs
+function isValidVisitedUrl(url, count = 0) {
+  if (!url) return false;
+  const hostname = (() => { try { return new URL(url).hostname; } catch { return ''; } })();
+  return !url.includes('newtab.html') && !url.includes('settings') && hostname !== 'chrome-dashboard' && !url.startsWith('chrome://') && count >= 5;
+}
 export const defaultSections = [
   { key: 'apps', name: 'App Drawer', items: [
     { name: 'Gmail', url: 'https://mail.google.com', icon: 'https://ssl.gstatic.com/ui/v1/icons/mail/rfr/gmail.ico' },
@@ -65,12 +69,8 @@ export function renderSections() {
           if (!urlMap.has(item.url)) urlMap.set(item.url, item);
           else urlMap.get(item.url).count = Math.max(urlMap.get(item.url).count, item.count);
         });
-        // Filter out dashboard, settings, and chrome internal pages
-        const union = Array.from(urlMap.values()).filter(item => {
-          const url = item.url || '';
-          const hostname = (() => { try { return new URL(url).hostname; } catch { return ''; } })();
-          return !url.includes('newtab.html') && !url.includes('settings') && hostname !== 'chrome-dashboard' && !url.startsWith('chrome://');
-        });
+        // Filter out dashboard, settings, and chrome internal pages, and require minimum 5 visits
+        const union = Array.from(urlMap.values()).filter(item => isValidVisitedUrl(item.url, item.count || 0)).sort((a, b) => (b.count || 0) - (a.count || 0)); // Sort by visit count descending
         let visitedSection = sections.find(s => s.key === 'visited');
         if (visitedSection) {
           visitedSection.items = union;
@@ -79,7 +79,6 @@ export function renderSections() {
         renderAllSections(sections);
       });
     } else {
-      updateVisitedOftenSection(sections);
       renderAllSections(sections);
     }
   });
@@ -177,52 +176,7 @@ function renderAllSections(sections) {
     });
 }
 
-// Update the 'Visited Often' section with union of localStorage and chrome.storage.local
-// Filter out newtab, settings, and chrome internal pages from union before displaying
-function updateVisitedOftenSection(sections) {
-  if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-    chrome.storage.local.get(['sections'], (chromeResult) => {
-      const chromeVisited = (chromeResult.sections || []).find(s => s.key === 'visited');
-      let localVisited = [];
-      try {
-        const localSections = JSON.parse(localStorage.getItem('sections') || '[]');
-        localVisited = (localSections.find(s => s.key === 'visited') || {}).items || [];
-      } catch {}
-      const urlMap = new Map();
-      (chromeVisited?.items || []).forEach(item => urlMap.set(item.url, item));
-      localVisited.forEach(item => {
-        if (!urlMap.has(item.url)) urlMap.set(item.url, item);
-      });
-      // Filter out dashboard, settings, and chrome internal pages
-      const union = Array.from(urlMap.values()).filter(item => {
-        const url = item.url || '';
-        const hostname = (() => { try { return new URL(url).hostname; } catch { return ''; } })();
-        return !url.includes('newtab.html') && !url.includes('settings') && hostname !== 'chrome-dashboard' && !url.startsWith('chrome://');
-      });
-      let visitedSection = sections.find(s => s.key === 'visited');
-      if (visitedSection) {
-        visitedSection.items = union;
-      }
-    });
-  } else {
-    // Fallback: just use localStorage
-    const frequentlyVisited = userTracker.getFrequentlyVisited(8);
-    const topSites = frequentlyVisited.map(site => ({
-      name: site.title,
-      url: site.originalUrl,
-      icon: site.icon,
-      count: site.count
-    })).filter(item => {
-      const url = item.url || '';
-      const hostname = (() => { try { return new URL(url).hostname; } catch { return ''; } })();
-      return !url.includes('newtab.html') && !url.includes('settings') && hostname !== 'chrome-dashboard' && !url.startsWith('chrome://');
-    });
-    let visitedSection = sections.find(s => s.key === 'visited');
-    if (visitedSection) {
-      visitedSection.items = topSites;
-    }
-  }
-}
+
 
 function openSectionMenu(e, sectionIdx) {
   import('./modal.js').then(({ showModal, hideModal }) => {

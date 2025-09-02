@@ -1,13 +1,14 @@
 // Main entry point
 import { setAIGradientBorder, updateWelcome, setWelcomeVisibility, applyTheme, applyCustomBackground } from './settings.js';
 import { getTimeString, getDateString, updateClock, userLocation } from './clock.js';
-import { updateWeather, getWeatherIcon } from './weather.js';
+import { updateWeather } from './weather.js';
 import { setupSearch } from './search.js';
 import { setupAIChat } from './ai.js';
 import { showModal, hideModal } from './modal.js';
-import { getSections, saveSections, defaultSections, renderSections } from './sections.js';
+import { getSections, saveSections, renderSections } from './sections.js';
 import { getTabGroups, saveTabGroups, renderTabGroups } from './tabGroups.js';
 import { userTracker } from './tracking.js';
+import { setupDevTools } from './dev-tools.js';
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -65,6 +66,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // Search and AI chat
   setupSearch();
   setupAIChat();
+  
+  // Developer tools
+  setupDevTools();
 
   // Modal overlay click
   const modalOverlay = document.getElementById('modal-overlay');

@@ -16,10 +16,5 @@
   "bugs": {
     "url": "https://github.com/TheFakeCreator/chrome-dashboard/issues"
   },
-  "homepage": "https://github.com/TheFakeCreator/chrome-dashboard#readme",
-  "dependencies": {
-    "dotenv": "^17.2.1",
-    "express": "^5.1.0",
-    "googleapis": "^154.1.0"
-  }
+  "homepage": "https://github.com/TheFakeCreator/chrome-dashboard#readme"
 }

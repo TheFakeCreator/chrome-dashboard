@@ -5,7 +5,7 @@ export class UserTracker {
   constructor() {
     this.storageKey = 'dashboard-user-tracking';
     this.maxEntries = 100; // Keep only top 100 entries to avoid storage bloat
-    this.minVisitsToShow = 2; // Minimum visits to show in frequently visited
+    this.minVisitsToShow = 5; // Minimum visits to show in frequently visited
   }
 
   // Get all tracking data
@@ -99,21 +99,6 @@ export class UserTracker {
     this.saveTrackingData(data);
   }
 
-  // Get recently visited websites
-  getRecentlyVisited(limit = 10) {
-    const data = this.getTrackingData();
-    return Object.values(data.websites)
-      .sort((a, b) => b.lastVisited - a.lastVisited)
-      .slice(0, limit)
-      .map(site => ({
-        name: site.title,
-        url: site.originalUrl,
-        icon: site.icon,
-        count: site.count,
-        lastVisited: site.lastVisited
-      }));
-  }
-
   // Get top searches for suggestions
   getTopSearches(limit = 10) {
     const data = this.getTrackingData();
@@ -125,6 +110,7 @@ export class UserTracker {
     const data = this.getTrackingData();
     return data.topWebsites
       .filter(site => site.count >= this.minVisitsToShow)
+      .sort((a, b) => (b.count || 0) - (a.count || 0)) // Ensure sorted by visit count descending
       .slice(0, limit);
   }
 
@@ -303,41 +289,6 @@ export class UserTracker {
   // Import data from backup
   importData(data) {
     this.saveTrackingData(data);
-  }
-
-  // Get usage statistics
-  getStatistics() {
-    const data = this.getTrackingData();
-    return {
-      totalUniqueSearches: Object.keys(data.searches).length,
-      totalSearches: Object.values(data.searches).reduce((sum, s) => sum + s.count, 0),
-      totalUniqueWebsites: Object.keys(data.websites).length,
-      totalVisits: Object.values(data.websites).reduce((sum, w) => sum + w.count, 0),
-      mostSearchedQuery: this.getMostSearched(),
-      mostVisitedWebsite: this.getMostVisited()
-    };
-  }
-
-  // Get most searched query
-  getMostSearched() {
-    const data = this.getTrackingData();
-    const searches = Object.values(data.searches);
-    if (searches.length === 0) return null;
-    
-    return searches.reduce((max, current) => 
-      current.count > max.count ? current : max
-    );
-  }
-
-  // Get most visited website
-  getMostVisited() {
-    const data = this.getTrackingData();
-    const websites = Object.values(data.websites);
-    if (websites.length === 0) return null;
-    
-    return websites.reduce((max, current) => 
-      current.count > max.count ? current : max
-    );
   }
 }
 

@@ -1,11 +1,18 @@
 // background.js - Track all website visits and searches
 
+// Helper function to filter out unwanted URLs (for display purposes)
+function isValidVisitedUrl(url, count = 0) {
+  if (!url) return false;
+  const hostname = (() => { try { return new URL(url).hostname; } catch { return ''; } })();
+  return !url.includes('newtab.html') && !url.includes('settings') && hostname !== 'chrome-dashboard' && !url.startsWith('chrome://');
+}
+
 chrome.webNavigation.onCompleted.addListener(async (details) => {
   if (!details.url || details.frameId !== 0) return;
   const url = details.url;
   const hostname = (new URL(url)).hostname;
   // Exclude dashboard newtab and settings pages
-  if (url.includes('newtab.html') || url.includes('settings') || hostname === 'chrome-dashboard' || url.startsWith('chrome://')) return;
+  if (!isValidVisitedUrl(url)) return;
   const title = hostname;
   let icon = `https://logo.clearbit.com/${hostname}`;
 

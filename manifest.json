@@ -13,15 +13,21 @@
   ],
   "host_permissions": ["<all_urls>"],
   "background": {
-    "service_worker": "src/core/background.js"
+    "service_worker": "background.js"
   },
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
-      "16": "src/assets/icons/icon128.png",
-      "32": "src/assets/icons/icon128.png",
-      "48": "src/assets/icons/icon128.png",
-      "128": "src/assets/icons/icon128.png"
+      "16": "assets/icon128.png",
+      "32": "assets/icon128.png",
+      "48": "assets/icon128.png",
+      "128": "assets/icon128.png"
     }
+  },
+  "icons": {
+    "16": "assets/icon128.png",
+    "32": "assets/icon128.png",
+    "48": "assets/icon128.png",
+    "128": "assets/icon128.png"
   }
 }

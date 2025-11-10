@@ -83,18 +83,23 @@ export class SettingsModal extends BaseComponent {
   setupEventListeners() {
     if (!this.element) return;
 
-    // Add event listeners (only if elements exist)
-    if (this.element.querySelector('[data-action]')) {
-      this.on('click', '[data-action]', (event) => this.handleEvent(event));
-    }
-    
+    // Use direct event delegation on the modal overlay
     const overlay = this.element.querySelector('.settings-modal-overlay');
-    if (overlay) {
-      this.on('click', '.settings-modal-overlay', (event) => {
-        if (event.target.classList.contains('settings-modal-overlay')) {
+    if (overlay && !this._clickHandler) {
+      this._clickHandler = (event) => {
+        // Handle clicks on action buttons
+        const actionElement = event.target.closest('[data-action]');
+        if (actionElement) {
+          this.handleEvent(event);
+          return;
+        }
+
+        // Handle clicks on overlay (close modal)
+        if (event.target === overlay) {
           this.close();
         }
-      });
+      };
+      overlay.addEventListener('click', this._clickHandler);
     }
 
     // Keyboard listener
@@ -589,21 +594,28 @@ export class SettingsModal extends BaseComponent {
    * @param {Event} event - DOM event
    */
   handleEvent(event) {
-    const action = event.target.closest('[data-action]')?.dataset.action;
+    const actionElement = event.target.closest('[data-action]');
+    const action = actionElement?.dataset.action;
+
+    console.log('[SettingsModal] Event:', action, event.target);
 
     if (action === 'close' || action === 'close-overlay') {
       if (action === 'close-overlay' && event.target.classList.contains('settings-modal')) {
         return; // Don't close when clicking inside modal
       }
+      console.log('[SettingsModal] Closing modal');
       this.close();
     } else if (action === 'switch-tab') {
-      const tab = event.target.closest('[data-tab]')?.dataset.tab;
+      const tab = actionElement?.dataset.tab;
+      console.log('[SettingsModal] Switching to tab:', tab);
       if (tab) this.switchTab(tab);
     } else if (action === 'save') {
       event.preventDefault();
+      console.log('[SettingsModal] Saving settings');
       this.saveSettings();
     } else if (action === 'change-theme') {
       const theme = event.target.value;
+      console.log('[SettingsModal] Changing theme:', theme);
       this.app.setTheme(theme);
     }
   }
@@ -634,6 +646,15 @@ export class SettingsModal extends BaseComponent {
     if (this.keyboardHandler) {
       document.removeEventListener('keydown', this.keyboardHandler);
       this.keyboardHandler = null;
+    }
+
+    // Remove click handler
+    if (this._clickHandler && this.element) {
+      const overlay = this.element.querySelector('.settings-modal-overlay');
+      if (overlay) {
+        overlay.removeEventListener('click', this._clickHandler);
+      }
+      this._clickHandler = null;
     }
 
     // Reset listeners flag

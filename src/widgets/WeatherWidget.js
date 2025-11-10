@@ -74,16 +74,20 @@ export class WeatherWidget extends BaseWidget {
       try {
         this.loading = true;
         this.emit('widget:loading', { widgetId: this.widgetId });
+        this.refresh(); // Show loading state
 
         await this.fetchWeatherData();
 
         this.loading = false;
         this.error = null;
         this.emit('widget:loaded', { widgetId: this.widgetId });
+        this.refresh(); // Show loaded data
+        console.log('[WeatherWidget] Data loaded successfully, widget refreshed');
       } catch (error) {
         this.loading = false;
         this.error = error.message;
         this.emit('widget:error', { widgetId: this.widgetId, error: error.message });
+        this.refresh(); // Show error state
         console.error('[WeatherWidget] Error loading data:', error);
       }
     }
@@ -106,13 +110,18 @@ export class WeatherWidget extends BaseWidget {
    * @returns {Promise<void>}
    */
   async fetchWeatherData() {
+    // Debug: Log settings
+    console.log('[WeatherWidget] fetchWeatherData - settings:', this.settings);
+    console.log('[WeatherWidget] fetchWeatherData - apiKey:', this.settings?.apiKey);
+    
     // Check if API key is configured
-    if (!this.settings.apiKey) {
+    if (!this.settings?.apiKey) {
       throw new Error('API key not configured. Get a free key from openweathermap.org');
     }
 
     // Get location
     const location = await this.getLocation();
+    console.log('[WeatherWidget] Using location:', location);
     
     // Build URL based on location type (coordinates or city name)
     let weatherUrl, forecastUrl;
@@ -126,11 +135,17 @@ export class WeatherWidget extends BaseWidget {
       forecastUrl = `${this.apiEndpoint}/forecast?q=${location}&appid=${this.settings.apiKey}&units=${this.settings.units}`;
     }
     
+    console.log('[WeatherWidget] Fetching from:', weatherUrl.replace(this.settings.apiKey, 'API_KEY_HIDDEN'));
+    
     // Fetch current weather
     const weatherResponse = await fetch(weatherUrl);
     
+    console.log('[WeatherWidget] Weather response status:', weatherResponse.status);
+    
     if (!weatherResponse.ok) {
-      throw new Error(`Weather API error: ${weatherResponse.status}`);
+      const errorText = await weatherResponse.text();
+      console.error('[WeatherWidget] API Error:', errorText);
+      throw new Error(`Weather API error: ${weatherResponse.status} - ${errorText}`);
     }
     
     this.currentWeather = await weatherResponse.json();
@@ -163,23 +178,27 @@ export class WeatherWidget extends BaseWidget {
    */
   async getLocation() {
     if (this.settings.location) {
+      console.log('[WeatherWidget] Using configured location:', this.settings.location);
       return this.settings.location;
     }
 
     if (this.settings.autoDetectLocation) {
       try {
         // Try to get location from browser geolocation API
+        console.log('[WeatherWidget] Attempting to get geolocation...');
         const position = await this.getCurrentPosition();
         const { latitude, longitude } = position.coords;
         
+        console.log('[WeatherWidget] Geolocation successful:', latitude, longitude);
         // Use coordinates to get location
         return `lat=${latitude}&lon=${longitude}`;
       } catch (error) {
-        console.warn('[WeatherWidget] Geolocation failed, using default location');
+        console.warn('[WeatherWidget] Geolocation failed:', error.message, '- using default location');
       }
     }
 
     // Default location
+    console.log('[WeatherWidget] Using default location: London');
     return 'London';
   }
 
@@ -451,12 +470,16 @@ export class WeatherWidget extends BaseWidget {
    * @param {Event} event - DOM event
    */
   handleEvent(event) {
-    const action = event.target.dataset.action;
+    const actionElement = event.target.closest('[data-action]');
+    const action = actionElement?.dataset.action;
+    
+    console.log('[WeatherWidget] handleEvent - action:', action, 'target:', event.target);
 
     if (action === 'retry') {
       this.lastFetchTime = null;
       this.loadData();
     } else if (action === 'configure') {
+      console.log('[WeatherWidget] Opening settings for widget:', this.widgetId);
       this.emit('widget:configure', { widgetId: this.widgetId });
     }
   }
@@ -484,10 +507,14 @@ export class WeatherWidget extends BaseWidget {
   onMount() {
     super.onMount();
     
-    // Add event listeners for actions (if elements exist)
-    if (this.element?.querySelector('[data-action]')) {
-      this.on('click', '[data-action]', (event) => this.handleEvent(event));
-    }
+    // Add click event listener to the widget element for all actions
+    this.element.addEventListener('click', (event) => {
+      const actionElement = event.target.closest('[data-action]');
+      if (actionElement) {
+        event.preventDefault();
+        this.handleEvent(event);
+      }
+    });
   }
 
   /**

@@ -121,8 +121,8 @@ export class BaseWidget extends BaseComponent {
     // Subscribe to widget state in global state
     this.subscribeToWidgetState();
 
-    // Load widget data
-    this.loadData();
+    // Don't load data here - wait until mount when settings are properly set
+    // this.loadData(); // Moved to onMount
 
     // Setup auto-update if interval specified
     if (this.updateInterval) {
@@ -445,16 +445,21 @@ export class BaseWidget extends BaseComponent {
   /**
    * Lifecycle: Widget mounted
    */
+  /**
+   * Lifecycle: After render (override)
+   */
+  onAfterRender() {
+    // Always initialize icons after rendering
+    initIcons();
+  }
+
   onMount() {
     // Setup event listeners
     this.setupEventListeners();
     
-    // Initialize icons (Lucide)
-    initIcons();
-    
-    // Initial data load if not loaded
-    if (!this.data && !this.loading) {
-      this.refreshData();
+    // Load data now that settings are properly initialized
+    if (!this.loading) {
+      this.loadData();
     }
   }
 

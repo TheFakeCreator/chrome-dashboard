@@ -178,6 +178,43 @@ export class ClockWidget extends BaseWidget {
         this.updateSettings({ format: newFormat });
       });
     }
+    
+    // Start real-time clock updates
+    this.startClock();
+  }
+  
+  /**
+   * Start clock timer for real-time updates
+   */
+  startClock() {
+    // Clear any existing timer
+    if (this.clockTimer) {
+      clearInterval(this.clockTimer);
+    }
+    
+    // Update every second
+    this.clockTimer = setInterval(() => {
+      this.updateTime();
+      this.refresh();
+    }, 1000);
+  }
+  
+  /**
+   * Stop clock timer
+   */
+  stopClock() {
+    if (this.clockTimer) {
+      clearInterval(this.clockTimer);
+      this.clockTimer = null;
+    }
+  }
+  
+  /**
+   * Component destroyed - cleanup timer
+   */
+  onDestroy() {
+    this.stopClock();
+    super.onDestroy();
   }
 
   /**

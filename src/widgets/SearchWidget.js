@@ -137,7 +137,10 @@ export class SearchWidget extends BaseWidget {
    * @param {string} engine - Search engine
    */
   search(query, engine = null) {
-    if (!query || !query.trim()) return;
+    if (!query || !query.trim()) {
+      console.log('[SearchWidget] Search called with empty query');
+      return;
+    }
 
     const searchEngine = engine || this.settings.defaultEngine;
     const engineConfig = this.engines[searchEngine];
@@ -148,11 +151,14 @@ export class SearchWidget extends BaseWidget {
     }
 
     const searchUrl = engineConfig.url + encodeURIComponent(query.trim());
+    console.log('[SearchWidget] Searching:', query.trim(), 'on', searchEngine, 'URL:', searchUrl);
 
     // Open in new tab or current tab
     if (this.settings.openInNewTab) {
+      console.log('[SearchWidget] Opening in new tab');
       chrome.tabs.create({ url: searchUrl });
     } else {
+      console.log('[SearchWidget] Opening in current tab');
       chrome.tabs.update({ url: searchUrl });
     }
 
@@ -162,12 +168,9 @@ export class SearchWidget extends BaseWidget {
       engine: searchEngine
     });
 
-    // Clear input
-    this.query = '';
-    if (this.element) {
-      const input = this.element.querySelector('.search-input');
-      if (input) input.value = '';
-    }
+    // Keep the query for potential re-search with different engine
+    // Don't clear input after search
+    console.log('[SearchWidget] Search completed successfully');
   }
 
   /**
@@ -302,6 +305,7 @@ export class SearchWidget extends BaseWidget {
               type="text"
               class="search-input flex-1 bg-transparent border-none outline-none text-dark-text placeholder-dark-muted"
               placeholder="${this.settings.placeholder}"
+              value="${this.query || ''}"
               autocomplete="off"
               spellcheck="false"
             />
@@ -356,12 +360,16 @@ export class SearchWidget extends BaseWidget {
    * @param {Event} event - DOM event
    */
   handleEvent(event) {
-    const action = event.target.closest('[data-action]')?.dataset.action;
+    const actionElement = event.target.closest('[data-action]');
+    const action = actionElement?.dataset.action;
+    
+    console.log('[SearchWidget] handleEvent - action:', action, 'target:', event.target);
 
     if (action === 'search') {
       this.search(this.query);
     } else if (action === 'set-engine') {
       const engine = event.target.closest('[data-engine]')?.dataset.engine;
+      console.log('[SearchWidget] Setting engine to:', engine);
       if (engine) {
         this.setEngine(engine);
       }
@@ -374,40 +382,82 @@ export class SearchWidget extends BaseWidget {
    * Set search engine
    * @param {string} engine - Engine key
    */
-  setEngine(engine) {
+  async setEngine(engine) {
     if (!this.engines[engine]) return;
 
-    this.settings.defaultEngine = engine;
+    console.log('[SearchWidget] Engine changed from', this.settings.defaultEngine, 'to', engine);
     
-    // Update active state
-    if (this.element) {
-      const quickEngines = this.element.querySelectorAll('.quick-engine');
-      quickEngines.forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.engine === engine);
-      });
-
-      // Update selector
-      const selector = this.element.querySelector('.search-engine-selector');
-      if (selector) {
-        const engineConfig = this.engines[engine];
-        selector.innerHTML = `
-          <span class="engine-icon">${engineConfig.icon}</span>
-          <span class="engine-name">${engineConfig.name}</span>
-          <span class="engine-dropdown-icon">▼</span>
-        `;
-      }
-    }
-
+    // Update settings (this will save and refresh automatically)
+    await this.updateSettings({ defaultEngine: engine });
+    
     // Emit event
     this.emit('search:engine-changed', { engine });
   }
 
   /**
-   * Show engine menu (future enhancement)
+   * Show engine menu
    */
-  showEngineMenu() {
-    // TODO: Show dropdown with all available engines
+  async showEngineMenu() {
     console.log('[SearchWidget] Show engine menu');
+    
+    // Create a temporary dropdown overlay
+    const dropdown = document.createElement('div');
+    dropdown.className = 'fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm';
+    dropdown.innerHTML = `
+      <div class="bg-dark-card border border-dark-border rounded-lg shadow-2xl max-w-sm w-full mx-4 p-4">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-semibold text-dark-text">Select Search Engine</h3>
+          <button class="p-1 rounded hover:bg-dark-elevated transition-colors" data-action="close-menu">
+            <i data-lucide="x" class="w-5 h-5 text-dark-muted"></i>
+          </button>
+        </div>
+        <div class="space-y-1 max-h-96 overflow-y-auto">
+          ${Object.entries(this.engines).map(([key, engine]) => `
+            <button 
+              class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-all ${
+                key === this.settings.defaultEngine
+                  ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30'
+                  : 'hover:bg-dark-elevated text-dark-text'
+              }"
+              data-action="set-engine"
+              data-engine="${key}"
+            >
+              <span class="text-2xl">${engine.icon}</span>
+              <div class="flex-1">
+                <div class="font-medium">${engine.name}</div>
+                <div class="text-xs text-dark-muted">${engine.url.split('//')[1].split('/')[0]}</div>
+              </div>
+              ${key === this.settings.defaultEngine ? `
+                <i data-lucide="check" class="w-5 h-5 text-primary-400"></i>
+              ` : ''}
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    `;
+    
+    // Close on overlay click
+    dropdown.addEventListener('click', (e) => {
+      if (e.target === dropdown || e.target.closest('[data-action="close-menu"]')) {
+        dropdown.remove();
+      }
+    });
+    
+    // Handle engine selection
+    dropdown.addEventListener('click', (e) => {
+      const engineBtn = e.target.closest('[data-engine]');
+      if (engineBtn) {
+        const engine = engineBtn.dataset.engine;
+        this.setEngine(engine);
+        dropdown.remove();
+      }
+    });
+    
+    document.body.appendChild(dropdown);
+    
+    // Initialize icons in dropdown
+    const { initIcons } = await import('../utils/icons.js');
+    initIcons();
   }
 
   /**
@@ -442,44 +492,93 @@ export class SearchWidget extends BaseWidget {
   }
 
   /**
+   * Setup event listeners for search widget
+   * @private
+   */
+  setupSearchEventListeners() {
+    // Get input element
+    const input = this.element?.querySelector('.search-input');
+    if (!input) return;
+
+    // Remove old listeners if they exist
+    if (this._clickHandler) {
+      this.element.removeEventListener('click', this._clickHandler);
+    }
+    if (this._inputHandler) {
+      input.removeEventListener('input', this._inputHandler);
+    }
+    if (this._focusHandler) {
+      input.removeEventListener('focus', this._focusHandler);
+    }
+    if (this._blurHandler) {
+      input.removeEventListener('blur', this._blurHandler);
+    }
+
+    // Add click event listener to the widget element for all actions
+    this._clickHandler = (event) => {
+      const actionElement = event.target.closest('[data-action]');
+      if (actionElement) {
+        event.preventDefault();
+        this.handleEvent(event);
+      }
+    };
+    this.element.addEventListener('click', this._clickHandler);
+    
+    // Input events
+    this._inputHandler = (event) => {
+      this.handleInputChange(event.target.value);
+    };
+    input.addEventListener('input', this._inputHandler);
+
+    this._focusHandler = () => this.handleFocus();
+    input.addEventListener('focus', this._focusHandler);
+
+    this._blurHandler = () => this.handleBlur();
+    input.addEventListener('blur', this._blurHandler);
+
+    // Suggestion click (only if suggestions container exists)
+    const suggestionsContainer = this.element?.querySelector('.search-suggestions');
+    if (suggestionsContainer) {
+      if (this._suggestionHandler) {
+        suggestionsContainer.removeEventListener('click', this._suggestionHandler);
+      }
+      
+      this._suggestionHandler = (event) => {
+        const suggestionItem = event.target.closest('.suggestion-item');
+        if (suggestionItem) {
+          const suggestion = suggestionItem.dataset.suggestion;
+          if (suggestion) {
+            this.query = suggestion;
+            input.value = suggestion;
+            this.search(suggestion);
+          }
+        }
+      };
+      suggestionsContainer.addEventListener('click', this._suggestionHandler);
+    }
+  }
+
+  /**
+   * Lifecycle: After render
+   */
+  onAfterRender() {
+    super.onAfterRender();
+    
+    // Re-attach event listeners after every render
+    this.setupSearchEventListeners();
+  }
+
+  /**
    * Widget mounted
    */
   onMount() {
     super.onMount();
 
-    // Get input element
-    const input = this.element?.querySelector('.search-input');
-    if (!input) return;
-
-    // Add event listeners (only if elements exist)
-    if (this.element?.querySelector('[data-action]')) {
-      this.on('click', '[data-action]', (event) => this.handleEvent(event));
+    // Setup keyboard shortcuts (document level) - only once
+    if (!this.keyboardHandler) {
+      this.keyboardHandler = (event) => this.handleKeyboard(event);
+      document.addEventListener('keydown', this.keyboardHandler);
     }
-    
-    // Input events
-    input.addEventListener('input', (event) => {
-      this.handleInputChange(event.target.value);
-    });
-
-    input.addEventListener('focus', () => this.handleFocus());
-    input.addEventListener('blur', () => this.handleBlur());
-
-    // Suggestion click (only if suggestions container exists)
-    const suggestionsContainer = this.element?.querySelector('.search-suggestions');
-    if (suggestionsContainer) {
-      this.on('click', '.suggestion-item', (event) => {
-        const suggestion = event.target.closest('.suggestion-item')?.dataset.suggestion;
-        if (suggestion) {
-          this.query = suggestion;
-          input.value = suggestion;
-          this.search(suggestion);
-        }
-      });
-    }
-
-    // Keyboard shortcuts (document level)
-    this.keyboardHandler = (event) => this.handleKeyboard(event);
-    document.addEventListener('keydown', this.keyboardHandler);
 
     console.log('[SearchWidget] Mounted and ready');
   }

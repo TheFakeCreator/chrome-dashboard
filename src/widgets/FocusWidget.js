@@ -20,18 +20,43 @@ export class FocusWidget extends BaseWidget {
   constructor(app, options = {}) {
     super(app, {
       widgetId: options.widgetId || 'focus-widget',
-      title: '🍅 Focus Mode',
+      title: 'Focus Mode',
+      icon: '<i data-lucide="timer" class="w-5 h-5"></i>',
       description: 'Pomodoro timer for focused work sessions',
       className: 'focus-widget',
       ...options
     });
 
-    this.timer = new PomodoroTimer(options.timerOptions);
+    // Initialize timer with settings
+    const timerOptions = {
+      workDuration: this.settings.workDuration || 25 * 60,
+      shortBreakDuration: this.settings.shortBreakDuration || 5 * 60,
+      longBreakDuration: this.settings.longBreakDuration || 15 * 60,
+      longBreakInterval: this.settings.longBreakInterval || 4
+    };
+
+    this.timer = new PomodoroTimer(timerOptions);
     this.stats = new FocusStats(app.storageManager);
     this.view = 'timer'; // 'timer' or 'stats'
     
     this._setupTimerListeners();
-    console.log('[FocusWidget] Initialized');
+    console.log('[FocusWidget] Initialized with settings:', this.settings);
+  }
+
+  /**
+   * Get default widget settings
+   */
+  getDefaultSettings() {
+    return {
+      workDuration: 25, // minutes
+      shortBreakDuration: 5, // minutes
+      longBreakDuration: 15, // minutes
+      longBreakInterval: 4, // number of work sessions before long break
+      autoStartBreaks: false,
+      autoStartWork: false,
+      notificationsEnabled: true,
+      soundEnabled: false
+    };
   }
 
   /**
@@ -74,20 +99,22 @@ export class FocusWidget extends BaseWidget {
    */
   renderContent() {
     return `
-      <div class="focus-widget-container">
+      <div class="p-4">
         <!-- View Toggle -->
         <div class="flex gap-2 mb-4 justify-center">
           <button 
             data-view-toggle="timer"
-            class="view-toggle-btn ${this.view === 'timer' ? 'active' : ''} px-4 py-2 rounded-lg text-sm font-medium transition-all"
+            class="${this.view === 'timer' ? 'bg-primary-500 border-primary-500 text-white' : 'bg-dark-surface border-dark-border text-dark-text-secondary'} px-4 py-2 rounded-lg text-sm font-medium transition-all hover:bg-primary-500/80 border flex items-center gap-2"
           >
-            🍅 Timer
+            <i data-lucide="timer" class="w-4 h-4"></i>
+            Timer
           </button>
           <button 
             data-view-toggle="stats"
-            class="view-toggle-btn ${this.view === 'stats' ? 'active' : ''} px-4 py-2 rounded-lg text-sm font-medium transition-all"
+            class="${this.view === 'stats' ? 'bg-primary-500 border-primary-500 text-white' : 'bg-dark-surface border-dark-border text-dark-text-secondary'} px-4 py-2 rounded-lg text-sm font-medium transition-all hover:bg-primary-500/80 border flex items-center gap-2"
           >
-            📊 Stats
+            <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+            Stats
           </button>
         </div>
 
@@ -115,109 +142,111 @@ export class FocusWidget extends BaseWidget {
     return `
       <div class="timer-view">
         <!-- Session Type -->
-        <div class="text-center mb-4">
-          <div class="text-lg font-semibold text-primary-400" data-session-label>
+        <div class="text-center mb-3">
+          <div class="text-lg font-semibold text-primary-400 flex items-center justify-center" data-session-label>
             ${sessionLabel}
           </div>
-          <div class="text-sm text-dark-text-muted mt-1">
-            Session #<span data-session-count>${state.sessionCount}</span>
+          <div class="text-sm text-dark-text-muted mt-1 flex items-center justify-center gap-1">
+            <i data-lucide="hash" class="w-3 h-3"></i>
+            <span data-session-count>${state.sessionCount}</span>
           </div>
         </div>
 
         <!-- Circular Timer -->
-        <div class="timer-circle-container relative mx-auto" style="width: 240px; height: 240px;">
-          <!-- SVG Circle Progress -->
-          <svg class="timer-circle" width="240" height="240" viewBox="0 0 240 240">
-            <circle
-              class="timer-circle-bg"
-              cx="120"
-              cy="120"
-              r="110"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="8"
-              opacity="0.1"
-            />
-            <circle
-              class="timer-circle-progress"
-              data-progress-circle
-              cx="120"
-              cy="120"
-              r="110"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="8"
-              stroke-linecap="round"
-              transform="rotate(-90 120 120)"
-              style="
-                stroke-dasharray: ${2 * Math.PI * 110};
-                stroke-dashoffset: ${2 * Math.PI * 110 * (1 - state.progress / 100)};
-                transition: stroke-dashoffset 0.3s ease;
-              "
-            />
-          </svg>
+        <div class="timer-circle-container relative mx-auto" style="width: 160px; height: 160px;">
+            <!-- SVG Circle Progress -->
+            <svg class="timer-circle" width="160" height="160" viewBox="0 0 160 160">
+              <circle
+                class="timer-circle-bg"
+                cx="80"
+                cy="80"
+                r="70"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="6"
+                opacity="0.1"
+              />
+              <circle
+                class="timer-circle-progress"
+                data-progress-circle
+                cx="80"
+                cy="80"
+                r="70"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="6"
+                stroke-linecap="round"
+                transform="rotate(-90 80 80)"
+                style="
+                  stroke-dasharray: ${2 * Math.PI * 70};
+                  stroke-dashoffset: ${2 * Math.PI * 70 * (1 - state.progress / 100)};
+                  transition: stroke-dashoffset 0.3s ease;
+                "
+              />
+            </svg>
 
           <!-- Time Display -->
           <div class="absolute inset-0 flex items-center justify-center flex-col">
             <div 
-              class="text-5xl font-bold text-primary-300"
+              class="text-3xl font-bold text-primary-300"
               data-time-display
             >
               ${PomodoroTimer.formatTime(state.timeRemaining)}
             </div>
-            <div class="text-sm text-dark-text-muted mt-2">
+            <div class="text-xs text-dark-text-muted mt-1">
               ${this._getStateLabel(state.state)}
             </div>
           </div>
         </div>
 
         <!-- Controls -->
-        <div class="timer-controls flex gap-3 justify-center mt-8">
+        <div class="flex gap-2 justify-center mt-4">
           <button
             data-action="start"
-            class="control-btn control-btn-primary ${state.state === PomodoroTimer.STATE.RUNNING ? 'hidden' : ''} 
-                   px-6 py-3 rounded-lg font-medium text-white transition-all hover:scale-105"
+            class="${state.state === PomodoroTimer.STATE.RUNNING ? 'hidden' : ''} bg-gradient-to-r from-primary-500 to-purple-500 px-4 py-2 rounded-lg text-sm font-medium text-white transition-all hover:scale-105 hover:shadow-lg flex items-center gap-2"
           >
-            ${state.state === PomodoroTimer.STATE.PAUSED ? '▶️ Resume' : '▶️ Start'}
+            <i data-lucide="play" class="w-4 h-4"></i>
+            ${state.state === PomodoroTimer.STATE.PAUSED ? 'Resume' : 'Start'}
           </button>
           
           <button
             data-action="pause"
-            class="control-btn control-btn-warning ${state.state === PomodoroTimer.STATE.RUNNING ? '' : 'hidden'}
-                   px-6 py-3 rounded-lg font-medium text-white transition-all hover:scale-105"
+            class="${state.state === PomodoroTimer.STATE.RUNNING ? '' : 'hidden'} bg-gradient-to-r from-orange-500 to-red-500 px-4 py-2 rounded-lg text-sm font-medium text-white transition-all hover:scale-105 hover:shadow-lg flex items-center gap-2"
           >
-            ⏸️ Pause
+            <i data-lucide="pause" class="w-4 h-4"></i>
+            Pause
           </button>
 
           <button
             data-action="stop"
-            class="control-btn control-btn-danger ${state.state === PomodoroTimer.STATE.IDLE ? 'hidden' : ''}
-                   px-4 py-3 rounded-lg font-medium text-white transition-all hover:scale-105"
+            class="${state.state === PomodoroTimer.STATE.IDLE ? 'hidden' : ''} bg-gradient-to-r from-red-500 to-red-600 px-4 py-2 rounded-lg text-sm font-medium text-white transition-all hover:scale-105 hover:shadow-lg flex items-center gap-2"
           >
-            ⏹️ Stop
+            <i data-lucide="square" class="w-4 h-4"></i>
+            Stop
           </button>
 
           <button
             data-action="skip"
-            class="control-btn control-btn-secondary px-4 py-3 rounded-lg font-medium transition-all hover:scale-105"
+            class="bg-dark-surface border border-dark-border px-4 py-2 rounded-lg text-sm font-medium transition-all hover:scale-105 hover:bg-dark-surface-hover hover:border-primary-500 flex items-center gap-2"
           >
-            ⏭️ Skip
+            <i data-lucide="skip-forward" class="w-4 h-4"></i>
+            Skip
           </button>
         </div>
 
         <!-- Quick Stats -->
-        <div class="quick-stats grid grid-cols-3 gap-3 mt-6" data-quick-stats>
-          <div class="stat-card bg-dark-surface/40 p-3 rounded-lg text-center">
-            <div class="text-2xl font-bold text-primary-400" data-stat="today">--</div>
-            <div class="text-xs text-dark-text-muted mt-1">Today</div>
+        <div class="quick-stats grid grid-cols-3 gap-2 mt-4" data-quick-stats>
+          <div class="stat-card bg-dark-surface/40 p-2 rounded-lg text-center">
+            <div class="text-lg font-bold text-primary-400" data-stat="today">--</div>
+            <div class="text-xs text-dark-text-muted">Today</div>
           </div>
-          <div class="stat-card bg-dark-surface/40 p-3 rounded-lg text-center">
-            <div class="text-2xl font-bold text-green-400" data-stat="streak">--</div>
-            <div class="text-xs text-dark-text-muted mt-1">Streak</div>
+          <div class="stat-card bg-dark-surface/40 p-2 rounded-lg text-center">
+            <div class="text-lg font-bold text-green-400" data-stat="streak">--</div>
+            <div class="text-xs text-dark-text-muted">Streak</div>
           </div>
-          <div class="stat-card bg-dark-surface/40 p-3 rounded-lg text-center">
-            <div class="text-2xl font-bold text-blue-400" data-stat="total">--</div>
-            <div class="text-xs text-dark-text-muted mt-1">Total</div>
+          <div class="stat-card bg-dark-surface/40 p-2 rounded-lg text-center">
+            <div class="text-lg font-bold text-blue-400" data-stat="total">--</div>
+            <div class="text-xs text-dark-text-muted">Total</div>
           </div>
         </div>
       </div>
@@ -239,14 +268,14 @@ export class FocusWidget extends BaseWidget {
   }
 
   /**
-   * Get session label
+   * Get session label with icon
    * @private
    */
   _getSessionLabel(sessionType) {
     const labels = {
-      work: '🎯 Focus Session',
-      short_break: '☕ Short Break',
-      long_break: '🌟 Long Break'
+      work: '<span class="flex items-center gap-2"><i data-lucide="target" class="w-5 h-5"></i> Focus Session</span>',
+      short_break: '<span class="flex items-center gap-2"><i data-lucide="coffee" class="w-5 h-5"></i> Short Break</span>',
+      long_break: '<span class="flex items-center gap-2"><i data-lucide="sparkles" class="w-5 h-5"></i> Long Break</span>'
     };
     return labels[sessionType] || 'Session';
   }
@@ -278,7 +307,7 @@ export class FocusWidget extends BaseWidget {
     }
 
     if (progressCircle) {
-      const circumference = 2 * Math.PI * 110;
+      const circumference = 2 * Math.PI * 70;
       const offset = circumference * (1 - data.progress / 100);
       progressCircle.style.strokeDashoffset = offset;
     }
@@ -296,7 +325,7 @@ export class FocusWidget extends BaseWidget {
     const sessionCount = this.element.querySelector('[data-session-count]');
 
     if (sessionLabel) {
-      sessionLabel.textContent = this._getSessionLabel(data.sessionType);
+      sessionLabel.innerHTML = this._getSessionLabel(data.sessionType);
     }
 
     if (sessionCount) {
@@ -312,12 +341,16 @@ export class FocusWidget extends BaseWidget {
         startBtn.classList.remove('hidden');
         pauseBtn.classList.add('hidden');
         stopBtn.classList.remove('hidden');
-        startBtn.textContent = '▶️ Resume';
+        startBtn.innerHTML = '<i data-lucide="play" class="w-4 h-4"></i> Resume';
       } else {
         startBtn.classList.remove('hidden');
         pauseBtn.classList.add('hidden');
         stopBtn.classList.add('hidden');
-        startBtn.textContent = '▶️ Start';
+        startBtn.innerHTML = '<i data-lucide="play" class="w-4 h-4"></i> Start';
+      }
+      // Reinitialize lucide icons
+      if (window.lucide) {
+        window.lucide.createIcons();
       }
     }
   }
@@ -493,12 +526,21 @@ export class FocusWidget extends BaseWidget {
     
     const timerView = this.element.querySelector('[data-view="timer"]');
     const statsView = this.element.querySelector('[data-view="stats"]');
-    const toggleBtns = this.element.querySelectorAll('[data-view-toggle]');
+    const timerToggleBtn = this.element.querySelector('[data-view-toggle="timer"]');
+    const statsToggleBtn = this.element.querySelector('[data-view-toggle="stats"]');
 
-    toggleBtns.forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.viewToggle === view);
-    });
+    // Update button states
+    if (timerToggleBtn && statsToggleBtn) {
+      if (view === 'timer') {
+        timerToggleBtn.className = 'bg-primary-500 border-primary-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all hover:bg-primary-500/80 border flex items-center gap-2';
+        statsToggleBtn.className = 'bg-dark-surface border-dark-border text-dark-text-secondary px-4 py-2 rounded-lg text-sm font-medium transition-all hover:bg-primary-500/80 border flex items-center gap-2';
+      } else {
+        timerToggleBtn.className = 'bg-dark-surface border-dark-border text-dark-text-secondary px-4 py-2 rounded-lg text-sm font-medium transition-all hover:bg-primary-500/80 border flex items-center gap-2';
+        statsToggleBtn.className = 'bg-primary-500 border-primary-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition-all hover:bg-primary-500/80 border flex items-center gap-2';
+      }
+    }
 
+    // Toggle views
     if (view === 'timer') {
       timerView?.classList.remove('hidden');
       statsView?.classList.add('hidden');
@@ -507,25 +549,37 @@ export class FocusWidget extends BaseWidget {
       statsView?.classList.remove('hidden');
       this._loadFullStats();
     }
+
+    // Reinitialize icons
+    if (window.lucide) {
+      window.lucide.createIcons();
+    }
   }
 
   /**
-   * Attach event listeners
+   * Setup event listeners (override BaseWidget method)
    */
-  _attachEventListeners() {
-    // Control buttons
-    this.element.addEventListener('click', (e) => {
+  setupEventListeners() {
+    // Call parent to setup default widget actions
+    super.setupEventListeners();
+
+    // Control buttons and view toggle - use event delegation
+    this.on(this.element, 'click', (e) => {
       const action = e.target.closest('[data-action]')?.dataset.action;
       if (action) {
         this._handleAction(action);
+        return;
       }
 
       // View toggle
       const viewToggle = e.target.closest('[data-view-toggle]')?.dataset.viewToggle;
       if (viewToggle) {
         this._switchView(viewToggle);
+        return;
       }
     });
+
+    console.log('[FocusWidget] Event listeners attached');
   }
 
   /**
@@ -554,6 +608,105 @@ export class FocusWidget extends BaseWidget {
    */
   async afterRender() {
     await this._updateQuickStats();
+    
+    // Initialize icons
+    if (window.lucide) {
+      window.lucide.createIcons();
+    }
+  }
+
+  /**
+   * Get settings schema for settings modal
+   */
+  getSettingsSchema() {
+    return {
+      workDuration: {
+        type: 'number',
+        label: 'Focus Duration (minutes)',
+        description: 'Length of focus work sessions',
+        min: 1,
+        max: 90,
+        step: 1,
+        default: 25
+      },
+      shortBreakDuration: {
+        type: 'number',
+        label: 'Short Break (minutes)',
+        description: 'Length of short break between work sessions',
+        min: 1,
+        max: 30,
+        step: 1,
+        default: 5
+      },
+      longBreakDuration: {
+        type: 'number',
+        label: 'Long Break (minutes)',
+        description: 'Length of long break after multiple sessions',
+        min: 5,
+        max: 60,
+        step: 1,
+        default: 15
+      },
+      longBreakInterval: {
+        type: 'number',
+        label: 'Long Break Interval',
+        description: 'Number of work sessions before a long break',
+        min: 2,
+        max: 10,
+        step: 1,
+        default: 4
+      },
+      autoStartBreaks: {
+        type: 'boolean',
+        label: 'Auto-start Breaks',
+        description: 'Automatically start break timers after work sessions',
+        default: false
+      },
+      autoStartWork: {
+        type: 'boolean',
+        label: 'Auto-start Work',
+        description: 'Automatically start work sessions after breaks',
+        default: false
+      },
+      notificationsEnabled: {
+        type: 'boolean',
+        label: 'Enable Notifications',
+        description: 'Show browser notifications when sessions complete',
+        default: true
+      },
+      soundEnabled: {
+        type: 'boolean',
+        label: 'Enable Sound',
+        description: 'Play sound when sessions complete',
+        default: false
+      }
+    };
+  }
+
+  /**
+   * Handle settings update
+   */
+  async onSettingsUpdate(newSettings) {
+    console.log('[FocusWidget] Settings updated:', newSettings);
+    
+    // Update timer durations (convert minutes to seconds)
+    if (newSettings.workDuration !== undefined) {
+      this.timer.durations.work = newSettings.workDuration * 60;
+    }
+    if (newSettings.shortBreakDuration !== undefined) {
+      this.timer.durations.short_break = newSettings.shortBreakDuration * 60;
+    }
+    if (newSettings.longBreakDuration !== undefined) {
+      this.timer.durations.long_break = newSettings.longBreakDuration * 60;
+    }
+    if (newSettings.longBreakInterval !== undefined) {
+      this.timer.longBreakInterval = newSettings.longBreakInterval;
+    }
+
+    // Rerender if timer is idle to show new durations
+    if (this.timer.getState().state === PomodoroTimer.STATE.IDLE) {
+      this.rerender();
+    }
   }
 
   /**

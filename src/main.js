@@ -291,9 +291,14 @@ async function createWidgets() {
     weatherWidget.mount(weatherContainer);
     topRowContainer.appendChild(weatherContainer);
     
-    // Now mount the complete top row to center panel
-    panelManager.mountWidget('center', topRowContainer, 'top-row-widgets');
-    console.log('[Main] Weather widget mounted to top row');
+    // Create main center panel container
+    const centerPanelContainer = document.createElement('div');
+    centerPanelContainer.className = 'w-full max-w-7xl mx-auto space-y-4';
+    centerPanelContainer.id = 'center-panel-container';
+
+    // Add top row (clock + weather) to center panel container
+    centerPanelContainer.appendChild(topRowContainer);
+    console.log('[Main] Weather widget added to center panel container');
 
     // Create Search widget with fixed ID
     console.log('[Main] Creating Search widget...');
@@ -312,12 +317,13 @@ async function createWidgets() {
       settings: searchSettings
     });
 
-    // Mount to CENTER panel (second row)
+    // Mount search widget full width
     const searchContainer = document.createElement('div');
-    searchContainer.className = 'w-full max-w-4xl';
+    searchContainer.className = 'w-full';
     searchWidget.mount(searchContainer);
-    panelManager.mountWidget('center', searchContainer, searchWidget.widgetId);
-    console.log('[Main] Search widget mounted to center panel');
+    centerPanelContainer.appendChild(searchContainer);
+    
+    console.log('[Main] Search widget added to center panel container');
 
     // Create Quick Links widget with fixed ID
     console.log('[Main] Creating Quick Links widget...');
@@ -360,6 +366,10 @@ async function createWidgets() {
     panelManager.mountWidget('top', extensionControlContainer, extensionControlWidget.widgetId);
     console.log('[Main] Extension Control widget mounted to top panel');
 
+    // Mount the complete center panel container
+    panelManager.mountWidget('center', centerPanelContainer, 'center-panel-container');
+    console.log('[Main] All center panel widgets mounted (clock, weather, search)');
+
     // Create Focus widget with fixed ID
     console.log('[Main] Creating Focus widget...');
     const focusWidgetId = 'widget-focus-main';
@@ -370,12 +380,12 @@ async function createWidgets() {
       settings: focusSettings
     });
 
-    // Mount to MAIN panel (center)
+    // Mount Focus widget to LEFT panel
     const focusContainer = document.createElement('div');
-    focusContainer.className = 'w-full max-w-md';
+    focusContainer.className = 'w-full';
     focusWidget.mount(focusContainer);
-    panelManager.mountWidget('main', focusContainer, focusWidget.widgetId);
-    console.log('[Main] Focus widget mounted to main panel');
+    panelManager.mountWidget('left', focusContainer, focusWidget.widgetId);
+    console.log('[Main] Focus widget mounted to left panel');
 
     // Create Settings Modal
     console.log('[Main] Creating Settings Modal...');

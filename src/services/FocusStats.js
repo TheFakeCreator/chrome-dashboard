@@ -45,20 +45,24 @@ export class FocusStats {
       // Load stats
       this.stats = await this.storageManager.get(FocusStats.STORAGE_KEYS.STATS) || this._getDefaultStats();
       
-      // Load sessions (last 30 days)
-      this.sessions = await this.storageManager.get(FocusStats.STORAGE_KEYS.SESSIONS) || [];
+      // Load sessions (last 30 days) - ensure it's always an array
+      const loadedSessions = await this.storageManager.get(FocusStats.STORAGE_KEYS.SESSIONS);
+      this.sessions = Array.isArray(loadedSessions) ? loadedSessions : [];
       
       // Load streaks
       this.streaks = await this.storageManager.get(FocusStats.STORAGE_KEYS.STREAKS) || this._getDefaultStreaks();
 
       // Clean old sessions (keep only last 90 days)
-      await this._cleanOldSessions();
+      if (this.sessions.length > 0) {
+        await this._cleanOldSessions();
+      }
 
       this.initialized = true;
       console.log('[FocusStats] Initialized:', this.stats);
     } catch (error) {
       console.error('[FocusStats] Initialization error:', error);
       this.stats = this._getDefaultStats();
+      this.sessions = [];
       this.streaks = this._getDefaultStreaks();
     }
   }

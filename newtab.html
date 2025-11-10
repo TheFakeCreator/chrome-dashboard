@@ -11,37 +11,36 @@
 </head>
 <body>
   <!-- App Container -->
-  <div id="app">
+  <div id="app" class="min-h-screen">
     <!-- Loading State -->
-    <div id="loading" class="loading-screen">
-      <div class="loading-content">
-        <div class="spinner"></div>
-        <h2>Loading Dashboard...</h2>
-        <p class="loading-message">Initializing your productivity hub</p>
+    <div id="loading" class="fixed inset-0 bg-dark-bg flex items-center justify-center z-50">
+      <div class="text-center space-y-4">
+        <div class="inline-block animate-spin">
+          <i data-lucide="loader-circle" class="w-12 h-12 text-primary-500"></i>
+        </div>
+        <h2 class="text-2xl font-semibold text-dark-text">Loading Dashboard...</h2>
+        <p class="text-dark-muted">Initializing your productivity hub</p>
       </div>
     </div>
 
     <!-- Header -->
-    <header id="header" class="dashboard-header" style="display: none;">
-      <div class="container">
-        <div class="header-content">
+    <header id="header" class="fixed top-0 left-0 right-0 bg-dark-surface/80 backdrop-blur-lg border-b border-dark-border z-40" style="display: none;">
+      <div class="max-w-7xl mx-auto px-6">
+        <div class="flex items-center justify-between h-16">
           <!-- Logo/Brand -->
-          <div class="brand">
-            <h1 class="brand-title">Dashboard</h1>
+          <div class="flex items-center gap-3">
+            <i data-lucide="layout-dashboard" class="w-6 h-6 text-primary-500"></i>
+            <h1 class="text-xl font-bold text-dark-text">Dashboard</h1>
           </div>
 
           <!-- Header Actions -->
-          <div class="header-actions">
-            <button id="btn-theme" class="btn btn-icon btn-ghost" title="Toggle Theme" aria-label="Toggle theme">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"/>
-              </svg>
+          <div class="flex items-center gap-2">
+            <button id="btn-theme" class="btn-ghost p-2 rounded-lg hover:bg-dark-elevated transition-colors" title="Toggle Theme" aria-label="Toggle theme">
+              <i data-lucide="sun" class="w-5 h-5"></i>
             </button>
             
-            <button id="btn-settings" class="btn btn-icon btn-ghost" title="Settings" aria-label="Open settings">
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
-              </svg>
+            <button id="btn-settings" class="btn-ghost p-2 rounded-lg hover:bg-dark-elevated transition-colors" title="Settings" aria-label="Open settings">
+              <i data-lucide="settings" class="w-5 h-5"></i>
             </button>
           </div>
         </div>
@@ -49,42 +48,52 @@
     </header>
 
     <!-- Main Content -->
-    <main id="main" class="dashboard-main" style="display: none;">
-      <div class="container">
+    <main id="main" class="pt-16 min-h-screen" style="display: none;">
+      <div class="max-w-7xl mx-auto px-6 py-8">
         <!-- Widget Grid -->
-        <div id="widget-grid" class="widget-grid" data-columns="3">
+        <div id="widget-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <!-- Widgets will be dynamically added here -->
         </div>
 
         <!-- Empty State (shown when no widgets) -->
-        <div id="empty-state" class="empty-state" style="display: none;">
-          <div class="empty-state-content">
-            <span class="empty-icon">📦</span>
-            <h2>Welcome to Your Dashboard</h2>
-            <p>Your productivity hub is ready. The system is initialized and working!</p>
-            <div class="badge badge-success">✓ Core System Ready</div>
+        <div id="empty-state" class="flex items-center justify-center min-h-[60vh]" style="display: none;">
+          <div class="text-center space-y-4 max-w-md">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-primary-500/10 rounded-full">
+              <i data-lucide="package" class="w-8 h-8 text-primary-500"></i>
+            </div>
+            <h2 class="text-2xl font-semibold text-dark-text">Welcome to Your Dashboard</h2>
+            <p class="text-dark-muted">Your productivity hub is ready. The system is initialized and working!</p>
+            <div class="badge badge-success">
+              <i data-lucide="check-circle" class="w-3 h-3"></i>
+              <span>Core System Ready</span>
+            </div>
           </div>
         </div>
       </div>
     </main>
 
     <!-- Footer -->
-    <footer id="footer" class="dashboard-footer" style="display: none;">
-      <div class="container">
-        <div class="footer-content">
-          <p class="footer-text">Chrome Dashboard v2.0.0-alpha</p>
-          <p class="footer-meta">Built with modern architecture</p>
+    <footer id="footer" class="border-t border-dark-border bg-dark-surface/50 mt-12" style="display: none;">
+      <div class="max-w-7xl mx-auto px-6 py-6">
+        <div class="flex items-center justify-between text-sm">
+          <p class="text-dark-text font-medium">Chrome Dashboard v2.0.0-alpha</p>
+          <p class="text-dark-muted">Built with modern architecture</p>
         </div>
       </div>
     </footer>
 
     <!-- Error State -->
-    <div id="error" class="error-screen" style="display: none;">
-      <div class="error-content">
-        <span class="error-icon">⚠️</span>
-        <h2>Something Went Wrong</h2>
-        <p id="error-message">An error occurred while loading the dashboard.</p>
-        <button id="btn-retry" class="btn btn-primary">Retry</button>
+    <div id="error" class="fixed inset-0 bg-dark-bg flex items-center justify-center z-50" style="display: none;">
+      <div class="text-center space-y-6 max-w-md px-6">
+        <div class="inline-flex items-center justify-center w-20 h-20 bg-red-500/10 rounded-full">
+          <i data-lucide="alert-circle" class="w-10 h-10 text-red-500"></i>
+        </div>
+        <h2 class="text-2xl font-semibold text-dark-text">Something Went Wrong</h2>
+        <p id="error-message" class="text-dark-muted">An error occurred while loading the dashboard.</p>
+        <button id="btn-retry" class="btn btn-primary">
+          <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+          <span>Retry</span>
+        </button>
       </div>
     </div>
   </div>

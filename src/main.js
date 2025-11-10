@@ -9,6 +9,7 @@ import { ClockWidget } from './widgets/ClockWidget.js';
 import { WeatherWidget } from './widgets/WeatherWidget.js';
 import { SearchWidget } from './widgets/SearchWidget.js';
 import { SettingsModal } from './components/SettingsModal.js';
+import { initIcons } from './utils/icons.js';
 
 // DOM elements
 let loadingEl;
@@ -86,6 +87,9 @@ function showDashboard() {
   if (headerEl) headerEl.style.display = 'block';
   if (mainEl) mainEl.style.display = 'block';
   if (footerEl) footerEl.style.display = 'block';
+  
+  // Initialize Lucide icons
+  initIcons();
   
   // Show empty state if no widgets
   const widgetGrid = document.getElementById('widget-grid');

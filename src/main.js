@@ -12,6 +12,7 @@ import { WeatherWidget } from './widgets/WeatherWidget.js';
 import { SearchWidget } from './widgets/SearchWidget.js';
 import { QuickLinksWidget } from './widgets/QuickLinksWidget.js';
 import { ExtensionControlWidget } from './widgets/ExtensionControlWidget.js';
+import { FocusWidget } from './widgets/FocusWidget.js';
 import { SettingsModal } from './components/SettingsModal.js';
 import { initIcons } from './utils/icons.js';
 
@@ -359,6 +360,23 @@ async function createWidgets() {
     panelManager.mountWidget('top', extensionControlContainer, extensionControlWidget.widgetId);
     console.log('[Main] Extension Control widget mounted to top panel');
 
+    // Create Focus widget with fixed ID
+    console.log('[Main] Creating Focus widget...');
+    const focusWidgetId = 'widget-focus-main';
+    const focusSettings = await loadWidgetSettings(focusWidgetId, {});
+    
+    const focusWidget = new FocusWidget(app, {
+      widgetId: focusWidgetId,
+      settings: focusSettings
+    });
+
+    // Mount to MAIN panel (center)
+    const focusContainer = document.createElement('div');
+    focusContainer.className = 'w-full max-w-md';
+    focusWidget.mount(focusContainer);
+    panelManager.mountWidget('main', focusContainer, focusWidget.widgetId);
+    console.log('[Main] Focus widget mounted to main panel');
+
     // Create Settings Modal
     console.log('[Main] Creating Settings Modal...');
     const settingsModal = new SettingsModal(app);
@@ -369,6 +387,7 @@ async function createWidgets() {
     settingsModal.registerWidget(searchWidget.widgetId, searchWidget);
     settingsModal.registerWidget(quickLinksWidget.widgetId, quickLinksWidget);
     settingsModal.registerWidget(extensionControlWidget.widgetId, extensionControlWidget);
+    settingsModal.registerWidget(focusWidget.widgetId, focusWidget);
     
     console.log('[Main] Settings Modal created');
 
@@ -387,7 +406,8 @@ async function createWidgets() {
       weather: weatherWidget,
       search: searchWidget,
       quickLinks: quickLinksWidget,
-      extensionControl: extensionControlWidget
+      extensionControl: extensionControlWidget,
+      focus: focusWidget
     };
     
     window.__settingsModal = settingsModal;

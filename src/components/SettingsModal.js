@@ -47,18 +47,25 @@ export class SettingsModal extends BaseComponent {
   open(tab = null) {
     if (this.isOpen) return;
 
+    console.log('[SettingsModal] Opening modal, tab:', tab);
+    
     this.currentTab = tab || this.currentTab;
     this.isOpen = true;
 
     // If already mounted, just refresh, otherwise mount fresh
     if (this.mounted) {
+      console.log('[SettingsModal] Already mounted, refreshing');
       this.refresh();
     } else {
+      console.log('[SettingsModal] Mounting to body');
       this.mount(document.body);
     }
     
+    console.log('[SettingsModal] Element after mount:', this.element);
+    
     // Setup event listeners if element exists and handlers aren't set yet
     if (this.element && !this._listenersSetup) {
+      console.log('[SettingsModal] Setting up event listeners');
       this.setupEventListeners();
       this._listenersSetup = true;
     }
@@ -67,6 +74,7 @@ export class SettingsModal extends BaseComponent {
     setTimeout(() => {
       if (this.element) {
         this.element.classList.add('show');
+        console.log('[SettingsModal] Added show class');
       }
     }, 10);
 
@@ -81,31 +89,44 @@ export class SettingsModal extends BaseComponent {
    * @private
    */
   setupEventListeners() {
-    if (!this.element) return;
+    if (!this.element) {
+      console.warn('[SettingsModal] No element to setup listeners on');
+      return;
+    }
 
-    // Use direct event delegation on the modal overlay
-    const overlay = this.element.querySelector('.settings-modal-overlay');
-    if (overlay && !this._clickHandler) {
+    console.log('[SettingsModal] Setting up event listeners on element');
+
+    // The element itself IS the overlay, so use it directly
+    const overlay = this.element;
+    console.log('[SettingsModal] Using element as overlay:', overlay);
+    
+    if (!this._clickHandler) {
       this._clickHandler = (event) => {
+        console.log('[SettingsModal] Click detected:', event.target);
+        
         // Handle clicks on action buttons
         const actionElement = event.target.closest('[data-action]');
         if (actionElement) {
+          console.log('[SettingsModal] Action element found:', actionElement.dataset.action);
           this.handleEvent(event);
           return;
         }
 
-        // Handle clicks on overlay (close modal)
+        // Handle clicks on overlay background (close modal)
         if (event.target === overlay) {
+          console.log('[SettingsModal] Clicked on overlay background, closing');
           this.close();
         }
       };
       overlay.addEventListener('click', this._clickHandler);
+      console.log('[SettingsModal] Click handler attached to overlay');
     }
 
     // Keyboard listener
     if (!this.keyboardHandler) {
       this.keyboardHandler = (event) => this.handleKeyboard(event);
       document.addEventListener('keydown', this.keyboardHandler);
+      console.log('[SettingsModal] Keyboard handler attached');
     }
   }
 
@@ -138,8 +159,36 @@ export class SettingsModal extends BaseComponent {
   switchTab(tabId) {
     if (this.currentTab === tabId) return;
 
+    console.log('[SettingsModal] Switching from', this.currentTab, 'to', tabId);
     this.currentTab = tabId;
-    this.refresh();
+    
+    // Update tab UI
+    const tabs = this.element?.querySelectorAll('.settings-tab');
+    const contents = this.element?.querySelector('.settings-content');
+    
+    console.log('[SettingsModal] Found tabs:', tabs?.length);
+    console.log('[SettingsModal] Found content container:', contents);
+    
+    // Update active tab
+    tabs?.forEach(tab => {
+      if (tab.dataset.tab === tabId) {
+        tab.classList.add('active');
+        console.log('[SettingsModal] Activated tab:', tabId);
+      } else {
+        tab.classList.remove('active');
+      }
+    });
+    
+    // Update content - just re-render the content area
+    if (contents) {
+      contents.innerHTML = `
+        <form id="settings-form" class="settings-form">
+          ${this.renderTabContent()}
+        </form>
+      `;
+      console.log('[SettingsModal] Content updated for tab:', tabId);
+    }
+    
     this.emit('tab:changed', { tab: tabId });
   }
 
@@ -502,7 +551,7 @@ export class SettingsModal extends BaseComponent {
    * @returns {string} HTML string
    */
   renderAppearanceTab() {
-    const currentTheme = this.app.config.get('theme.mode') || 'dark';
+    const currentTheme = this.app.configManager.get('theme.mode') || 'dark';
 
     return `
       <div class="settings-section">
@@ -650,10 +699,7 @@ export class SettingsModal extends BaseComponent {
 
     // Remove click handler
     if (this._clickHandler && this.element) {
-      const overlay = this.element.querySelector('.settings-modal-overlay');
-      if (overlay) {
-        overlay.removeEventListener('click', this._clickHandler);
-      }
+      this.element.removeEventListener('click', this._clickHandler);
       this._clickHandler = null;
     }
 

@@ -664,8 +664,9 @@ export class SettingsModal extends BaseComponent {
       this.saveSettings();
     } else if (action === 'change-theme') {
       const theme = event.target.value;
-      console.log('[SettingsModal] Changing theme:', theme);
-      this.app.setTheme(theme);
+      console.log('[SettingsModal] Changing theme to:', theme);
+      // Emit theme change event through event bus
+      this.app.eventBus.emit('theme:change', { theme: { mode: theme } });
     }
   }
 

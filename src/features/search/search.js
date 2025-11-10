@@ -1,5 +1,5 @@
 // Search logic
-import { userTracker } from './tracking.js';
+import { userTracker } from '../analytics/tracking.js';
 
 export function setupSearch() {
 

@@ -1,5 +1,5 @@
 // Weather logic
-import { userLocation, setUserLocation } from './clock.js';
+import { userLocation, setUserLocation } from '../clock/clock.js';
 
 export function getWeatherIcon(code) {
   if ([0].includes(code)) return '☀️';

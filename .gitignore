@@ -1,27 +1,77 @@
 # Node modules
 node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
 
-# Build output
-/dist/
-/build/
+# Build outputs
+dist/
+build/
+*.zip
+*.crx
+*.pem
 
-# VS Code settings
-.vscode/
-
-# OS files
-.DS_Store
-Thumbs.db
-
-# Logs
-*.log
-
-# Environment files
+# Environment variables
 .env
+.env.local
+.env.development
+.env.production
 .env.*
 !.env.example
-# Misc
-*.bak
-*.tmp
 
-# Ignore old style.css if not needed
+# IDE and editor files
+.vscode/settings.json
+.vscode/launch.json
+.idea/
+*.swp
+*.swo
+*~
+
+# Test coverage
+coverage/
+.nyc_output/
+*.lcov
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Logs
+logs/
+*.log
+
+# Operating System Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# Release packages (keep releases/ folder but ignore contents initially)
+releases/*.zip
+releases/*.crx
+
+# Chrome extension specific
+*.pem
+*.crx
+
+# Development
+.eslintcache
+.stylelintcache
+
+# Backup files
+*.bak
+*.backup
+*~
+
+# Lock files (we'll keep pnpm-lock.yaml)
+# package-lock.json
+# yarn.lock
+
+# Old files
 style.css

@@ -1,20 +1,57 @@
 {
   "name": "chrome-dashboard",
-  "version": "0.1.0",
-  "description": "A modern, modular new tab dashboard for Chrome with:\r - Customizable sections and cards\r - Weather, clock, and location\r - AI search bar with gradient border\r - Tab groups\r - Responsive design\r - Modular CSS and JS",
-  "main": "main.js",
+  "version": "2.0.0-alpha",
+  "description": "A modern, productivity-focused new tab dashboard for Chrome with customizable sections, focus mode, task management, and smart widgets",
+  "main": "src/core/main.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "echo \"Development mode - Load extension in Chrome\"",
+    "build": "node scripts/build.js",
+    "lint": "eslint . --ext .js",
+    "lint:fix": "eslint . --ext .js --fix",
+    "format": "prettier --write \"**/*.{js,json,css,html,md}\"",
+    "format:check": "prettier --check \"**/*.{js,json,css,html,md}\"",
+    "prepare": "husky",
+    "test": "echo \"Tests will be added soon\" && exit 0"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,css,html,md}": [
+      "prettier --write"
+    ]
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/TheFakeCreator/chrome-dashboard.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "chrome-extension",
+    "dashboard",
+    "productivity",
+    "new-tab",
+    "focus-mode",
+    "task-management",
+    "pomodoro",
+    "widgets"
+  ],
+  "author": "TheFakeCreator",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0",
+    "pnpm": ">=8.0.0"
+  },
   "bugs": {
     "url": "https://github.com/TheFakeCreator/chrome-dashboard/issues"
   },
-  "homepage": "https://github.com/TheFakeCreator/chrome-dashboard#readme"
+  "homepage": "https://github.com/TheFakeCreator/chrome-dashboard#readme",
+  "devDependencies": {
+    "archiver": "^7.0.1",
+    "eslint": "^9.39.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.6",
+    "prettier": "^3.6.2"
+  }
 }

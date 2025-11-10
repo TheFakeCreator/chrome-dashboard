@@ -1,14 +1,14 @@
 // Main entry point
 import { setAIGradientBorder, updateWelcome, setWelcomeVisibility, applyTheme, applyCustomBackground } from './settings.js';
-import { getTimeString, getDateString, updateClock, userLocation } from './clock.js';
-import { updateWeather } from './weather.js';
-import { setupSearch } from './search.js';
-import { setupAIChat } from './ai.js';
-import { showModal, hideModal } from './modal.js';
-import { getSections, saveSections, renderSections } from './sections.js';
-import { getTabGroups, saveTabGroups, renderTabGroups } from './tabGroups.js';
-import { userTracker } from './tracking.js';
-import { setupDevTools } from './dev-tools.js';
+import { getTimeString, getDateString, updateClock, userLocation } from '../features/widgets/clock/clock.js';
+import { updateWeather } from '../features/widgets/weather/weather.js';
+import { setupSearch } from '../features/search/search.js';
+import { setupAIChat } from '../features/search/ai.js';
+import { showModal, hideModal } from '../utils/modal.js';
+import { getSections, saveSections, renderSections } from '../features/sections/sections.js';
+import { getTabGroups, saveTabGroups, renderTabGroups } from '../features/tabs/tabGroups.js';
+import { userTracker } from '../features/analytics/tracking.js';
+import { setupDevTools } from '../../scripts/dev-tools.js';
 
 
 document.addEventListener('DOMContentLoaded', () => {

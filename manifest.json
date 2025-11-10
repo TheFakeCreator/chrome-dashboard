@@ -13,15 +13,15 @@
   ],
   "host_permissions": ["<all_urls>"],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "src/core/background.js"
   },
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
-      "16": "icon128.png",
-      "32": "icon128.png",
-      "48": "icon128.png",
-      "128": "icon128.png"
+      "16": "src/assets/icons/icon128.png",
+      "32": "src/assets/icons/icon128.png",
+      "48": "src/assets/icons/icon128.png",
+      "128": "src/assets/icons/icon128.png"
     }
   }
 }

@@ -6,6 +6,7 @@
 
 import { app } from './core/App.js';
 import { ClockWidget } from './widgets/ClockWidget.js';
+import { WeatherWidget } from './widgets/WeatherWidget.js';
 
 // DOM elements
 let loadingEl;
@@ -120,9 +121,29 @@ async function createWidgets() {
     clockWidget.mount(widgetGrid);
     console.log('[Main] Clock widget mounted successfully');
 
-    // Store reference for debugging
+    // Create Weather widget
+    console.log('[Main] Creating Weather widget...');
+    const weatherWidget = new WeatherWidget(app, {
+      settings: {
+        apiKey: '', // User needs to add their own API key
+        location: '',
+        autoDetectLocation: true,
+        units: 'metric',
+        showForecast: true,
+        showFeelsLike: true,
+        showHumidity: true,
+        showWind: true
+      }
+    });
+
+    // Mount the widget
+    weatherWidget.mount(widgetGrid);
+    console.log('[Main] Weather widget mounted successfully');
+
+    // Store references for debugging
     window.__widgets = {
-      clock: clockWidget
+      clock: clockWidget,
+      weather: weatherWidget
     };
 
   } catch (error) {

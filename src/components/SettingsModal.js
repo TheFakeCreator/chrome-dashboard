@@ -8,6 +8,7 @@
  */
 
 import { BaseComponent } from './BaseComponent.js';
+import { initIcons } from '../utils/icons.js';
 
 export class SettingsModal extends BaseComponent {
   constructor(app, options = {}) {
@@ -24,10 +25,10 @@ export class SettingsModal extends BaseComponent {
     
     // Available tabs
     this.tabs = [
-      { id: 'general', label: 'General', icon: '⚙️' },
-      { id: 'widgets', label: 'Widgets', icon: '🧩' },
-      { id: 'appearance', label: 'Appearance', icon: '🎨' },
-      { id: 'about', label: 'About', icon: 'ℹ️' }
+      { id: 'general', label: 'General' },
+      { id: 'widgets', label: 'Widgets' },
+      { id: 'appearance', label: 'Appearance' },
+      { id: 'about', label: 'About' }
     ];
   }
 
@@ -70,11 +71,22 @@ export class SettingsModal extends BaseComponent {
       this._listenersSetup = true;
     }
     
-    // Add show class for animation
+    // Initialize Lucide icons
+    initIcons();
+    
+    // Trigger animation by removing opacity-0 and scale-95, and adding proper classes
     setTimeout(() => {
       if (this.element) {
-        this.element.classList.add('show');
-        console.log('[SettingsModal] Added show class');
+        this.element.classList.remove('opacity-0');
+        this.element.classList.add('opacity-100');
+        
+        const modalContent = this.element.querySelector('.bg-dark-surface');
+        if (modalContent) {
+          modalContent.classList.remove('scale-95');
+          modalContent.classList.add('scale-100');
+        }
+        
+        console.log('[SettingsModal] Animation triggered');
       }
     }, 10);
 
@@ -107,15 +119,22 @@ export class SettingsModal extends BaseComponent {
         // Handle clicks on action buttons
         const actionElement = event.target.closest('[data-action]');
         if (actionElement) {
-          console.log('[SettingsModal] Action element found:', actionElement.dataset.action);
+          const action = actionElement.dataset.action;
+          console.log('[SettingsModal] Action element found:', action);
+          
+          // Special handling for close-overlay - only close if clicked on overlay itself
+          if (action === 'close-overlay') {
+            if (event.target === overlay) {
+              console.log('[SettingsModal] Clicked on overlay background, closing');
+              this.close();
+            }
+            // Otherwise ignore - clicked inside modal content
+            return;
+          }
+          
+          // Handle other actions
           this.handleEvent(event);
           return;
-        }
-
-        // Handle clicks on overlay background (close modal)
-        if (event.target === overlay) {
-          console.log('[SettingsModal] Clicked on overlay background, closing');
-          this.close();
         }
       };
       overlay.addEventListener('click', this._clickHandler);
@@ -138,9 +157,16 @@ export class SettingsModal extends BaseComponent {
 
     this.isOpen = false;
 
-    // Remove show class for animation
+    // Trigger close animation
     if (this.element) {
-      this.element.classList.remove('show');
+      this.element.classList.remove('opacity-100');
+      this.element.classList.add('opacity-0');
+      
+      const modalContent = this.element.querySelector('.bg-dark-surface');
+      if (modalContent) {
+        modalContent.classList.remove('scale-100');
+        modalContent.classList.add('scale-95');
+      }
     }
 
     // Unmount after animation
@@ -162,31 +188,34 @@ export class SettingsModal extends BaseComponent {
     console.log('[SettingsModal] Switching from', this.currentTab, 'to', tabId);
     this.currentTab = tabId;
     
-    // Update tab UI
-    const tabs = this.element?.querySelectorAll('.settings-tab');
-    const contents = this.element?.querySelector('.settings-content');
+    // Update tab UI - find buttons with data-action="switch-tab"
+    const tabs = this.element?.querySelectorAll('[data-action="switch-tab"]');
+    const contents = this.element?.querySelector('form#settings-form');
     
     console.log('[SettingsModal] Found tabs:', tabs?.length);
     console.log('[SettingsModal] Found content container:', contents);
     
-    // Update active tab
+    // Update active tab styling
     tabs?.forEach(tab => {
       if (tab.dataset.tab === tabId) {
-        tab.classList.add('active');
+        // Add active state
+        tab.classList.remove('text-dark-muted', 'hover:bg-dark-elevated/50');
+        tab.classList.add('bg-dark-elevated', 'text-primary-400', 'border-b-2', 'border-primary-500');
         console.log('[SettingsModal] Activated tab:', tabId);
       } else {
-        tab.classList.remove('active');
+        // Remove active state
+        tab.classList.remove('bg-dark-elevated', 'text-primary-400', 'border-b-2', 'border-primary-500');
+        tab.classList.add('text-dark-muted', 'hover:bg-dark-elevated/50');
       }
     });
     
-    // Update content - just re-render the content area
+    // Update content - re-render the form content
     if (contents) {
-      contents.innerHTML = `
-        <form id="settings-form" class="settings-form">
-          ${this.renderTabContent()}
-        </form>
-      `;
+      contents.innerHTML = this.renderTabContent();
       console.log('[SettingsModal] Content updated for tab:', tabId);
+      
+      // Initialize Lucide icons in new content
+      initIcons();
     }
     
     this.emit('tab:changed', { tab: tabId });
@@ -198,12 +227,17 @@ export class SettingsModal extends BaseComponent {
   async saveSettings() {
     try {
       // Get form data
-      const formData = new FormData(this.element.querySelector('#settings-form'));
+      const form = this.element.querySelector('#settings-form');
+      const formData = new FormData(form);
       const settings = {};
 
+      console.log('[SettingsModal] Processing form data...');
+      
       // Convert FormData to object
       for (const [key, value] of formData.entries()) {
-        // Handle nested paths (e.g., "weather.apiKey")
+        console.log('[SettingsModal] Form field:', key, '=', value);
+        
+        // Handle nested paths (e.g., "widget-weather-123.apiKey")
         const parts = key.split('.');
         let current = settings;
         
@@ -214,21 +248,70 @@ export class SettingsModal extends BaseComponent {
           current = current[parts[i]];
         }
         
-        current[parts[parts.length - 1]] = value;
+        // Convert checkbox values from 'on' to true
+        const finalValue = value === 'on' ? true : value;
+        current[parts[parts.length - 1]] = finalValue;
       }
+
+      // Handle unchecked checkboxes (they don't appear in FormData)
+      // Find all checkboxes in the form and set false for unchecked ones
+      const checkboxes = form.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(checkbox => {
+        const name = checkbox.name;
+        if (name && !checkbox.checked) {
+          const parts = name.split('.');
+          let current = settings;
+          
+          for (let i = 0; i < parts.length - 1; i++) {
+            if (!current[parts[i]]) {
+              current[parts[i]] = {};
+            }
+            current = current[parts[i]];
+          }
+          
+          current[parts[parts.length - 1]] = false;
+        }
+      });
+
+      console.log('[SettingsModal] Parsed settings:', settings);
+      console.log('[SettingsModal] Registered widgets:', Array.from(this.widgets.keys()));
 
       // Save to widgets
       for (const [widgetId, widgetSettings] of Object.entries(settings)) {
+        console.log('[SettingsModal] Processing widget:', widgetId, 'with settings:', widgetSettings);
+        
         const widget = this.widgets.get(widgetId);
         if (widget) {
+          console.log('[SettingsModal] Found widget:', widget.name, 'Current settings:', widget.settings);
+          
           // Merge with existing settings
           widget.settings = { ...widget.settings, ...widgetSettings };
           
+          console.log('[SettingsModal] Updated settings:', widget.settings);
+          
+          // Save to storage - IMPORTANT: Use an object, not a string key!
+          const storageKey = `widget.${widgetId}.settings`;
+          const storageData = { [storageKey]: widget.settings };
+          console.log('[SettingsModal] Saving to storage:', storageKey, '=', widget.settings);
+          await this.app.storageManager.set(storageData);
+          
+          // Verify it was saved
+          const verifyData = await this.app.storageManager.get([storageKey]);
+          console.log('[SettingsModal] Verified saved data:', verifyData);
+          
           // Trigger settings change
-          widget.onSettingsChanged && widget.onSettingsChanged(widget.settings, widget.settings);
+          if (widget.onSettingsChanged) {
+            widget.onSettingsChanged(widget.settings, widget.settings);
+          }
           
           // Reload widget data
+          console.log('[SettingsModal] Reloading widget:', widget.name);
           await widget.loadData();
+          
+          // Refresh widget display
+          widget.refresh();
+        } else {
+          console.warn('[SettingsModal] Widget not found:', widgetId);
         }
       }
 
@@ -265,52 +348,71 @@ export class SettingsModal extends BaseComponent {
     if (!this.isOpen) return '';
 
     return `
-      <div class="settings-modal-overlay" data-action="close-overlay">
-        <div class="settings-modal">
+      <div class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 opacity-0 transition-opacity duration-300" data-action="close-overlay">
+        <div class="bg-dark-surface rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden transform scale-95 transition-transform duration-300">
           <!-- Header -->
-          <div class="settings-header">
-            <h2 class="settings-title">
-              <span class="title-icon">⚙️</span>
+          <div class="flex items-center justify-between p-6 border-b border-dark-border">
+            <h2 class="flex items-center gap-3 text-2xl font-bold text-dark-text">
+              <i data-lucide="settings" class="w-6 h-6 text-primary-500"></i>
               Dashboard Settings
             </h2>
-            <button class="btn-close" data-action="close" title="Close (Esc)">
-              <span>✕</span>
+            <button class="p-2 rounded-lg hover:bg-dark-elevated text-dark-muted hover:text-dark-text transition-colors" data-action="close" title="Close (Esc)">
+              <i data-lucide="x" class="w-5 h-5"></i>
             </button>
           </div>
 
           <!-- Tabs -->
-          <div class="settings-tabs">
+          <div class="flex gap-1 px-6 pt-4 border-b border-dark-border overflow-x-auto">
             ${this.tabs.map(tab => `
               <button 
-                class="settings-tab ${tab.id === this.currentTab ? 'active' : ''}"
+                class="flex items-center gap-2 px-4 py-3 rounded-t-lg transition-all ${
+                  tab.id === this.currentTab 
+                    ? 'bg-dark-elevated text-primary-400 border-b-2 border-primary-500' 
+                    : 'text-dark-muted hover:text-dark-text hover:bg-dark-elevated/50'
+                }"
                 data-action="switch-tab"
                 data-tab="${tab.id}"
               >
-                <span class="tab-icon">${tab.icon}</span>
-                <span class="tab-label">${tab.label}</span>
+                <i data-lucide="${this.getTabIcon(tab.id)}" class="w-4 h-4"></i>
+                <span class="font-medium">${tab.label}</span>
               </button>
             `).join('')}
           </div>
 
           <!-- Content -->
-          <div class="settings-content">
-            <form id="settings-form">
+          <div class="flex-1 overflow-y-auto p-6">
+            <form id="settings-form" class="space-y-6">
               ${this.renderTabContent()}
             </form>
           </div>
 
           <!-- Footer -->
-          <div class="settings-footer">
-            <button class="btn btn-secondary" data-action="close">
+          <div class="flex items-center justify-end gap-3 p-6 border-t border-dark-border bg-dark-bg">
+            <button class="btn-secondary px-6 py-2.5 rounded-lg font-medium transition-colors" data-action="close">
               Cancel
             </button>
-            <button class="btn btn-primary" data-action="save">
+            <button class="btn-primary px-6 py-2.5 rounded-lg font-medium transition-colors" data-action="save">
               Save Settings
             </button>
           </div>
         </div>
       </div>
     `;
+  }
+
+  /**
+   * Get Lucide icon name for tab
+   * @param {string} tabId - Tab ID
+   * @returns {string} Lucide icon name
+   */
+  getTabIcon(tabId) {
+    const icons = {
+      general: 'settings',
+      widgets: 'grid-2x2',
+      appearance: 'palette',
+      about: 'info'
+    };
+    return icons[tabId] || 'circle';
   }
 
   /**
@@ -338,28 +440,30 @@ export class SettingsModal extends BaseComponent {
    */
   renderGeneralTab() {
     return `
-      <div class="settings-section">
-        <h3 class="section-title">General Settings</h3>
-        <p class="section-description">Configure global dashboard behavior</p>
+      <div class="space-y-6">
+        <div>
+          <h3 class="text-xl font-semibold text-dark-text mb-2">General Settings</h3>
+          <p class="text-sm text-dark-muted">Configure global dashboard behavior</p>
+        </div>
 
-        <div class="setting-group">
-          <label class="setting-label">
-            <span class="label-text">Dashboard Name</span>
+        <div class="space-y-2">
+          <label class="block">
+            <span class="block text-sm font-medium text-dark-text mb-1.5">Dashboard Name</span>
             <input 
               type="text" 
-              class="setting-input" 
+              class="w-full px-4 py-2.5 bg-dark-elevated border border-dark-border rounded-lg text-dark-text placeholder-dark-muted focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all" 
               name="general.name"
               value="My Dashboard"
               placeholder="Enter dashboard name"
             />
           </label>
-          <p class="setting-hint">Customize your dashboard name</p>
+          <p class="text-xs text-dark-muted mt-1">Customize your dashboard name</p>
         </div>
 
-        <div class="setting-group">
-          <label class="setting-label">
-            <span class="label-text">Language</span>
-            <select class="setting-select" name="general.language">
+        <div class="space-y-2">
+          <label class="block">
+            <span class="block text-sm font-medium text-dark-text mb-1.5">Language</span>
+            <select class="w-full px-4 py-2.5 bg-dark-elevated border border-dark-border rounded-lg text-dark-text focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all" name="general.language">
               <option value="en">English</option>
               <option value="es">Spanish</option>
               <option value="fr">French</option>
@@ -368,25 +472,25 @@ export class SettingsModal extends BaseComponent {
           </label>
         </div>
 
-        <div class="setting-group">
-          <label class="setting-checkbox">
+        <div class="space-y-3">
+          <label class="flex items-center gap-3 cursor-pointer group">
             <input 
               type="checkbox" 
               name="general.animations"
               checked
+              class="w-5 h-5 rounded border-dark-border text-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-offset-0 bg-dark-elevated"
             />
-            <span class="checkbox-label">Enable animations</span>
+            <span class="text-sm font-medium text-dark-text group-hover:text-primary-400 transition-colors">Enable animations</span>
           </label>
-        </div>
 
-        <div class="setting-group">
-          <label class="setting-checkbox">
+          <label class="flex items-center gap-3 cursor-pointer group">
             <input 
               type="checkbox" 
               name="general.shortcuts"
               checked
+              class="w-5 h-5 rounded border-dark-border text-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-offset-0 bg-dark-elevated"
             />
-            <span class="checkbox-label">Enable keyboard shortcuts</span>
+            <span class="text-sm font-medium text-dark-text group-hover:text-primary-400 transition-colors">Enable keyboard shortcuts</span>
           </label>
         </div>
       </div>
@@ -401,20 +505,24 @@ export class SettingsModal extends BaseComponent {
     const widgetsArray = Array.from(this.widgets.values());
 
     return `
-      <div class="settings-section">
-        <h3 class="section-title">Widget Settings</h3>
-        <p class="section-description">Configure individual widget settings</p>
+      <div class="space-y-6">
+        <div>
+          <h3 class="text-xl font-semibold text-dark-text mb-2">Widget Settings</h3>
+          <p class="text-sm text-dark-muted">Configure individual widget settings</p>
+        </div>
 
-        ${widgetsArray.map(widget => `
-          <div class="widget-settings">
-            <div class="widget-settings-header">
-              <span class="widget-icon">${widget.icon}</span>
-              <h4 class="widget-name">${widget.title}</h4>
+        <div class="space-y-6">
+          ${widgetsArray.map(widget => `
+            <div class="p-6 bg-dark-elevated rounded-lg border border-dark-border space-y-4">
+              <div class="flex items-center gap-3 pb-3 border-b border-dark-border">
+                ${widget.icon}
+                <h4 class="text-lg font-semibold text-dark-text">${widget.title}</h4>
+              </div>
+
+              ${this.renderWidgetSettings(widget)}
             </div>
-
-            ${this.renderWidgetSettings(widget)}
-          </div>
-        `).join('')}
+          `).join('')}
+        </div>
       </div>
     `;
   }
@@ -431,119 +539,127 @@ export class SettingsModal extends BaseComponent {
     // Special handling for different widgets
     if (widget.name === 'Weather') {
       return `
-        <div class="setting-group">
-          <label class="setting-label">
-            <span class="label-text">OpenWeatherMap API Key</span>
-            <input 
-              type="text" 
-              class="setting-input" 
-              name="${widgetId}.apiKey"
-              value="${settings.apiKey || ''}"
-              placeholder="Enter your API key"
-            />
-          </label>
-          <p class="setting-hint">
-            Get a free API key from 
-            <a href="https://openweathermap.org/api" target="_blank">OpenWeatherMap</a>
-          </p>
-        </div>
+        <div class="space-y-4">
+          <div class="space-y-2">
+            <label class="block">
+              <span class="block text-sm font-medium text-dark-text mb-1.5">OpenWeatherMap API Key</span>
+              <input 
+                type="text" 
+                class="w-full px-4 py-2.5 bg-dark-bg border border-dark-border rounded-lg text-dark-text placeholder-dark-muted focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all" 
+                name="${widgetId}.apiKey"
+                value="${settings.apiKey || ''}"
+                placeholder="Enter your API key"
+              />
+            </label>
+            <p class="text-xs text-dark-muted">
+              Get a free API key from 
+              <a href="https://openweathermap.org/api" target="_blank" class="text-primary-400 hover:text-primary-300 underline">OpenWeatherMap</a>
+            </p>
+          </div>
 
-        <div class="setting-group">
-          <label class="setting-label">
-            <span class="label-text">Location</span>
-            <input 
-              type="text" 
-              class="setting-input" 
-              name="${widgetId}.location"
-              value="${settings.location || ''}"
-              placeholder="Leave empty for auto-detect"
-            />
-          </label>
-          <p class="setting-hint">City name or leave empty for automatic detection</p>
-        </div>
+          <div class="space-y-2">
+            <label class="block">
+              <span class="block text-sm font-medium text-dark-text mb-1.5">Location</span>
+              <input 
+                type="text" 
+                class="w-full px-4 py-2.5 bg-dark-bg border border-dark-border rounded-lg text-dark-text placeholder-dark-muted focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all" 
+                name="${widgetId}.location"
+                value="${settings.location || ''}"
+                placeholder="Leave empty for auto-detect"
+              />
+            </label>
+            <p class="text-xs text-dark-muted">City name or leave empty for automatic detection</p>
+          </div>
 
-        <div class="setting-group">
-          <label class="setting-label">
-            <span class="label-text">Units</span>
-            <select class="setting-select" name="${widgetId}.units">
-              <option value="metric" ${settings.units === 'metric' ? 'selected' : ''}>Metric (°C)</option>
-              <option value="imperial" ${settings.units === 'imperial' ? 'selected' : ''}>Imperial (°F)</option>
-            </select>
-          </label>
-        </div>
+          <div class="space-y-2">
+            <label class="block">
+              <span class="block text-sm font-medium text-dark-text mb-1.5">Units</span>
+              <select class="w-full px-4 py-2.5 bg-dark-bg border border-dark-border rounded-lg text-dark-text focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all" name="${widgetId}.units">
+                <option value="metric" ${settings.units === 'metric' ? 'selected' : ''}>Metric (°C)</option>
+                <option value="imperial" ${settings.units === 'imperial' ? 'selected' : ''}>Imperial (°F)</option>
+              </select>
+            </label>
+          </div>
 
-        <div class="setting-group">
-          <label class="setting-checkbox">
-            <input 
-              type="checkbox" 
-              name="${widgetId}.showForecast"
-              ${settings.showForecast ? 'checked' : ''}
-            />
-            <span class="checkbox-label">Show 5-day forecast</span>
-          </label>
+          <div>
+            <label class="flex items-center gap-3 cursor-pointer group">
+              <input 
+                type="checkbox" 
+                name="${widgetId}.showForecast"
+                ${settings.showForecast ? 'checked' : ''}
+                class="w-5 h-5 rounded border-dark-border text-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-offset-0 bg-dark-bg"
+              />
+              <span class="text-sm font-medium text-dark-text group-hover:text-primary-400 transition-colors">Show 5-day forecast</span>
+            </label>
+          </div>
         </div>
       `;
     } else if (widget.name === 'Clock') {
       return `
-        <div class="setting-group">
-          <label class="setting-label">
-            <span class="label-text">Time Format</span>
-            <select class="setting-select" name="${widgetId}.format">
-              <option value="24h" ${settings.format === '24h' ? 'selected' : ''}>24-hour</option>
-              <option value="12h" ${settings.format === '12h' ? 'selected' : ''}>12-hour</option>
-            </select>
-          </label>
-        </div>
+        <div class="space-y-4">
+          <div class="space-y-2">
+            <label class="block">
+              <span class="block text-sm font-medium text-dark-text mb-1.5">Time Format</span>
+              <select class="w-full px-4 py-2.5 bg-dark-bg border border-dark-border rounded-lg text-dark-text focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all" name="${widgetId}.format">
+                <option value="24h" ${settings.format === '24h' ? 'selected' : ''}>24-hour</option>
+                <option value="12h" ${settings.format === '12h' ? 'selected' : ''}>12-hour</option>
+              </select>
+            </label>
+          </div>
 
-        <div class="setting-group">
-          <label class="setting-checkbox">
-            <input 
-              type="checkbox" 
-              name="${widgetId}.showSeconds"
-              ${settings.showSeconds ? 'checked' : ''}
-            />
-            <span class="checkbox-label">Show seconds</span>
-          </label>
-        </div>
+          <div class="space-y-3">
+            <label class="flex items-center gap-3 cursor-pointer group">
+              <input 
+                type="checkbox" 
+                name="${widgetId}.showSeconds"
+                ${settings.showSeconds ? 'checked' : ''}
+                class="w-5 h-5 rounded border-dark-border text-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-offset-0 bg-dark-bg"
+              />
+              <span class="text-sm font-medium text-dark-text group-hover:text-primary-400 transition-colors">Show seconds</span>
+            </label>
 
-        <div class="setting-group">
-          <label class="setting-checkbox">
-            <input 
-              type="checkbox" 
-              name="${widgetId}.showDate"
-              ${settings.showDate ? 'checked' : ''}
-            />
-            <span class="checkbox-label">Show date</span>
-          </label>
+            <label class="flex items-center gap-3 cursor-pointer group">
+              <input 
+                type="checkbox" 
+                name="${widgetId}.showDate"
+                ${settings.showDate ? 'checked' : ''}
+                class="w-5 h-5 rounded border-dark-border text-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-offset-0 bg-dark-bg"
+              />
+              <span class="text-sm font-medium text-dark-text group-hover:text-primary-400 transition-colors">Show date</span>
+            </label>
+          </div>
         </div>
       `;
     } else if (widget.name === 'Search') {
       return `
-        <div class="setting-group">
-          <label class="setting-label">
-            <span class="label-text">Default Search Engine</span>
-            <select class="setting-select" name="${widgetId}.defaultEngine">
-              <option value="google" ${settings.defaultEngine === 'google' ? 'selected' : ''}>Google</option>
-              <option value="duckduckgo" ${settings.defaultEngine === 'duckduckgo' ? 'selected' : ''}>DuckDuckGo</option>
-              <option value="bing" ${settings.defaultEngine === 'bing' ? 'selected' : ''}>Bing</option>
-            </select>
-          </label>
-        </div>
+        <div class="space-y-4">
+          <div class="space-y-2">
+            <label class="block">
+              <span class="block text-sm font-medium text-dark-text mb-1.5">Default Search Engine</span>
+              <select class="w-full px-4 py-2.5 bg-dark-bg border border-dark-border rounded-lg text-dark-text focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all" name="${widgetId}.defaultEngine">
+                <option value="google" ${settings.defaultEngine === 'google' ? 'selected' : ''}>Google</option>
+                <option value="duckduckgo" ${settings.defaultEngine === 'duckduckgo' ? 'selected' : ''}>DuckDuckGo</option>
+                <option value="bing" ${settings.defaultEngine === 'bing' ? 'selected' : ''}>Bing</option>
+              </select>
+            </label>
+          </div>
 
-        <div class="setting-group">
-          <label class="setting-checkbox">
-            <input 
-              type="checkbox" 
-              name="${widgetId}.openInNewTab"
-              ${settings.openInNewTab ? 'checked' : ''}
-            />
-            <span class="checkbox-label">Open results in new tab</span>
-          </label>
+          <div>
+            <label class="flex items-center gap-3 cursor-pointer group">
+              <input 
+                type="checkbox" 
+                name="${widgetId}.openInNewTab"
+                ${settings.openInNewTab ? 'checked' : ''}
+                class="w-5 h-5 rounded border-dark-border text-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-offset-0 bg-dark-bg"
+              />
+              <span class="text-sm font-medium text-dark-text group-hover:text-primary-400 transition-colors">Open results in new tab</span>
+            </label>
+          </div>
         </div>
       `;
     }
 
-    return `<p class="setting-hint">No configurable settings for this widget</p>`;
+    return `<p class="text-sm text-dark-muted">No configurable settings for this widget</p>`;
   }
 
   /**
@@ -554,14 +670,16 @@ export class SettingsModal extends BaseComponent {
     const currentTheme = this.app.configManager.get('theme.mode') || 'dark';
 
     return `
-      <div class="settings-section">
-        <h3 class="section-title">Appearance</h3>
-        <p class="section-description">Customize the look and feel</p>
+      <div class="space-y-6">
+        <div>
+          <h3 class="text-xl font-semibold text-dark-text mb-2">Appearance</h3>
+          <p class="text-sm text-dark-muted">Customize the look and feel</p>
+        </div>
 
-        <div class="setting-group">
-          <label class="setting-label">
-            <span class="label-text">Theme</span>
-            <select class="setting-select" name="appearance.theme" data-action="change-theme">
+        <div class="space-y-2">
+          <label class="block">
+            <span class="block text-sm font-medium text-dark-text mb-1.5">Theme</span>
+            <select class="w-full px-4 py-2.5 bg-dark-elevated border border-dark-border rounded-lg text-dark-text focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all" name="appearance.theme" data-action="change-theme">
               <option value="light" ${currentTheme === 'light' ? 'selected' : ''}>Light</option>
               <option value="dark" ${currentTheme === 'dark' ? 'selected' : ''}>Dark</option>
               <option value="auto" ${currentTheme === 'auto' ? 'selected' : ''}>Auto (System)</option>
@@ -569,22 +687,22 @@ export class SettingsModal extends BaseComponent {
           </label>
         </div>
 
-        <div class="setting-group">
-          <label class="setting-label">
-            <span class="label-text">Accent Color</span>
+        <div class="space-y-2">
+          <label class="block">
+            <span class="block text-sm font-medium text-dark-text mb-1.5">Accent Color</span>
             <input 
               type="color" 
-              class="setting-color" 
+              class="w-full h-12 px-2 py-1 bg-dark-elevated border border-dark-border rounded-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all" 
               name="appearance.accentColor"
               value="#3b82f6"
             />
           </label>
         </div>
 
-        <div class="setting-group">
-          <label class="setting-label">
-            <span class="label-text">Background Effect</span>
-            <select class="setting-select" name="appearance.background">
+        <div class="space-y-2">
+          <label class="block">
+            <span class="block text-sm font-medium text-dark-text mb-1.5">Background Effect</span>
+            <select class="w-full px-4 py-2.5 bg-dark-elevated border border-dark-border rounded-lg text-dark-text focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all" name="appearance.background">
               <option value="none">None</option>
               <option value="gradient">Gradient</option>
               <option value="particles">Particles</option>
@@ -601,37 +719,45 @@ export class SettingsModal extends BaseComponent {
    */
   renderAboutTab() {
     return `
-      <div class="settings-section">
-        <h3 class="section-title">About Chrome Dashboard</h3>
+      <div class="space-y-6">
+        <div>
+          <h3 class="text-xl font-semibold text-dark-text mb-2">About Chrome Dashboard</h3>
+        </div>
         
-        <div class="about-content">
-          <div class="about-logo">
-            <span style="font-size: 4rem;">🚀</span>
+        <div class="flex flex-col items-center text-center space-y-6 py-6">
+          <div class="w-24 h-24 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center shadow-xl">
+            <i data-lucide="rocket" class="w-12 h-12 text-white"></i>
           </div>
 
-          <div class="about-info">
-            <p class="about-version">Version 2.0.0</p>
-            <p class="about-description">
+          <div class="space-y-2">
+            <p class="inline-flex items-center gap-2 px-4 py-2 bg-primary-500/10 text-primary-400 rounded-full text-sm font-semibold">
+              <i data-lucide="tag" class="w-4 h-4"></i>
+              Version 2.0.0
+            </p>
+            <p class="text-dark-muted max-w-md mx-auto">
               A modern, productivity-focused Chrome extension that replaces your new tab 
               with a customizable dashboard.
             </p>
           </div>
 
-          <div class="about-links">
-            <a href="https://github.com/TheFakeCreator/chrome-dashboard" target="_blank" class="about-link">
-              <span>🐙</span> GitHub Repository
+          <div class="w-full max-w-md space-y-2">
+            <a href="https://github.com/TheFakeCreator/chrome-dashboard" target="_blank" class="flex items-center justify-center gap-3 px-6 py-3 bg-dark-elevated hover:bg-dark-border border border-dark-border rounded-lg text-dark-text hover:text-primary-400 transition-all group">
+              <i data-lucide="github" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+              <span class="font-medium">GitHub Repository</span>
             </a>
-            <a href="#" class="about-link">
-              <span>📝</span> Documentation
+            <a href="#" class="flex items-center justify-center gap-3 px-6 py-3 bg-dark-elevated hover:bg-dark-border border border-dark-border rounded-lg text-dark-text hover:text-primary-400 transition-all group">
+              <i data-lucide="book-open" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+              <span class="font-medium">Documentation</span>
             </a>
-            <a href="#" class="about-link">
-              <span>🐛</span> Report an Issue
+            <a href="#" class="flex items-center justify-center gap-3 px-6 py-3 bg-dark-elevated hover:bg-dark-border border border-dark-border rounded-lg text-dark-text hover:text-primary-400 transition-all group">
+              <i data-lucide="bug" class="w-5 h-5 group-hover:scale-110 transition-transform"></i>
+              <span class="font-medium">Report an Issue</span>
             </a>
           </div>
 
-          <div class="about-credits">
-            <p>Made with ❤️ by TheFakeCreator</p>
-            <p class="about-license">Licensed under MIT</p>
+          <div class="pt-6 border-t border-dark-border space-y-1">
+            <p class="text-dark-text font-medium">Made with <i data-lucide="heart" class="w-4 h-4 inline text-red-500 fill-current"></i> by TheFakeCreator</p>
+            <p class="text-xs text-dark-muted">Licensed under MIT</p>
           </div>
         </div>
       </div>
@@ -648,12 +774,17 @@ export class SettingsModal extends BaseComponent {
 
     console.log('[SettingsModal] Event:', action, event.target);
 
-    if (action === 'close' || action === 'close-overlay') {
-      if (action === 'close-overlay' && event.target.classList.contains('settings-modal')) {
-        return; // Don't close when clicking inside modal
-      }
-      console.log('[SettingsModal] Closing modal');
+    if (action === 'close') {
+      console.log('[SettingsModal] Closing modal via close button');
       this.close();
+    } else if (action === 'close-overlay') {
+      // Only close if clicked directly on the overlay (not on modal content)
+      if (event.target === this.element) {
+        console.log('[SettingsModal] Closing modal via overlay click');
+        this.close();
+      }
+      // Otherwise ignore - clicked inside modal
+      return;
     } else if (action === 'switch-tab') {
       const tab = actionElement?.dataset.tab;
       console.log('[SettingsModal] Switching to tab:', tab);

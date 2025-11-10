@@ -114,8 +114,19 @@ export class WeatherWidget extends BaseWidget {
     // Get location
     const location = await this.getLocation();
     
+    // Build URL based on location type (coordinates or city name)
+    let weatherUrl, forecastUrl;
+    if (location.startsWith('lat=')) {
+      // Location is coordinates, use them directly as parameters
+      weatherUrl = `${this.apiEndpoint}/weather?${location}&appid=${this.settings.apiKey}&units=${this.settings.units}`;
+      forecastUrl = `${this.apiEndpoint}/forecast?${location}&appid=${this.settings.apiKey}&units=${this.settings.units}`;
+    } else {
+      // Location is city name, use q parameter
+      weatherUrl = `${this.apiEndpoint}/weather?q=${location}&appid=${this.settings.apiKey}&units=${this.settings.units}`;
+      forecastUrl = `${this.apiEndpoint}/forecast?q=${location}&appid=${this.settings.apiKey}&units=${this.settings.units}`;
+    }
+    
     // Fetch current weather
-    const weatherUrl = `${this.apiEndpoint}/weather?q=${location}&appid=${this.settings.apiKey}&units=${this.settings.units}`;
     const weatherResponse = await fetch(weatherUrl);
     
     if (!weatherResponse.ok) {
@@ -128,7 +139,6 @@ export class WeatherWidget extends BaseWidget {
 
     // Fetch forecast if enabled
     if (this.settings.showForecast) {
-      const forecastUrl = `${this.apiEndpoint}/forecast?q=${location}&appid=${this.settings.apiKey}&units=${this.settings.units}`;
       const forecastResponse = await fetch(forecastUrl);
       
       if (forecastResponse.ok) {

@@ -111,52 +111,86 @@ async function createWidgets() {
   }
 
   try {
-    // Create Clock widget
-    console.log('[Main] Creating Clock widget...');
-    const clockWidget = new ClockWidget(app, {
-      settings: {
-        format: '24h',
-        showSeconds: true,
-        showDate: true,
-        showDayOfWeek: true,
-        showTimezone: false
+    // Helper function to load widget settings from storage
+    const loadWidgetSettings = async (widgetId, defaultSettings) => {
+      try {
+        // Build the storage key
+        const storageKey = `widget.${widgetId}.settings`;
+        
+        // Try to get the settings from storage
+        const result = await app.storageManager.get([storageKey]);
+        
+        if (result && result[storageKey]) {
+          console.log('[Main] Loaded saved settings for', widgetId, ':', result[storageKey]);
+          return { ...defaultSettings, ...result[storageKey] };
+        }
+        
+        console.log('[Main] No saved settings found for', widgetId, ', using defaults');
+        return defaultSettings;
+      } catch (error) {
+        console.error('[Main] Error loading widget settings:', error);
+        return defaultSettings;
       }
+    };
+
+    // Create Clock widget with fixed ID
+    console.log('[Main] Creating Clock widget...');
+    const clockWidgetId = 'widget-clock-main';
+    const clockSettings = await loadWidgetSettings(clockWidgetId, {
+      format: '24h',
+      showSeconds: true,
+      showDate: true,
+      showDayOfWeek: true,
+      showTimezone: false
+    });
+    
+    const clockWidget = new ClockWidget(app, {
+      widgetId: clockWidgetId,
+      settings: clockSettings
     });
 
     // Mount the widget
     clockWidget.mount(widgetGrid);
     console.log('[Main] Clock widget mounted successfully');
 
-    // Create Weather widget
+    // Create Weather widget with fixed ID
     console.log('[Main] Creating Weather widget...');
+    const weatherWidgetId = 'widget-weather-main';
+    const weatherSettings = await loadWidgetSettings(weatherWidgetId, {
+      apiKey: '', // User needs to add their own API key
+      location: '',
+      autoDetectLocation: true,
+      units: 'metric',
+      showForecast: true,
+      showFeelsLike: true,
+      showHumidity: true,
+      showWind: true
+    });
+    
     const weatherWidget = new WeatherWidget(app, {
-      settings: {
-        apiKey: '', // User needs to add their own API key
-        location: '',
-        autoDetectLocation: true,
-        units: 'metric',
-        showForecast: true,
-        showFeelsLike: true,
-        showHumidity: true,
-        showWind: true
-      }
+      widgetId: weatherWidgetId,
+      settings: weatherSettings
     });
 
     // Mount the widget
     weatherWidget.mount(widgetGrid);
     console.log('[Main] Weather widget mounted successfully');
 
-    // Create Search widget
+    // Create Search widget with fixed ID
     console.log('[Main] Creating Search widget...');
+    const searchWidgetId = 'widget-search-main';
+    const searchSettings = await loadWidgetSettings(searchWidgetId, {
+      defaultEngine: 'google',
+      showSuggestions: false,
+      openInNewTab: true,
+      showEngineSelector: true,
+      placeholder: 'Search the web...',
+      quickEngines: ['google', 'youtube', 'github']
+    });
+    
     const searchWidget = new SearchWidget(app, {
-      settings: {
-        defaultEngine: 'google',
-        showSuggestions: false,
-        openInNewTab: true,
-        showEngineSelector: true,
-        placeholder: 'Search the web...',
-        quickEngines: ['google', 'youtube', 'github']
-      }
+      widgetId: searchWidgetId,
+      settings: searchSettings
     });
 
     // Mount the widget

@@ -374,10 +374,12 @@ export class BaseWidget extends BaseComponent {
 
     return `
       <div class="${classes}" style="${style}" data-widget-id="${this.widgetId}">
-        <div class="widget-header">
-          <span class="widget-icon">${this.icon}</span>
-          <h3 class="widget-title">${this.title}</h3>
-          <div class="widget-actions">
+        <div class="widget-header flex items-center justify-between mb-4 pb-4 border-b border-dark-border">
+          <div class="flex items-center gap-2">
+            <span class="widget-icon">${this.icon}</span>
+            <h3 class="widget-title text-lg font-semibold text-dark-text">${this.title}</h3>
+          </div>
+          <div class="widget-actions flex items-center gap-1">
             ${this.renderActions()}
           </div>
         </div>
@@ -396,16 +398,11 @@ export class BaseWidget extends BaseComponent {
    */
   renderActions() {
     return `
-      <button class="widget-action widget-refresh" title="Refresh" aria-label="Refresh widget">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-          <path d="M13.65 2.35A7.5 7.5 0 0 0 1 8h2a5.5 5.5 0 1 1 1.62 3.88l1.41 1.41A7.5 7.5 0 0 0 13.65 2.35z"/>
-        </svg>
+      <button class="widget-action widget-refresh p-1.5 rounded hover:bg-dark-elevated transition-colors" title="Refresh" aria-label="Refresh widget">
+        <i data-lucide="refresh-cw" class="w-4 h-4 text-dark-muted"></i>
       </button>
-      <button class="widget-action widget-settings" title="Settings" aria-label="Widget settings">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-          <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"/>
-          <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319z"/>
-        </svg>
+      <button class="widget-action widget-settings p-1.5 rounded hover:bg-dark-elevated transition-colors" title="Settings" aria-label="Widget settings">
+        <i data-lucide="settings" class="w-4 h-4 text-dark-muted"></i>
       </button>
     `;
   }

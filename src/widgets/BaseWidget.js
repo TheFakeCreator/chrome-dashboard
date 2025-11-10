@@ -27,7 +27,7 @@
  * }
  */
 
-import { BaseComponent } from './BaseComponent.js';
+import { BaseComponent } from '../components/BaseComponent.js';
 
 export class BaseWidget extends BaseComponent {
   /**

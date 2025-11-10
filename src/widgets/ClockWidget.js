@@ -54,6 +54,11 @@ export class ClockWidget extends BaseWidget {
    * Update current time
    */
   updateTime() {
+    // Ensure settings are initialized
+    if (!this.settings) {
+      this.settings = this.getDefaultSettings();
+    }
+    
     const now = new Date();
     
     // Format time based on settings

@@ -134,29 +134,29 @@ export class ClockWidget extends BaseWidget {
    */
   renderContent() {
     if (!this.data) {
-      return '<p>Loading time...</p>';
+      return '<p class="text-dark-muted">Loading time...</p>';
     }
 
     return `
-      <div class="clock-widget-content">
-        <div class="clock-time">
+      <div class="flex flex-col items-center justify-center gap-3 p-6 text-center min-h-[150px]">
+        <div class="clock-time text-5xl font-bold text-primary-500 tabular-nums tracking-tight cursor-pointer transition-all duration-200 hover:scale-105 hover:text-primary-400 select-none">
           ${this.data.time}
         </div>
         
         ${this.settings.showDayOfWeek ? `
-          <div class="clock-day">
+          <div class="text-lg font-semibold text-dark-text capitalize">
             ${this.data.dayOfWeek}
           </div>
         ` : ''}
         
         ${this.settings.showDate ? `
-          <div class="clock-date">
+          <div class="text-base text-dark-muted">
             ${this.data.date}
           </div>
         ` : ''}
         
         ${this.settings.showTimezone ? `
-          <div class="clock-timezone">
+          <div class="text-xs text-dark-muted font-mono mt-2 px-3 py-1 bg-dark-elevated rounded-full">
             ${this.data.timezone}
           </div>
         ` : ''}
@@ -170,9 +170,6 @@ export class ClockWidget extends BaseWidget {
   onMount() {
     super.onMount();
     
-    // Add custom CSS for clock widget
-    this.addClockStyles();
-    
     // Setup format toggle on click
     const timeEl = this.$('.clock-time');
     if (timeEl) {
@@ -184,9 +181,11 @@ export class ClockWidget extends BaseWidget {
   }
 
   /**
-   * Add custom styles for clock
+   * Add custom styles for clock (REMOVED - using Tailwind now)
    */
   addClockStyles() {
+    // No longer needed - using Tailwind CSS
+    /*
     const styleId = 'clock-widget-styles';
     
     // Check if styles already exist
@@ -258,5 +257,6 @@ export class ClockWidget extends BaseWidget {
     `;
     
     document.head.appendChild(style);
+    */
   }
 }

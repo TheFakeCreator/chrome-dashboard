@@ -279,10 +279,12 @@ export class WeatherWidget extends BaseWidget {
    */
   renderLoading() {
     return `
-      <div class="weather-widget loading">
-        <div class="weather-loading">
-          <div class="spinner"></div>
-          <p>Loading weather data...</p>
+      <div class="flex items-center justify-center p-8">
+        <div class="text-center space-y-3">
+          <div class="inline-block animate-spin">
+            <i data-lucide="loader-circle" class="w-8 h-8 text-primary-500"></i>
+          </div>
+          <p class="text-dark-muted">Loading weather data...</p>
         </div>
       </div>
     `;
@@ -294,18 +296,21 @@ export class WeatherWidget extends BaseWidget {
    */
   renderError() {
     return `
-      <div class="weather-widget error">
-        <div class="weather-error">
-          <span class="error-icon">⚠️</span>
-          <p class="error-message">${this.error}</p>
+      <div class="flex items-center justify-center p-8">
+        <div class="text-center space-y-4 max-w-sm">
+          <div class="inline-flex items-center justify-center w-12 h-12 bg-red-500/10 rounded-full">
+            <i data-lucide="alert-circle" class="w-6 h-6 text-red-500"></i>
+          </div>
+          <p class="text-dark-text font-medium">${this.error}</p>
           ${!this.settings.apiKey ? `
-            <p class="error-hint">
+            <p class="text-sm text-dark-muted">
               Get a free API key from 
-              <a href="https://openweathermap.org/api" target="_blank">OpenWeatherMap</a>
+              <a href="https://openweathermap.org/api" target="_blank" class="text-primary-500 hover:text-primary-400 underline">OpenWeatherMap</a>
             </p>
           ` : ''}
           <button class="btn btn-primary" data-action="retry">
-            Retry
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+            <span>Retry</span>
           </button>
         </div>
       </div>
@@ -318,12 +323,15 @@ export class WeatherWidget extends BaseWidget {
    */
   renderEmpty() {
     return `
-      <div class="weather-widget empty">
-        <div class="weather-empty">
-          <span class="empty-icon">🌤️</span>
-          <p>Configure weather widget</p>
+      <div class="flex items-center justify-center p-8">
+        <div class="text-center space-y-4">
+          <div class="inline-flex items-center justify-center w-16 h-16 bg-primary-500/10 rounded-full">
+            <i data-lucide="cloud-sun" class="w-8 h-8 text-primary-500"></i>
+          </div>
+          <p class="text-dark-text">Configure weather widget</p>
           <button class="btn btn-primary" data-action="configure">
-            Add API Key
+            <i data-lucide="settings" class="w-4 h-4"></i>
+            <span>Add API Key</span>
           </button>
         </div>
       </div>
@@ -342,21 +350,23 @@ export class WeatherWidget extends BaseWidget {
     const description = weather.weather[0].description;
 
     return `
-      <div class="weather-widget">
+      <div class="space-y-4">
         <!-- Current Weather -->
-        <div class="weather-current">
-          <div class="weather-header">
-            <div class="weather-location">
-              <span class="location-icon">📍</span>
-              <span class="location-name">${weather.name}, ${weather.sys.country}</span>
-            </div>
+        <div class="space-y-4">
+          <!-- Location Header -->
+          <div class="flex items-center gap-2 text-dark-muted">
+            <i data-lucide="map-pin" class="w-4 h-4"></i>
+            <span class="text-sm font-medium">${weather.name}, ${weather.sys.country}</span>
           </div>
 
-          <div class="weather-main">
-            <div class="weather-icon">${icon}</div>
-            <div class="weather-temp">
-              <div class="temp-value">${temp}</div>
-              <div class="temp-description">${description}</div>
+          <!-- Main Weather Display -->
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <div class="text-6xl">${icon}</div>
+              <div>
+                <div class="text-4xl font-bold text-dark-text">${temp}</div>
+                <div class="text-sm text-dark-muted capitalize">${description}</div>
+              </div>
             </div>
           </div>
 
@@ -377,25 +387,25 @@ export class WeatherWidget extends BaseWidget {
     const feelsLike = this.formatTemperature(weather.main.feels_like);
 
     return `
-      <div class="weather-details">
+      <div class="grid grid-cols-3 gap-4 pt-4 border-t border-dark-border">
         ${this.settings.showFeelsLike ? `
-          <div class="weather-detail">
-            <span class="detail-label">Feels like</span>
-            <span class="detail-value">${feelsLike}</span>
+          <div class="flex flex-col items-center gap-1">
+            <span class="text-xs text-dark-muted">Feels like</span>
+            <span class="text-sm font-semibold text-dark-text">${feelsLike}</span>
           </div>
         ` : ''}
         
         ${this.settings.showHumidity ? `
-          <div class="weather-detail">
-            <span class="detail-label">Humidity</span>
-            <span class="detail-value">${weather.main.humidity}%</span>
+          <div class="flex flex-col items-center gap-1">
+            <span class="text-xs text-dark-muted">Humidity</span>
+            <span class="text-sm font-semibold text-dark-text">${weather.main.humidity}%</span>
           </div>
         ` : ''}
         
         ${this.settings.showWind ? `
-          <div class="weather-detail">
-            <span class="detail-label">Wind</span>
-            <span class="detail-value">${Math.round(weather.wind.speed)} ${this.settings.units === 'imperial' ? 'mph' : 'm/s'}</span>
+          <div class="flex flex-col items-center gap-1">
+            <span class="text-xs text-dark-muted">Wind</span>
+            <span class="text-sm font-semibold text-dark-text">${Math.round(weather.wind.speed)} ${this.settings.units === 'imperial' ? 'mph' : 'm/s'}</span>
           </div>
         ` : ''}
       </div>
@@ -410,12 +420,12 @@ export class WeatherWidget extends BaseWidget {
     if (!this.forecast || this.forecast.length === 0) return '';
 
     return `
-      <div class="weather-forecast">
+      <div class="grid grid-cols-5 gap-2 pt-4 border-t border-dark-border">
         ${this.forecast.map(day => `
-          <div class="forecast-day">
-            <div class="forecast-date">${day.date}</div>
-            <div class="forecast-icon">${this.getWeatherIcon(day.icon)}</div>
-            <div class="forecast-temp">
+          <div class="flex flex-col items-center gap-2 p-2 rounded-lg hover:bg-dark-elevated transition-colors">
+            <div class="text-xs text-dark-muted font-medium">${day.date}</div>
+            <div class="text-2xl">${this.getWeatherIcon(day.icon)}</div>
+            <div class="text-sm font-semibold text-dark-text">
               ${this.formatTemperature(day.tempMax)}
             </div>
           </div>

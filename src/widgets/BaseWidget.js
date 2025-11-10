@@ -28,6 +28,7 @@
  */
 
 import { BaseComponent } from '../components/BaseComponent.js';
+import { initIcons } from '../utils/icons.js';
 
 export class BaseWidget extends BaseComponent {
   /**
@@ -450,6 +451,9 @@ export class BaseWidget extends BaseComponent {
   onMount() {
     // Setup event listeners
     this.setupEventListeners();
+    
+    // Initialize icons (Lucide)
+    initIcons();
     
     // Initial data load if not loaded
     if (!this.data && !this.loading) {

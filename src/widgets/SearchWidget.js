@@ -286,50 +286,56 @@ export class SearchWidget extends BaseWidget {
     const currentEngine = this.engines[this.settings.defaultEngine];
 
     return `
-      <div class="search-widget">
+      <div class="space-y-4">
         <!-- Search Input -->
-        <div class="search-container">
-          <div class="search-input-wrapper">
+        <div class="space-y-2">
+          <div class="relative flex items-center gap-2 bg-dark-elevated border border-dark-border rounded-lg p-3 focus-within:ring-2 focus-within:ring-primary-500 focus-within:border-transparent transition-all">
             ${this.settings.showEngineSelector ? `
-              <div class="search-engine-selector" data-action="select-engine">
-                <span class="engine-icon">${currentEngine.icon}</span>
-                <span class="engine-name">${currentEngine.name}</span>
-                <span class="engine-dropdown-icon">▼</span>
-              </div>
+              <button class="flex items-center gap-2 px-2 py-1 rounded hover:bg-dark-surface transition-colors" data-action="select-engine">
+                <span class="text-lg">${currentEngine.icon}</span>
+                <span class="text-sm font-medium text-dark-text">${currentEngine.name}</span>
+                <i data-lucide="chevron-down" class="w-4 h-4 text-dark-muted"></i>
+              </button>
             ` : ''}
             
             <input
               type="text"
-              class="search-input"
+              class="search-input flex-1 bg-transparent border-none outline-none text-dark-text placeholder-dark-muted"
               placeholder="${this.settings.placeholder}"
               autocomplete="off"
               spellcheck="false"
             />
             
-            <button class="search-button" data-action="search" title="Search">
-              <span>🔍</span>
+            <button class="p-2 rounded-lg hover:bg-dark-surface transition-colors" data-action="search" title="Search">
+              <i data-lucide="search" class="w-5 h-5 text-dark-muted"></i>
             </button>
           </div>
 
           <!-- Suggestions -->
           ${this.settings.showSuggestions ? `
-            <div class="search-suggestions"></div>
+            <div class="search-suggestions hidden"></div>
           ` : ''}
         </div>
 
         <!-- Quick Engine Access -->
         ${this.settings.showEngineSelector ? `
-          <div class="quick-engines">
+          <div class="flex items-center gap-2 flex-wrap">
             ${this.settings.quickEngines.map(engineKey => {
               const engine = this.engines[engineKey];
+              const isActive = engineKey === this.settings.defaultEngine;
               return `
                 <button 
-                  class="quick-engine ${engineKey === this.settings.defaultEngine ? 'active' : ''}"
+                  class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-all ${
+                    isActive 
+                      ? 'bg-primary-500/20 text-primary-400 border border-primary-500/30' 
+                      : 'bg-dark-elevated text-dark-muted hover:bg-dark-surface border border-transparent'
+                  }"
                   data-action="set-engine"
                   data-engine="${engineKey}"
                   title="${engine.name}"
                 >
-                  ${engine.icon}
+                  <span class="text-base">${engine.icon}</span>
+                  <span class="font-medium">${engine.name}</span>
                 </button>
               `;
             }).join('')}
@@ -337,8 +343,9 @@ export class SearchWidget extends BaseWidget {
         ` : ''}
 
         <!-- Keyboard Shortcut Hint -->
-        <div class="search-hint">
-          <kbd>/</kbd> to focus search
+        <div class="flex items-center justify-center gap-2 text-xs text-dark-muted">
+          <kbd class="px-2 py-1 bg-dark-elevated border border-dark-border rounded font-mono">/</kbd>
+          <span>to focus search</span>
         </div>
       </div>
     `;

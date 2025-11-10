@@ -50,13 +50,18 @@ export class SettingsModal extends BaseComponent {
     this.currentTab = tab || this.currentTab;
     this.isOpen = true;
 
-    // Mount if not already mounted
-    if (!this.mounted) {
+    // If already mounted, just refresh, otherwise mount fresh
+    if (this.mounted) {
+      this.refresh();
+    } else {
       this.mount(document.body);
     }
-
-    // Show modal
-    this.refresh();
+    
+    // Setup event listeners if element exists and handlers aren't set yet
+    if (this.element && !this._listenersSetup) {
+      this.setupEventListeners();
+      this._listenersSetup = true;
+    }
     
     // Add show class for animation
     setTimeout(() => {
@@ -69,6 +74,34 @@ export class SettingsModal extends BaseComponent {
     document.body.style.overflow = 'hidden';
 
     this.emit('modal:opened', { tab: this.currentTab });
+  }
+
+  /**
+   * Setup event listeners
+   * @private
+   */
+  setupEventListeners() {
+    if (!this.element) return;
+
+    // Add event listeners (only if elements exist)
+    if (this.element.querySelector('[data-action]')) {
+      this.on('click', '[data-action]', (event) => this.handleEvent(event));
+    }
+    
+    const overlay = this.element.querySelector('.settings-modal-overlay');
+    if (overlay) {
+      this.on('click', '.settings-modal-overlay', (event) => {
+        if (event.target.classList.contains('settings-modal-overlay')) {
+          this.close();
+        }
+      });
+    }
+
+    // Keyboard listener
+    if (!this.keyboardHandler) {
+      this.keyboardHandler = (event) => this.handleKeyboard(event);
+      document.addEventListener('keydown', this.keyboardHandler);
+    }
   }
 
   /**
@@ -590,24 +623,7 @@ export class SettingsModal extends BaseComponent {
    */
   onMount() {
     super.onMount();
-
-    // Add event listeners (only if elements exist)
-    if (this.element?.querySelector('[data-action]')) {
-      this.on('click', '[data-action]', (event) => this.handleEvent(event));
-    }
-    
-    const overlay = this.element?.querySelector('.settings-modal-overlay');
-    if (overlay) {
-      this.on('click', '.settings-modal-overlay', (event) => {
-        if (event.target.classList.contains('settings-modal-overlay')) {
-          this.close();
-        }
-      });
-    }
-
-    // Keyboard listener
-    this.keyboardHandler = (event) => this.handleKeyboard(event);
-    document.addEventListener('keydown', this.keyboardHandler);
+    // Event listeners are set up in open() method instead
   }
 
   /**
@@ -619,6 +635,9 @@ export class SettingsModal extends BaseComponent {
       document.removeEventListener('keydown', this.keyboardHandler);
       this.keyboardHandler = null;
     }
+
+    // Reset listeners flag
+    this._listenersSetup = false;
 
     super.onDestroy();
   }

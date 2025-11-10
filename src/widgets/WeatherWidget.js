@@ -462,8 +462,10 @@ export class WeatherWidget extends BaseWidget {
   onMount() {
     super.onMount();
     
-    // Add event listeners for actions
-    this.on('click', '[data-action]', (event) => this.handleEvent(event));
+    // Add event listeners for actions (if elements exist)
+    if (this.element?.querySelector('[data-action]')) {
+      this.on('click', '[data-action]', (event) => this.handleEvent(event));
+    }
   }
 
   /**

@@ -107,6 +107,12 @@ export class SearchWidget extends BaseWidget {
       this.settings = this.getDefaultSettings();
     }
 
+    // Ensure engines are initialized
+    if (!this.engines) {
+      console.error('[SearchWidget] Engines not initialized');
+      return;
+    }
+
     // No initial data to load
     this.data = {
       query: this.query,
@@ -428,8 +434,10 @@ export class SearchWidget extends BaseWidget {
     const input = this.element?.querySelector('.search-input');
     if (!input) return;
 
-    // Add event listeners
-    this.on('click', '[data-action]', (event) => this.handleEvent(event));
+    // Add event listeners (only if elements exist)
+    if (this.element?.querySelector('[data-action]')) {
+      this.on('click', '[data-action]', (event) => this.handleEvent(event));
+    }
     
     // Input events
     input.addEventListener('input', (event) => {
@@ -439,15 +447,18 @@ export class SearchWidget extends BaseWidget {
     input.addEventListener('focus', () => this.handleFocus());
     input.addEventListener('blur', () => this.handleBlur());
 
-    // Suggestion click
-    this.on('click', '.suggestion-item', (event) => {
-      const suggestion = event.target.closest('.suggestion-item')?.dataset.suggestion;
-      if (suggestion) {
-        this.query = suggestion;
-        input.value = suggestion;
-        this.search(suggestion);
-      }
-    });
+    // Suggestion click (only if suggestions container exists)
+    const suggestionsContainer = this.element?.querySelector('.search-suggestions');
+    if (suggestionsContainer) {
+      this.on('click', '.suggestion-item', (event) => {
+        const suggestion = event.target.closest('.suggestion-item')?.dataset.suggestion;
+        if (suggestion) {
+          this.query = suggestion;
+          input.value = suggestion;
+          this.search(suggestion);
+        }
+      });
+    }
 
     // Keyboard shortcuts (document level)
     this.keyboardHandler = (event) => this.handleKeyboard(event);

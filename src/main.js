@@ -7,6 +7,7 @@
 import { app } from './core/App.js';
 import { ClockWidget } from './widgets/ClockWidget.js';
 import { WeatherWidget } from './widgets/WeatherWidget.js';
+import { SearchWidget } from './widgets/SearchWidget.js';
 
 // DOM elements
 let loadingEl;
@@ -140,10 +141,28 @@ async function createWidgets() {
     weatherWidget.mount(widgetGrid);
     console.log('[Main] Weather widget mounted successfully');
 
+    // Create Search widget
+    console.log('[Main] Creating Search widget...');
+    const searchWidget = new SearchWidget(app, {
+      settings: {
+        defaultEngine: 'google',
+        showSuggestions: false,
+        openInNewTab: true,
+        showEngineSelector: true,
+        placeholder: 'Search the web...',
+        quickEngines: ['google', 'youtube', 'github']
+      }
+    });
+
+    // Mount the widget
+    searchWidget.mount(widgetGrid);
+    console.log('[Main] Search widget mounted successfully');
+
     // Store references for debugging
     window.__widgets = {
       clock: clockWidget,
-      weather: weatherWidget
+      weather: weatherWidget,
+      search: searchWidget
     };
 
   } catch (error) {

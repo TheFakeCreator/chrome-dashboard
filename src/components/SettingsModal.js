@@ -591,13 +591,19 @@ export class SettingsModal extends BaseComponent {
   onMount() {
     super.onMount();
 
-    // Add event listeners
-    this.on('click', '[data-action]', (event) => this.handleEvent(event));
-    this.on('click', '.settings-modal-overlay', (event) => {
-      if (event.target.classList.contains('settings-modal-overlay')) {
-        this.close();
-      }
-    });
+    // Add event listeners (only if elements exist)
+    if (this.element?.querySelector('[data-action]')) {
+      this.on('click', '[data-action]', (event) => this.handleEvent(event));
+    }
+    
+    const overlay = this.element?.querySelector('.settings-modal-overlay');
+    if (overlay) {
+      this.on('click', '.settings-modal-overlay', (event) => {
+        if (event.target.classList.contains('settings-modal-overlay')) {
+          this.close();
+        }
+      });
+    }
 
     // Keyboard listener
     this.keyboardHandler = (event) => this.handleKeyboard(event);

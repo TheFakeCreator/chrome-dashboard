@@ -117,9 +117,9 @@ export class SearchWidget extends BaseWidget {
       this.settings = this.getDefaultSettings();
     }
 
-    // Ensure engines are initialized
+    // Ensure engines are initialized (they're set in constructor, this is just a safety check)
     if (!this.engines) {
-      console.error('[SearchWidget] Engines not initialized');
+      console.warn('[SearchWidget] Engines not yet initialized, skipping loadData');
       return;
     }
 

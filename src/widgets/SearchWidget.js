@@ -17,6 +17,7 @@ import { BaseWidget } from '../widgets/BaseWidget.js';
 
 export class SearchWidget extends BaseWidget {
   constructor(app, options = {}) {
+    // Call super first
     super(app, {
       ...options,
       name: 'Search',
@@ -80,6 +81,15 @@ export class SearchWidget extends BaseWidget {
     // Debounce timer for suggestions
     this.suggestionTimer = null;
     this.suggestionDelay = 300;
+
+    // Initialize data now that engines are set
+    if (!this.data) {
+      this.data = {
+        query: this.query,
+        selectedEngine: this.settings.defaultEngine,
+        engines: Object.keys(this.engines)
+      };
+    }
   }
 
   /**

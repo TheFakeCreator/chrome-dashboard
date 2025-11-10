@@ -5,6 +5,7 @@
  */
 
 import { app } from './core/App.js';
+import { ClockWidget } from './widgets/ClockWidget.js';
 
 // DOM elements
 let loadingEl;
@@ -89,6 +90,43 @@ function showDashboard() {
   
   if (emptyStateEl) {
     emptyStateEl.style.display = hasWidgets ? 'none' : 'flex';
+  }
+}
+
+/**
+ * Create and mount widgets
+ */
+async function createWidgets() {
+  const widgetGrid = document.getElementById('widget-grid');
+  if (!widgetGrid) {
+    console.error('[Main] Widget grid not found');
+    return;
+  }
+
+  try {
+    // Create Clock widget
+    console.log('[Main] Creating Clock widget...');
+    const clockWidget = new ClockWidget(app, {
+      settings: {
+        format: '24h',
+        showSeconds: true,
+        showDate: true,
+        showDayOfWeek: true,
+        showTimezone: false
+      }
+    });
+
+    // Mount the widget
+    clockWidget.mount(widgetGrid);
+    console.log('[Main] Clock widget mounted successfully');
+
+    // Store reference for debugging
+    window.__widgets = {
+      clock: clockWidget
+    };
+
+  } catch (error) {
+    console.error('[Main] Error creating widgets:', error);
   }
 }
 
@@ -332,6 +370,10 @@ async function initialize() {
         console.log('[Main] Theme changed to:', value);
       }
     });
+
+    // Create and mount widgets
+    console.log('[Main] Creating widgets...');
+    await createWidgets();
     
     // Show the dashboard
     showDashboard()

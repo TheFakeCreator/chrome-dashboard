@@ -8,6 +8,7 @@ import { app } from './core/App.js';
 import { ClockWidget } from './widgets/ClockWidget.js';
 import { WeatherWidget } from './widgets/WeatherWidget.js';
 import { SearchWidget } from './widgets/SearchWidget.js';
+import { SettingsModal } from './components/SettingsModal.js';
 
 // DOM elements
 let loadingEl;
@@ -158,12 +159,31 @@ async function createWidgets() {
     searchWidget.mount(widgetGrid);
     console.log('[Main] Search widget mounted successfully');
 
+    // Create Settings Modal
+    console.log('[Main] Creating Settings Modal...');
+    const settingsModal = new SettingsModal(app);
+    
+    // Register widgets with settings modal
+    settingsModal.registerWidget(clockWidget.widgetId, clockWidget);
+    settingsModal.registerWidget(weatherWidget.widgetId, weatherWidget);
+    settingsModal.registerWidget(searchWidget.widgetId, searchWidget);
+    
+    console.log('[Main] Settings Modal created');
+
+    // Listen for widget configure events
+    app.eventBus.on('widget:configure', ({ widgetId }) => {
+      console.log('[Main] Opening settings for widget:', widgetId);
+      settingsModal.open('widgets');
+    });
+
     // Store references for debugging
     window.__widgets = {
       clock: clockWidget,
       weather: weatherWidget,
       search: searchWidget
     };
+    
+    window.__settingsModal = settingsModal;
 
   } catch (error) {
     console.error('[Main] Error creating widgets:', error);
@@ -198,8 +218,10 @@ function setupEventListeners() {
   if (settingsBtn) {
     settingsBtn.addEventListener('click', () => {
       console.log('Settings button clicked');
+      if (window.__settingsModal) {
+        window.__settingsModal.open();
+      }
       app.eventBus.emit('settings:open');
-      // TODO: Open settings modal
     });
   }
 

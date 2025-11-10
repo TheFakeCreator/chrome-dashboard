@@ -21,7 +21,7 @@ export class WeatherWidget extends BaseWidget {
       ...options,
       name: 'Weather',
       title: 'Weather',
-      icon: '🌤️',
+      icon: '<i data-lucide="cloud-sun" class="w-5 h-5"></i>',
       description: 'Display current weather and forecast',
       category: 'productivity',
       updateInterval: 600000 // Update every 10 minutes
@@ -222,24 +222,26 @@ export class WeatherWidget extends BaseWidget {
   }
 
   /**
-   * Get weather icon emoji
+   * Get weather icon (Lucide icon name)
    * @param {string} iconCode - OpenWeatherMap icon code
-   * @returns {string} Weather emoji
+   * @param {string} size - Icon size class (default: w-16 h-16)
+   * @returns {string} Lucide icon HTML
    */
-  getWeatherIcon(iconCode) {
+  getWeatherIcon(iconCode, size = 'w-16 h-16') {
     const iconMap = {
-      '01d': '☀️', '01n': '🌙',
-      '02d': '⛅', '02n': '☁️',
-      '03d': '☁️', '03n': '☁️',
-      '04d': '☁️', '04n': '☁️',
-      '09d': '🌧️', '09n': '🌧️',
-      '10d': '🌦️', '10n': '🌧️',
-      '11d': '⛈️', '11n': '⛈️',
-      '13d': '🌨️', '13n': '🌨️',
-      '50d': '🌫️', '50n': '🌫️'
+      '01d': 'sun', '01n': 'moon',
+      '02d': 'cloud-sun', '02n': 'cloud-moon',
+      '03d': 'cloud', '03n': 'cloud',
+      '04d': 'cloudy', '04n': 'cloudy',
+      '09d': 'cloud-drizzle', '09n': 'cloud-drizzle',
+      '10d': 'cloud-rain', '10n': 'cloud-rain',
+      '11d': 'cloud-lightning', '11n': 'cloud-lightning',
+      '13d': 'cloud-snow', '13n': 'cloud-snow',
+      '50d': 'cloud-fog', '50n': 'cloud-fog'
     };
 
-    return iconMap[iconCode] || '🌤️';
+    const iconName = iconMap[iconCode] || 'cloud-sun';
+    return `<i data-lucide="${iconName}" class="${size} text-primary-500"></i>`;
   }
 
   /**
@@ -362,7 +364,7 @@ export class WeatherWidget extends BaseWidget {
           <!-- Main Weather Display -->
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-4">
-              <div class="text-6xl">${icon}</div>
+              <div>${icon}</div>
               <div>
                 <div class="text-4xl font-bold text-dark-text">${temp}</div>
                 <div class="text-sm text-dark-muted capitalize">${description}</div>
@@ -424,7 +426,7 @@ export class WeatherWidget extends BaseWidget {
         ${this.forecast.map(day => `
           <div class="flex flex-col items-center gap-2 p-2 rounded-lg hover:bg-dark-elevated transition-colors">
             <div class="text-xs text-dark-muted font-medium">${day.date}</div>
-            <div class="text-2xl">${this.getWeatherIcon(day.icon)}</div>
+            <div>${this.getWeatherIcon(day.icon, 'w-8 h-8')}</div>
             <div class="text-sm font-semibold text-dark-text">
               ${this.formatTemperature(day.tempMax)}
             </div>

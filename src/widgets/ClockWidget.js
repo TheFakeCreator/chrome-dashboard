@@ -17,7 +17,7 @@ export class ClockWidget extends BaseWidget {
       ...options,
       name: 'Clock',
       title: 'Clock',
-      icon: '🕐',
+      icon: '<i data-lucide="clock" class="w-5 h-5"></i>',
       description: 'Display current time and date',
       category: 'productivity',
       updateInterval: 1000 // Update every second

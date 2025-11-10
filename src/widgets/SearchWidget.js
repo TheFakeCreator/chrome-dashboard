@@ -22,7 +22,7 @@ export class SearchWidget extends BaseWidget {
       ...options,
       name: 'Search',
       title: 'Search',
-      icon: '🔍',
+      icon: '<i data-lucide="search" class="w-5 h-5"></i>',
       description: 'Universal search with multiple engines',
       category: 'productivity',
       updateInterval: null // No auto-update needed
@@ -37,43 +37,43 @@ export class SearchWidget extends BaseWidget {
     this.engines = {
       google: {
         name: 'Google',
-        icon: '🔍',
+        icon: '<i data-lucide="search" class="w-4 h-4"></i>',
         url: 'https://www.google.com/search?q=',
         suggest: 'https://suggestqueries.google.com/complete/search?client=firefox&q='
       },
       duckduckgo: {
         name: 'DuckDuckGo',
-        icon: '🦆',
+        icon: '<i data-lucide="shield" class="w-4 h-4"></i>',
         url: 'https://duckduckgo.com/?q='
       },
       bing: {
         name: 'Bing',
-        icon: '🅱️',
+        icon: '<i data-lucide="globe" class="w-4 h-4"></i>',
         url: 'https://www.bing.com/search?q='
       },
       youtube: {
         name: 'YouTube',
-        icon: '📺',
+        icon: '<i data-lucide="video" class="w-4 h-4"></i>',
         url: 'https://www.youtube.com/results?search_query='
       },
       github: {
         name: 'GitHub',
-        icon: '🐙',
+        icon: '<i data-lucide="github" class="w-4 h-4"></i>',
         url: 'https://github.com/search?q='
       },
       stackoverflow: {
         name: 'Stack Overflow',
-        icon: '📚',
+        icon: '<i data-lucide="layers" class="w-4 h-4"></i>',
         url: 'https://stackoverflow.com/search?q='
       },
       mdn: {
         name: 'MDN',
-        icon: '📖',
+        icon: '<i data-lucide="book-open" class="w-4 h-4"></i>',
         url: 'https://developer.mozilla.org/search?q='
       },
       npm: {
         name: 'npm',
-        icon: '📦',
+        icon: '<i data-lucide="package" class="w-4 h-4"></i>',
         url: 'https://www.npmjs.com/search?q='
       }
     };
@@ -243,9 +243,9 @@ export class SearchWidget extends BaseWidget {
 
     suggestionsContainer.innerHTML = this.suggestions
       .map(suggestion => `
-        <div class="suggestion-item" data-suggestion="${suggestion}">
-          <span class="suggestion-icon">🔍</span>
-          <span class="suggestion-text">${suggestion}</span>
+        <div class="suggestion-item flex items-center gap-2 px-3 py-2 hover:bg-dark-elevated cursor-pointer transition-colors" data-suggestion="${suggestion}">
+          <i data-lucide="search" class="w-4 h-4 text-dark-muted"></i>
+          <span class="text-sm text-dark-text">${suggestion}</span>
         </div>
       `)
       .join('');

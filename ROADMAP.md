@@ -1,138 +1,187 @@
-# Chrome Dashboard v2.0 - Productivity Update Roadmap
+# Chrome Dashboard v2.0 - Complete Rewrite Roadmap
 
 ## 🎯 Vision
-Transform Chrome Dashboard into the ultimate productivity companion that helps users stay focused, organized, and efficient throughout their workday.
+Build a modern, production-quality Chrome Dashboard from scratch using industry best practices, clean architecture, and modern web technologies.
+
+## 🔥 Approach: Clean Slate Development
+We're starting fresh with a complete rewrite. Legacy code has been archived for reference, but we're building everything new with:
+- Modern ES6+ modules
+- Component-based architecture
+- Clean, maintainable code
+- Type safety (JSDoc)
+- Performance-first approach
+- Scalable design patterns
 
 ---
 
-## 📋 Phase 1: Foundation & Infrastructure (Week 1-2)
+## 📋 Phase 1: Modern Architecture & Foundation (Week 1-2)
 
-### ✅ Setup & Planning
+### ✅ Completed Setup
 - [x] Create new branch `productivity-update-v2`
-- [x] Setup proper folder structure
-- [x] Create Copilot instructions
-- [ ] Migrate to pnpm package manager
-- [ ] Setup build tooling (Vite/Rollup)
-- [ ] Configure ESLint + Prettier
-- [ ] Setup Git hooks (Husky)
-- [ ] Create .gitignore and .editorconfig
+- [x] Setup project structure
+- [x] Archive legacy code to `legacy/` folder
+- [x] Configure pnpm, ESLint, Prettier, Husky
+- [x] Create comprehensive documentation
 
-### 🏗️ Code Organization
-- [ ] Move existing CSS files to `src/styles/`
-- [ ] Move existing JS files to appropriate folders
-- [ ] Create module structure with proper imports/exports
-- [ ] Implement configuration management system
-- [ ] Setup environment variables
+### 🏗️ Core Architecture Design
+**Goal**: Build a solid, scalable foundation
 
-### 📚 Documentation
-- [ ] Update README with new structure
-- [ ] Create CHANGELOG.md
-- [ ] Document API and architecture
-- [ ] Create user guide
+- [ ] **Application Core** (`src/core/`)
+  - [ ] App.js - Main application controller
+  - [ ] EventBus.js - Central event system
+  - [ ] StateManager.js - Application state management
+  - [ ] StorageManager.js - Chrome storage wrapper
+  - [ ] ConfigManager.js - Configuration management
+  - [ ] Router.js - View/component routing
+
+- [ ] **Component System** (`src/components/`)
+  - [ ] BaseComponent.js - Component base class
+  - [ ] ComponentRegistry.js - Component registration
+  - [ ] Lifecycle hooks (mount, update, destroy)
+  - [ ] Event handling patterns
+  - [ ] State binding utilities
+
+- [ ] **Design System** (`src/styles/`)
+  - [ ] design-tokens.css - Colors, spacing, typography
+  - [ ] components.css - Reusable UI components
+  - [ ] utilities.css - Utility classes
+  - [ ] animations.css - Modern animations
+  - [ ] themes.css - Light/dark themes
+
+### � Technical Specifications
+- [ ] Define component interface
+- [ ] Design state management pattern
+- [ ] Create event communication system
+- [ ] Plan module dependencies
+- [ ] Document architecture decisions
 
 ---
 
-## 🚀 Phase 2: Core Productivity Features (Week 3-5)
+## 🚀 Phase 2: Core Dashboard Features (Week 3-4)
 
-### Feature 1: Focus Mode & Pomodoro Timer 🍅
-**Priority: HIGH**
+### Feature 1: Modern Dashboard Layout 📐
+**Priority: CRITICAL**
 
 #### Goals
-- Help users maintain focus with timed work sessions
-- Reduce distractions during productivity periods
-- Track productivity patterns over time
+- Clean, beautiful, responsive layout
+- Card-based widget system
+- Drag-and-drop functionality
+- Customizable grid layout
 
 #### Implementation
-- [ ] Design Focus Mode UI
-- [ ] Implement Pomodoro timer (25/5/15 intervals)
-- [ ] Add custom timer settings
-- [ ] Create visual and audio notifications
-- [ ] Block distracting websites during focus mode
-- [ ] Track focus sessions and statistics
-- [ ] Add break reminders
-- [ ] Implement focus mode shortcuts (Ctrl+Shift+F)
+- [ ] Create Grid System
+  - [ ] GridManager.js - Layout management
+  - [ ] GridItem component - Draggable widgets
+  - [ ] Layout persistence
+  - [ ] Responsive breakpoints
 
-#### Testing
-- [ ] Unit tests for timer logic
-- [ ] Integration tests for focus mode activation
-- [ ] Test notification system
-- [ ] Test blocked sites functionality
+- [ ] Widget System
+  - [ ] BaseWidget.js - Widget base class
+  - [ ] WidgetRegistry.js - Widget management
+  - [ ] Widget lifecycle (init, render, destroy)
+  - [ ] Widget settings/configuration
+
+- [ ] UI Components
+  - [ ] Header component with search
+  - [ ] Widget container with glassmorphism
+  - [ ] Settings panel
+  - [ ] Modal system
 
 #### Files to Create
-- `src/features/focus/focusMode.js`
-- `src/features/focus/pomodoroTimer.js`
-- `src/features/focus/focusStats.js`
-- `src/styles/focus.css`
-- `tests/focus.test.js`
+- `src/core/GridManager.js`
+- `src/components/BaseWidget.js`
+- `src/components/GridItem.js`
+- `src/styles/grid.css`
+- `src/styles/widgets.css`
 
 ---
 
-### Feature 2: Task Management System ✅
+### Feature 2: Essential Widgets 🎨
 **Priority: HIGH**
 
-#### Goals
-- Built-in todo list for quick task capture
-- Organize tasks by priority and projects
-- Track task completion and productivity
+#### Quick Access Widget
+- [ ] Create QuickLinksWidget.js
+- [ ] Add/edit/delete links
+- [ ] Drag to reorder
+- [ ] Icon detection
+- [ ] Categories/folders
 
-#### Implementation
-- [ ] Design task UI (inline on dashboard)
-- [ ] Create task CRUD operations
-- [ ] Implement priority levels (High/Medium/Low)
-- [ ] Add due dates and reminders
-- [ ] Create project/category organization
-- [ ] Implement drag-and-drop task reordering
-- [ ] Add task filtering and search
-- [ ] Implement recurring tasks
-- [ ] Add task completion animations
-- [ ] Create keyboard shortcuts (Ctrl+K for quick add)
+#### Clock & Weather Widget
+- [ ] ClockWidget.js - Real-time clock
+- [ ] WeatherWidget.js - Weather display
+- [ ] Location detection
+- [ ] Unit conversion
+- [ ] Beautiful UI with icons
 
-#### Testing
-- [ ] Unit tests for task operations
-- [ ] Test data persistence
-- [ ] Test sorting and filtering
-- [ ] Test keyboard shortcuts
+#### Search Widget
+- [ ] SearchWidget.js - Universal search
+- [ ] Multiple search engines
+- [ ] Search suggestions
+- [ ] Keyboard shortcuts (/)
 
 #### Files to Create
-- `src/features/tasks/taskManager.js`
-- `src/features/tasks/taskUI.js`
-- `src/features/tasks/taskStorage.js`
-- `src/styles/tasks.css`
-- `tests/tasks.test.js`
+- `src/widgets/QuickLinksWidget.js`
+- `src/widgets/ClockWidget.js`
+- `src/widgets/WeatherWidget.js`
+- `src/widgets/SearchWidget.js`
 
 ---
 
-### Feature 3: Quick Notes & Clipboard Manager 📝
+## 💪 Phase 3: Productivity Features (Week 5-6)
+
+### Feature 3: Focus Mode & Pomodoro 🍅
+**Priority: HIGH**
+
+#### Implementation
+- [ ] FocusMode widget with timer
+- [ ] Pomodoro intervals (25/5/15)
+- [ ] Session tracking
+- [ ] Website blocking
+- [ ] Break notifications
+- [ ] Statistics dashboard
+- [ ] Keyboard shortcuts
+
+#### Files to Create
+- `src/widgets/FocusWidget.js`
+- `src/services/PomodoroTimer.js`
+- `src/services/SiteBlocker.js`
+- `src/services/FocusStats.js`
+
+---
+
+### Feature 4: Task Management Widget ✅
+**Priority: HIGH**
+
+#### Implementation
+- [ ] TaskWidget.js - Main task widget
+- [ ] Task CRUD operations
+- [ ] Priority levels & due dates
+- [ ] Drag & drop reordering
+- [ ] Task filtering & search
+- [ ] Keyboard shortcuts (Ctrl+K)
+- [ ] Beautiful animations
+
+#### Files to Create
+- `src/widgets/TaskWidget.js`
+- `src/services/TaskManager.js`
+- `src/components/TaskItem.js`
+
+---
+
+### Feature 5: Quick Notes Widget 📝
 **Priority: MEDIUM**
 
-#### Goals
-- Capture quick thoughts without leaving the dashboard
-- Manage clipboard history for productivity
-- Easy access to frequently used text snippets
-
 #### Implementation
-- [ ] Design notes widget UI
-- [ ] Create sticky notes functionality
-- [ ] Implement clipboard history (last 20 items)
-- [ ] Add text snippets library
-- [ ] Create Markdown support for notes
-- [ ] Implement note search
-- [ ] Add note tags and categories
-- [ ] Create keyboard shortcuts (Ctrl+Shift+N)
-- [ ] Export notes functionality
-
-#### Testing
-- [ ] Test note persistence
-- [ ] Test clipboard monitoring
-- [ ] Test search functionality
-- [ ] Test Markdown rendering
+- [ ] NotesWidget.js - Sticky notes
+- [ ] Rich text support
+- [ ] Tags & categories
+- [ ] Quick capture (Ctrl+Shift+N)
+- [ ] Search & filter
+- [ ] Export functionality
 
 #### Files to Create
-- `src/features/notes/quickNotes.js`
-- `src/features/notes/clipboardManager.js`
-- `src/features/notes/snippets.js`
-- `src/styles/notes.css`
-- `tests/notes.test.js`
+- `src/widgets/NotesWidget.js`
+- `src/services/NotesManager.js`
 
 ---
 

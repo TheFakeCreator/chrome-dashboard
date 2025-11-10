@@ -5,19 +5,26 @@
  */
 
 import { app } from './core/App.js';
+import { PanelManager } from './core/PanelManager.js';
+import { GestureDetector } from './core/GestureDetector.js';
 import { ClockWidget } from './widgets/ClockWidget.js';
 import { WeatherWidget } from './widgets/WeatherWidget.js';
 import { SearchWidget } from './widgets/SearchWidget.js';
+import { QuickLinksWidget } from './widgets/QuickLinksWidget.js';
+import { ExtensionControlWidget } from './widgets/ExtensionControlWidget.js';
 import { SettingsModal } from './components/SettingsModal.js';
 import { initIcons } from './utils/icons.js';
 
 // DOM elements
 let loadingEl;
 let errorEl;
-let headerEl;
-let mainEl;
-let footerEl;
-let emptyStateEl;
+let panelContainerEl;
+let headerActionsEl;
+let panelIndicatorsEl;
+
+// Panel System
+let panelManager;
+let gestureDetector;
 
 /**
  * Initialize DOM references
@@ -25,10 +32,9 @@ let emptyStateEl;
 function initDOMReferences() {
   loadingEl = document.getElementById('loading');
   errorEl = document.getElementById('error');
-  headerEl = document.getElementById('header');
-  mainEl = document.getElementById('main');
-  footerEl = document.getElementById('footer');
-  emptyStateEl = document.getElementById('empty-state');
+  panelContainerEl = document.getElementById('panel-container');
+  headerActionsEl = document.getElementById('header-actions');
+  panelIndicatorsEl = document.getElementById('panel-indicators');
 }
 
 /**
@@ -84,54 +90,153 @@ function showDashboard() {
   hideLoading();
   hideError();
   
-  if (headerEl) headerEl.style.display = 'block';
-  if (mainEl) mainEl.style.display = 'block';
-  if (footerEl) footerEl.style.display = 'block';
+  if (panelContainerEl) panelContainerEl.style.display = 'block';
+  if (headerActionsEl) headerActionsEl.style.display = 'flex';
+  if (panelIndicatorsEl) panelIndicatorsEl.style.display = 'block';
   
   // Initialize Lucide icons
   initIcons();
-  
-  // Show empty state if no widgets
-  const widgetGrid = document.getElementById('widget-grid');
-  const hasWidgets = widgetGrid && widgetGrid.children.length > 0;
-  
-  if (emptyStateEl) {
-    emptyStateEl.style.display = hasWidgets ? 'none' : 'flex';
+}
+
+/**
+ * Helper function to load widget settings from storage
+ */
+async function loadWidgetSettings(widgetId, defaultSettings) {
+  try {
+    // Build the storage key
+    const storageKey = `widget.${widgetId}.settings`;
+    
+    // Try to get the settings from storage
+    const result = await app.storageManager.get([storageKey]);
+    
+    if (result && result[storageKey]) {
+      console.log('[Main] Loaded saved settings for', widgetId, ':', result[storageKey]);
+      return { ...defaultSettings, ...result[storageKey] };
+    }
+    
+    console.log('[Main] No saved settings found for', widgetId, ', using defaults');
+    return defaultSettings;
+  } catch (error) {
+    console.error('[Main] Error loading widget settings:', error);
+    return defaultSettings;
   }
+}
+
+/**
+ * Initialize Panel System
+ */
+function initPanelSystem() {
+  console.log('[Main] Initializing panel system...');
+  
+  // Create Panel Manager
+  panelManager = new PanelManager({
+    transitionDuration: 500, // Match gesture reset delay
+    enabledPanels: ['center', 'top', 'bottom', 'left', 'right'],
+    onPanelChange: (to, from) => {
+      console.log('[Main] Panel changed:', from, '→', to);
+      updatePanelIndicators();
+    }
+  });
+
+  // Initialize with container
+  const success = panelManager.initialize(panelContainerEl);
+  if (!success) {
+    console.error('[Main] Failed to initialize panel system');
+    return false;
+  }
+
+  // Create Gesture Detector
+  // Natural gestures: swipe DOWN pulls top panel down, swipe UP pulls bottom panel up
+  gestureDetector = new GestureDetector({
+    threshold: 100, // Higher threshold = more deliberate swipe needed
+    velocity: 0.3,
+    onSwipeUp: () => panelManager.navigateDirection('up'),      // Swipe up → go to bottom panel
+    onSwipeDown: () => panelManager.navigateDirection('down'),  // Swipe down → go to top panel
+    onSwipeLeft: () => panelManager.navigateDirection('left'),  // Swipe left → go to left panel
+    onSwipeRight: () => panelManager.navigateDirection('right') // Swipe right → go to right panel
+  });
+
+  // Initialize gestures on viewport
+  gestureDetector.initialize(panelContainerEl);
+
+  // Setup keyboard shortcuts for panel navigation
+  document.addEventListener('keydown', (event) => {
+    // Alt + Arrow keys for panel navigation
+    if (event.altKey && !event.ctrlKey && !event.shiftKey && !event.metaKey) {
+      let handled = false;
+      let direction = '';
+      
+      switch (event.key) {
+        case 'ArrowUp':
+          direction = 'up';
+          handled = panelManager.navigateDirection('up');
+          break;
+        case 'ArrowDown':
+          direction = 'down';
+          handled = panelManager.navigateDirection('down');
+          break;
+        case 'ArrowLeft':
+          direction = 'left';
+          handled = panelManager.navigateDirection('left');
+          break;
+        case 'ArrowRight':
+          direction = 'right';
+          handled = panelManager.navigateDirection('right');
+          break;
+      }
+      
+      if (direction) {
+        event.preventDefault();
+        console.log(`[Main] Keyboard: ${event.key} -> direction: ${direction}, handled: ${handled}, current panel: ${panelManager.getCurrentPanel()}`);
+      }
+    }
+  });
+
+  console.log('[Main] Panel system initialized successfully');
+  console.log('[Main] Keyboard shortcuts: Alt + Arrow keys to navigate panels');
+  return true;
+}
+
+/**
+ * Update panel indicators UI
+ */
+function updatePanelIndicators() {
+  if (!panelIndicatorsEl || !panelManager) return;
+
+  const current = panelManager.getCurrentPanel();
+  const available = panelManager.getAvailableDirections();
+
+  const indicatorsContainer = panelIndicatorsEl.querySelector('div');
+  if (!indicatorsContainer) return;
+
+  // Build indicators HTML
+  indicatorsContainer.innerHTML = `
+    <div class="flex items-center gap-2 text-xs text-dark-muted">
+      ${available.includes('up') ? '<i data-lucide="chevron-up" class="w-3 h-3"></i>' : ''}
+      ${available.includes('left') ? '<i data-lucide="chevron-left" class="w-3 h-3"></i>' : ''}
+      <div class="flex gap-1.5">
+        <div class="panel-indicator ${current === 'left' ? 'active' : ''}"></div>
+        <div class="panel-indicator ${current === 'center' ? 'active' : ''}"></div>
+        <div class="panel-indicator ${current === 'right' ? 'active' : ''}"></div>
+      </div>
+      ${available.includes('right') ? '<i data-lucide="chevron-right" class="w-3 h-3"></i>' : ''}
+      ${available.includes('down') ? '<i data-lucide="chevron-down" class="w-3 h-3"></i>' : ''}
+    </div>
+  `;
+
+  // Re-initialize icons
+  initIcons();
 }
 
 /**
  * Create and mount widgets
  */
 async function createWidgets() {
-  const widgetGrid = document.getElementById('widget-grid');
-  if (!widgetGrid) {
-    console.error('[Main] Widget grid not found');
-    return;
-  }
-
   try {
-    // Helper function to load widget settings from storage
-    const loadWidgetSettings = async (widgetId, defaultSettings) => {
-      try {
-        // Build the storage key
-        const storageKey = `widget.${widgetId}.settings`;
-        
-        // Try to get the settings from storage
-        const result = await app.storageManager.get([storageKey]);
-        
-        if (result && result[storageKey]) {
-          console.log('[Main] Loaded saved settings for', widgetId, ':', result[storageKey]);
-          return { ...defaultSettings, ...result[storageKey] };
-        }
-        
-        console.log('[Main] No saved settings found for', widgetId, ', using defaults');
-        return defaultSettings;
-      } catch (error) {
-        console.error('[Main] Error loading widget settings:', error);
-        return defaultSettings;
-      }
-    };
+    // Initialize Panel System first
+    if (!initPanelSystem()) {
+      throw new Error('Panel system initialization failed');
+    }
 
     // Create Clock widget with fixed ID
     console.log('[Main] Creating Clock widget...');
@@ -149,9 +254,16 @@ async function createWidgets() {
       settings: clockSettings
     });
 
-    // Mount the widget
-    clockWidget.mount(widgetGrid);
-    console.log('[Main] Clock widget mounted successfully');
+    // Create a row container for Clock and Weather
+    const topRowContainer = document.createElement('div');
+    topRowContainer.className = 'w-full grid grid-cols-2 gap-4 max-w-5xl';
+    
+    // Mount Clock to row container
+    const clockContainer = document.createElement('div');
+    clockContainer.className = 'w-full';
+    clockWidget.mount(clockContainer);
+    topRowContainer.appendChild(clockContainer);
+    console.log('[Main] Clock widget mounted to top row');
 
     // Create Weather widget with fixed ID
     console.log('[Main] Creating Weather widget...');
@@ -172,9 +284,15 @@ async function createWidgets() {
       settings: weatherSettings
     });
 
-    // Mount the widget
-    weatherWidget.mount(widgetGrid);
-    console.log('[Main] Weather widget mounted successfully');
+    // Mount Weather to row container (same row as Clock)
+    const weatherContainer = document.createElement('div');
+    weatherContainer.className = 'w-full';
+    weatherWidget.mount(weatherContainer);
+    topRowContainer.appendChild(weatherContainer);
+    
+    // Now mount the complete top row to center panel
+    panelManager.mountWidget('center', topRowContainer, 'top-row-widgets');
+    console.log('[Main] Weather widget mounted to top row');
 
     // Create Search widget with fixed ID
     console.log('[Main] Creating Search widget...');
@@ -193,9 +311,53 @@ async function createWidgets() {
       settings: searchSettings
     });
 
-    // Mount the widget
-    searchWidget.mount(widgetGrid);
-    console.log('[Main] Search widget mounted successfully');
+    // Mount to CENTER panel (second row)
+    const searchContainer = document.createElement('div');
+    searchContainer.className = 'w-full max-w-4xl';
+    searchWidget.mount(searchContainer);
+    panelManager.mountWidget('center', searchContainer, searchWidget.widgetId);
+    console.log('[Main] Search widget mounted to center panel');
+
+    // Create Quick Links widget with fixed ID
+    console.log('[Main] Creating Quick Links widget...');
+    const quickLinksWidgetId = 'widget-quicklinks-main';
+    const quickLinksSettings = await loadWidgetSettings(quickLinksWidgetId, {
+      viewMode: 'grid',
+      sortBy: 'manual',
+      showUsageCount: false,
+      iconsOnly: false,
+      maxLinks: 50,
+      gridColumns: 5,
+      showCategories: false
+    });
+    
+    const quickLinksWidget = new QuickLinksWidget(app, {
+      widgetId: quickLinksWidgetId,
+      settings: quickLinksSettings
+    });
+
+    // Mount to BOTTOM panel (for future carousel)
+    const quickLinksContainer = document.createElement('div');
+    quickLinksWidget.mount(quickLinksContainer);
+    panelManager.mountWidget('bottom', quickLinksContainer, quickLinksWidget.widgetId);
+    console.log('[Main] Quick Links widget mounted to bottom panel');
+
+    // Create Extension Control widget with fixed ID
+    console.log('[Main] Creating Extension Control widget...');
+    const extensionControlWidgetId = 'widget-extension-control-main';
+    const extensionControlSettings = await loadWidgetSettings(extensionControlWidgetId, {});
+    
+    const extensionControlWidget = new ExtensionControlWidget(app, {
+      widgetId: extensionControlWidgetId,
+      settings: extensionControlSettings
+    });
+
+    // Mount to TOP panel
+    const extensionControlContainer = document.createElement('div');
+    extensionControlContainer.className = 'w-full max-w-4xl';
+    extensionControlWidget.mount(extensionControlContainer);
+    panelManager.mountWidget('top', extensionControlContainer, extensionControlWidget.widgetId);
+    console.log('[Main] Extension Control widget mounted to top panel');
 
     // Create Settings Modal
     console.log('[Main] Creating Settings Modal...');
@@ -205,6 +367,8 @@ async function createWidgets() {
     settingsModal.registerWidget(clockWidget.widgetId, clockWidget);
     settingsModal.registerWidget(weatherWidget.widgetId, weatherWidget);
     settingsModal.registerWidget(searchWidget.widgetId, searchWidget);
+    settingsModal.registerWidget(quickLinksWidget.widgetId, quickLinksWidget);
+    settingsModal.registerWidget(extensionControlWidget.widgetId, extensionControlWidget);
     
     console.log('[Main] Settings Modal created');
 
@@ -214,14 +378,44 @@ async function createWidgets() {
       settingsModal.open('widgets');
     });
 
+    // Initialize panel indicators
+    updatePanelIndicators();
+
     // Store references for debugging
     window.__widgets = {
       clock: clockWidget,
       weather: weatherWidget,
-      search: searchWidget
+      search: searchWidget,
+      quickLinks: quickLinksWidget,
+      extensionControl: extensionControlWidget
     };
     
     window.__settingsModal = settingsModal;
+    window.__panelManager = panelManager;
+    window.__gestureDetector = gestureDetector;
+
+    // Auto-focus search input when possible
+    // Note: Chrome prevents focus from being stolen from omnibox on new tabs (Ctrl+T)
+    // Solution: Press Tab key once to focus the search input
+    const focusSearchInput = () => {
+      const searchInput = document.querySelector('.search-input');
+      if (searchInput) {
+        searchInput.focus();
+      }
+    };
+
+    // Try on initial load (works on reload)
+    setTimeout(focusSearchInput, 100);
+    
+    // Listen for window focus (when switching back to tab)
+    window.addEventListener('focus', focusSearchInput);
+    
+    // Listen for visibility change (when tab becomes visible)
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) {
+        setTimeout(focusSearchInput, 10);
+      }
+    });
 
   } catch (error) {
     console.error('[Main] Error creating widgets:', error);
@@ -232,9 +426,9 @@ async function createWidgets() {
  * Hide dashboard
  */
 function hideDashboard() {
-  if (headerEl) headerEl.style.display = 'none';
-  if (mainEl) mainEl.style.display = 'none';
-  if (footerEl) footerEl.style.display = 'none';
+  if (panelContainerEl) panelContainerEl.style.display = 'none';
+  if (headerActionsEl) headerActionsEl.style.display = 'none';
+  if (panelIndicatorsEl) panelIndicatorsEl.style.display = 'none';
 }
 
 /**

@@ -7,6 +7,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Panel System Styles */
+@import './panels.css';
+
+/* Carousel Component Styles */
+@import './carousel.css';
+
 /* Custom Base Styles */
 @layer base {
   * {

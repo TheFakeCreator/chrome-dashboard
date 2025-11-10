@@ -381,22 +381,22 @@ export class WeatherWidget extends BaseWidget {
     const description = weather.weather[0].description;
 
     return `
-      <div class="space-y-4">
+      <div class="space-y-2 py-3">
         <!-- Current Weather -->
-        <div class="space-y-4">
+        <div class="space-y-2">
           <!-- Location Header -->
           <div class="flex items-center gap-2 text-dark-muted">
-            <i data-lucide="map-pin" class="w-4 h-4"></i>
-            <span class="text-sm font-medium">${weather.name}, ${weather.sys.country}</span>
+            <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
+            <span class="text-xs font-medium">${weather.name}, ${weather.sys.country}</span>
           </div>
 
           <!-- Main Weather Display -->
           <div class="flex items-center justify-between">
-            <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2.5">
               <div>${icon}</div>
               <div>
-                <div class="text-4xl font-bold text-dark-text">${temp}</div>
-                <div class="text-sm text-dark-muted capitalize">${description}</div>
+                <div class="text-2xl font-bold text-dark-text">${temp}</div>
+                <div class="text-xs text-dark-muted capitalize">${description}</div>
               </div>
             </div>
           </div>

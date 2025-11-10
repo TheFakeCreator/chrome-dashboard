@@ -1,0 +1,87 @@
+/**
+ * Infinite Carousel Styles
+ * 
+ * Minimal CSS for carousel-specific effects that complement Tailwind.
+ * Most styling is done via Tailwind utility classes in the component.
+ */
+
+/* ============================================
+   CAROUSEL MOUNT POINT
+   ============================================ */
+
+[data-carousel-mount] {
+  width: 100%;
+  max-width: 100%;
+  display: block;
+  overflow: visible;
+}
+
+/* ============================================
+   DRAG STATE - Changes cursor during drag
+   ============================================ */
+
+.carousel-track.is-dragging {
+  cursor: grabbing !important;
+  transition: none !important;
+}
+
+.carousel-track.is-dragging .carousel-item {
+  cursor: grabbing !important;
+  pointer-events: none;
+}
+
+/* ============================================
+   CENTER FOCUS EFFECT
+   ============================================ */
+
+/* Center item - scaled and highlighted */
+.carousel-item.is-center {
+  transform: scale(1.15) translateY(-8px) !important;
+  border-color: rgba(99, 102, 241, 0.6) !important;
+  box-shadow: 
+    0 0 0 1px rgba(99, 102, 241, 0.4),
+    0 20px 40px -12px rgba(0, 0, 0, 0.5),
+    0 0 80px -20px rgba(99, 102, 241, 0.6),
+    inset 0 0 20px rgba(99, 102, 241, 0.1) !important;
+  z-index: 10 !important;
+  background: rgba(17, 24, 39, 0.9) !important;
+}
+
+/* Show details only on center item */
+.carousel-item.is-center .carousel-item-details {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* Side items - dimmed effect */
+.carousel-item:not(.is-center) {
+  opacity: 0.6;
+  filter: grayscale(0.3);
+}
+
+.carousel-item:not(.is-center):hover {
+  opacity: 0.85;
+  filter: grayscale(0.1);
+}
+
+/* ============================================
+   ACCESSIBILITY
+   ============================================ */
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .carousel-track,
+  .carousel-item {
+    transition: none !important;
+  }
+}
+
+/* ============================================
+   RESPONSIVE - Mobile adjustments
+   ============================================ */
+
+@media (max-width: 768px) {
+  .carousel-item.is-center {
+    transform: scale(1.08) translateY(-4px) !important;
+  }
+}

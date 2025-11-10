@@ -138,25 +138,25 @@ export class ClockWidget extends BaseWidget {
     }
 
     return `
-      <div class="flex flex-col items-center justify-center gap-3 p-6 text-center min-h-[150px]">
-        <div class="clock-time text-5xl font-bold text-primary-500 tabular-nums tracking-tight cursor-pointer transition-all duration-200 hover:scale-105 hover:text-primary-400 select-none">
+      <div class="flex flex-col items-center justify-center gap-1.5 py-3 text-center">
+        <div class="clock-time text-3xl font-bold text-primary-500 tabular-nums tracking-tight cursor-pointer transition-all duration-200 hover:scale-105 hover:text-primary-400 select-none">
           ${this.data.time}
         </div>
         
         ${this.settings.showDayOfWeek ? `
-          <div class="text-lg font-semibold text-dark-text capitalize">
+          <div class="text-sm font-semibold text-dark-text capitalize">
             ${this.data.dayOfWeek}
           </div>
         ` : ''}
         
         ${this.settings.showDate ? `
-          <div class="text-base text-dark-muted">
+          <div class="text-xs text-dark-muted">
             ${this.data.date}
           </div>
         ` : ''}
         
         ${this.settings.showTimezone ? `
-          <div class="text-xs text-dark-muted font-mono mt-2 px-3 py-1 bg-dark-elevated rounded-full">
+          <div class="text-xs text-dark-muted font-mono mt-1 px-2 py-0.5 bg-dark-elevated rounded-full">
             ${this.data.timezone}
           </div>
         ` : ''}

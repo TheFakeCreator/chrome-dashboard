@@ -32,6 +32,7 @@ export class SearchWidget extends BaseWidget {
     this.query = '';
     this.focused = false;
     this.suggestions = [];
+    this.hintDismissed = false; // Track if hint has been dismissed
 
     // Search engines configuration
     this.engines = {
@@ -292,6 +293,13 @@ export class SearchWidget extends BaseWidget {
       <div class="space-y-4">
         <!-- Search Input -->
         <div class="space-y-2">
+          <!-- Hint for new users (only shown if not dismissed) -->
+          ${!this.hintDismissed ? `
+            <div class="text-center text-xs text-dark-muted/70 search-hint">
+              Press <kbd class="px-1.5 py-0.5 bg-dark-surface border border-dark-border rounded text-[10px]">Tab</kbd> 3 times to start searching
+            </div>
+          ` : ''}
+          
           <div class="relative flex items-center gap-2 bg-dark-elevated border border-dark-border rounded-lg p-3 focus-within:ring-2 focus-within:ring-primary-500 focus-within:border-transparent transition-all">
             ${this.settings.showEngineSelector ? `
               <button class="flex items-center gap-2 px-2 py-1 rounded hover:bg-dark-surface transition-colors" data-action="select-engine">
@@ -308,6 +316,7 @@ export class SearchWidget extends BaseWidget {
               value="${this.query || ''}"
               autocomplete="off"
               spellcheck="false"
+              autofocus
             />
             
             <button class="p-2 rounded-lg hover:bg-dark-surface transition-colors" data-action="search" title="Search">
@@ -392,6 +401,35 @@ export class SearchWidget extends BaseWidget {
     
     // Emit event
     this.emit('search:engine-changed', { engine });
+  }
+
+  /**
+   * Cycle through search engines
+   * @param {string} direction - 'next' or 'prev'
+   */
+  async cycleEngine(direction = 'next') {
+    const engineKeys = Object.keys(this.engines);
+    const currentIndex = engineKeys.indexOf(this.settings.defaultEngine);
+    
+    let nextIndex;
+    if (direction === 'next') {
+      nextIndex = (currentIndex + 1) % engineKeys.length;
+    } else {
+      nextIndex = (currentIndex - 1 + engineKeys.length) % engineKeys.length;
+    }
+    
+    const nextEngine = engineKeys[nextIndex];
+    console.log('[SearchWidget] Cycling engine:', direction, '->', nextEngine);
+    
+    await this.setEngine(nextEngine);
+    
+    // Re-focus the input after engine change (after refresh)
+    setTimeout(() => {
+      const input = this.element?.querySelector('.search-input');
+      if (input) {
+        input.focus();
+      }
+    }, 0);
   }
 
   /**
@@ -530,11 +568,45 @@ export class SearchWidget extends BaseWidget {
     };
     input.addEventListener('input', this._inputHandler);
 
-    this._focusHandler = () => this.handleFocus();
+    this._focusHandler = () => {
+      this.handleFocus();
+      // Hide the hint permanently when user focuses the search input
+      if (!this.hintDismissed) {
+        this.hintDismissed = true;
+        const hint = this.element?.querySelector('.search-hint');
+        if (hint) {
+          hint.remove(); // Remove instead of hide to prevent it from coming back
+        }
+      }
+    };
     input.addEventListener('focus', this._focusHandler);
 
     this._blurHandler = () => this.handleBlur();
     input.addEventListener('blur', this._blurHandler);
+
+    // Keyboard navigation for cycling engines
+    if (this._keydownHandler) {
+      input.removeEventListener('keydown', this._keydownHandler);
+    }
+    
+    this._keydownHandler = (event) => {
+      // Tab key: cycle forward (when input is empty or cursor at start)
+      if (event.key === 'Tab' && (input.value === '' || input.selectionStart === 0)) {
+        event.preventDefault();
+        this.cycleEngine('next');
+      }
+      // Arrow Up: cycle to previous engine
+      else if (event.key === 'ArrowUp') {
+        event.preventDefault();
+        this.cycleEngine('prev');
+      }
+      // Arrow Down: cycle to next engine
+      else if (event.key === 'ArrowDown') {
+        event.preventDefault();
+        this.cycleEngine('next');
+      }
+    };
+    input.addEventListener('keydown', this._keydownHandler);
 
     // Suggestion click (only if suggestions container exists)
     const suggestionsContainer = this.element?.querySelector('.search-suggestions');
@@ -591,6 +663,13 @@ export class SearchWidget extends BaseWidget {
     if (this.keyboardHandler) {
       document.removeEventListener('keydown', this.keyboardHandler);
       this.keyboardHandler = null;
+    }
+
+    // Remove input keydown handler
+    const input = this.element?.querySelector('.search-input');
+    if (input && this._keydownHandler) {
+      input.removeEventListener('keydown', this._keydownHandler);
+      this._keydownHandler = null;
     }
 
     // Clear timers

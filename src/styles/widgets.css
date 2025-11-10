@@ -130,6 +130,44 @@
   overflow: auto;
 }
 
+/* Center panel widget constraints */
+.panel-center .widget {
+  overflow: visible; /* Allow dropdowns and popovers */
+}
+
+.panel-center .widget-body {
+  overflow: visible; /* Allow content to show */
+}
+
+.panel-center .widget-content {
+  overflow: visible;
+}
+
+/* Make widgets more compact in center panel */
+.panel-center .widget {
+  padding: 1rem 1.5rem;
+}
+
+.panel-center .widget-header {
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+/* Clock widget - extra compact */
+.panel-center .widget-clock .widget-body {
+  padding: 0.5rem 0;
+}
+
+/* Weather widget - compact */
+.panel-center .widget-weather .widget-body {
+  padding: 0.5rem 0;
+}
+
+/* Search widget - no extra padding */
+.panel-center .widget-search .widget-body {
+  padding: 0;
+}
+
 /* ========================================
    WIDGET STATES
    ======================================== */
@@ -577,6 +615,7 @@
 .search-container {
   position: relative;
   width: 100%;
+  z-index: 10; /* Ensure dropdowns appear above other content */
 }
 
 .search-input-wrapper {
@@ -682,7 +721,7 @@
   max-height: 0;
   overflow: hidden;
   transition: max-height var(--transition-fast);
-  z-index: 10;
+  z-index: 100; /* High z-index to appear above everything */
 }
 
 .search-suggestions.visible {

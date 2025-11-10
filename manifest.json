@@ -10,7 +10,8 @@
     "storage",
     "tabs",
     "history",
-    "webNavigation"
+    "webNavigation",
+    "management"
   ],
   "host_permissions": ["<all_urls>"],
   "background": {

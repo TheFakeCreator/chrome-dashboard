@@ -3,99 +3,102 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>New Tab</title>
-  <link rel="stylesheet" href="/src/styles/base.css">
-  <link rel="stylesheet" href="/src/styles/components/header.css">
-  <link rel="stylesheet" href="/src/styles/features/search.css">
-  <link rel="stylesheet" href="/src/styles/components/sections.css">
-  <link rel="stylesheet" href="/src/styles/components/modal.css">
-  <link rel="stylesheet" href="/src/styles/features/settings.css">
-  <link rel="stylesheet" href="/src/styles/responsive.css">
-  <link rel="stylesheet" href="/src/styles/components/form.css">
-  <link rel="stylesheet" href="/src/styles/components/card-popup.css">
-  <link rel="stylesheet" href="/src/styles/components/customDropdown.css">
-  <script src="/src/utils/customDropdown.js"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta name="description" content="Chrome Dashboard - Your Productivity Hub">
+  <title>New Tab - Chrome Dashboard</title>
+  
+  <!-- Design System -->
+  <link rel="stylesheet" href="src/styles/design-tokens.css">
+  <link rel="stylesheet" href="src/styles/base.css">
+  <link rel="stylesheet" href="src/styles/components.css">
+  <link rel="stylesheet" href="src/styles/widgets.css">
 </head>
 <body>
-  <div id="loading-screen" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(30,32,40,0.45);backdrop-filter:blur(18px) saturate(180%);box-shadow:0 8px 32px 0 rgba(31,38,135,0.37);transition:transform 0.8s cubic-bezier(.77,0,.18,1), opacity 0.5s;">
-    
-  </div>
-  <div id="main-container">
-    <header>
-      <h1 id="welcome">Welcome, Sanskar 👋</h1>
-      <div id="clock"></div>
-      <div id="date-weather">
-        <span id="location"></span>
-        <span id="date"></span>
-        <span id="weather"></span>
+  <!-- App Container -->
+  <div id="app">
+    <!-- Loading State -->
+    <div id="loading" class="loading-screen">
+      <div class="loading-content">
+        <div class="spinner"></div>
+        <h2>Loading Dashboard...</h2>
+        <p class="loading-message">Initializing your productivity hub</p>
       </div>
-      <div id="daily-quote" style="margin: 18px 0; text-align: center; font-size: 1.35em; color: #eaeaea;">
-      <span id="quote-text">Loading quote...</span>
-      <br>
-      <span id="quote-author" style="font-size: 0.95em; color: #bdbdbd;"></span>
-</div>
-      <button id="settings-btn" title="Settings">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#a0a0a0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09A1.65 1.65 0 0 0 9 3.09V3a2 2 0 0 1 4 0v.09c.38.16.7.46 1 1.51a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82c.16.38.46.7 1.51 1H21a2 2 0 0 1 0 4h-.09c-.16.38-.46.7-1.51 1z"/></svg>
-      </button>
+    </div>
+
+    <!-- Header -->
+    <header id="header" class="dashboard-header" style="display: none;">
+      <div class="container">
+        <div class="header-content">
+          <!-- Logo/Brand -->
+          <div class="brand">
+            <h1 class="brand-title">Dashboard</h1>
+          </div>
+
+          <!-- Header Actions -->
+          <div class="header-actions">
+            <button id="btn-theme" class="btn btn-icon btn-ghost" title="Toggle Theme" aria-label="Toggle theme">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"/>
+              </svg>
+            </button>
+            
+            <button id="btn-settings" class="btn btn-icon btn-ghost" title="Settings" aria-label="Open settings">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
     </header>
-    <section id="search-section">
-      <form id="search-form">
-        <input type="text" id="search-input" placeholder="Search..." autocomplete="off">
-        <div id="search-suggestions" class="suggestions-dropdown" style="display:none;"></div>
-        <div class="custom-dropdown" data-name="search-engine">
-          <input type="hidden" name="search-engine" value="google">
-          <div class="dropdown-selected">Google</div>
-          <div class="dropdown-options">
-            <div class="dropdown-option selected" data-value="google">Google</div>
-            <div class="dropdown-option" data-value="bing">Bing</div>
-            <div class="dropdown-option" data-value="duckduckgo">DuckDuckGo</div>
-            <div class="dropdown-option" data-value="youtube">YouTube</div>
-            <div class="dropdown-option" data-value="github">GitHub</div>
+
+    <!-- Main Content -->
+    <main id="main" class="dashboard-main" style="display: none;">
+      <div class="container">
+        <!-- Widget Grid -->
+        <div id="widget-grid" class="widget-grid" data-columns="3">
+          <!-- Widgets will be dynamically added here -->
+        </div>
+
+        <!-- Empty State (shown when no widgets) -->
+        <div id="empty-state" class="empty-state" style="display: none;">
+          <div class="empty-state-content">
+            <span class="empty-icon">📦</span>
+            <h2>Welcome to Your Dashboard</h2>
+            <p>Your productivity hub is ready. The system is initialized and working!</p>
+            <div class="badge badge-success">✓ Core System Ready</div>
           </div>
         </div>
-        <div class="custom-dropdown" data-name="search-filter">
-          <input type="hidden" name="search-filter" value="">
-          <div class="dropdown-selected">All</div>
-          <div class="dropdown-options">
-            <div class="dropdown-option selected" data-value="">All</div>
-            <div class="dropdown-option" data-value="images">Images</div>
-            <div class="dropdown-option" data-value="videos">Videos</div>
-          </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer id="footer" class="dashboard-footer" style="display: none;">
+      <div class="container">
+        <div class="footer-content">
+          <p class="footer-text">Chrome Dashboard v2.0.0-alpha</p>
+          <p class="footer-meta">Built with modern architecture</p>
         </div>
-        <button type="submit" id="search-btn" title="Search" style="display: flex; align-items: center; justify-content: center; padding: 0 16px;">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a0a0a0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        </button>
-      </form>
-    </section>
-    <section id="ai-section" style="display: none;">
-      <form id="ai-form">
-        <div class="ai-inner">
-          <input type="text" id="ai-input" placeholder="Ask AI..." autocomplete="off">
-          <div class="custom-dropdown" data-name="ai-platform">
-            <input type="hidden" name="ai-platform" value="chatgpt">
-            <div class="dropdown-selected">ChatGPT</div>
-            <div class="dropdown-options">
-              <div class="dropdown-option selected" data-value="chatgpt">ChatGPT</div>
-              <div class="dropdown-option" data-value="gemini">Gemini</div>
-              <div class="dropdown-option" data-value="claude">Claude</div>
-            </div>
-          </div>
-          <button type="submit">Ask</button>
-        </div>
-      </form>
-    </section>
-    <div id="grid-sections"></div>
-    <button id="add-section-btn" title="Add New Section">+</button>
-    <section id="tab-groups-section">
-      <h2>Tab Groups</h2>
-      <div id="tab-groups-list"></div>
-      <button id="add-tab-group-btn">+ Add Tab Group</button>
-    </section>
+      </div>
+    </footer>
+
+    <!-- Error State -->
+    <div id="error" class="error-screen" style="display: none;">
+      <div class="error-content">
+        <span class="error-icon">⚠️</span>
+        <h2>Something Went Wrong</h2>
+        <p id="error-message">An error occurred while loading the dashboard.</p>
+        <button id="btn-retry" class="btn btn-primary">Retry</button>
+      </div>
+    </div>
   </div>
-  
-  <div id="modal-overlay" class="hidden"></div>
-  <div id="modal" class="hidden"></div>
-  <script type="module" src="/src/core/main.js"></script>
+
+  <!-- Modal Container -->
+  <div id="modal-root"></div>
+
+  <!-- Notification Container -->
+  <div id="notification-root"></div>
+
+  <!-- Main Script -->
+  <script type="module" src="src/main.js"></script>
 </body>
 </html>

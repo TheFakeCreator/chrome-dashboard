@@ -423,6 +423,8 @@ pnpm build
 
 ## 🗺️ Roadmap
 
+**[View Full Roadmap](.github/ROADMAP_ISSUE.md)** | **[GitHub Projects](https://github.com/TheFakeCreator/chrome-dashboard/projects)** | **[Milestones](https://github.com/TheFakeCreator/chrome-dashboard/milestones)**
+
 ### ✅ Completed (v2.0-alpha)
 - [x] Modern component-based architecture
 - [x] Focus Mode with Pomodoro Timer
@@ -452,6 +454,8 @@ pnpm build
 - [ ] Spotify now playing
 - [ ] Custom widget marketplace
 - [ ] Multiple dashboard profiles
+
+> 💡 **Have an idea?** [Suggest a feature](https://github.com/TheFakeCreator/chrome-dashboard/issues/new?labels=feature+request,roadmap) or vote on existing proposals!
 
 ## 🤝 Contributing
 

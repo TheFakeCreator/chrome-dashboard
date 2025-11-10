@@ -133,23 +133,7 @@ function setupEventListeners() {
     });
   }
 
-  // Listen for app events
-  app.eventBus.on('app:initialized', () => {
-    console.log('[Main] App initialized successfully');
-    showDashboard();
-  });
-
-  app.eventBus.on('app:error', ({ error }) => {
-    console.error('[Main] App error:', error);
-    showError(error.message || 'An unexpected error occurred');
-  });
-
-  // Listen for theme changes
-  app.eventBus.on('config:updated', ({ path, value }) => {
-    if (path === 'theme') {
-      console.log('[Main] Theme changed to:', value);
-    }
-  });
+  // Note: App event listeners will be set up after app.init()
 }
 
 /**
@@ -319,7 +303,7 @@ async function initialize() {
     // Show loading
     showLoading();
 
-    // Setup event listeners
+    // Setup UI event listeners (buttons, etc)
     setupEventListeners();
 
     // Initialize the app
@@ -336,8 +320,21 @@ async function initialize() {
     // Log current state
     const currentTheme = app.configManager.get('theme');
     console.log(`[Main] Current theme: ${currentTheme}`);
+
+    // Setup app event listeners (now that app is initialized)
+    app.eventBus.on('app:error', ({ error }) => {
+      console.error('[Main] App error:', error);
+      showError(error.message || 'An unexpected error occurred');
+    });
+
+    app.eventBus.on('config:updated', ({ path, value }) => {
+      if (path === 'theme') {
+        console.log('[Main] Theme changed to:', value);
+      }
+    });
     
-    // Dashboard will be shown by the 'app:initialized' event
+    // Show the dashboard
+    showDashboard()
     
   } catch (error) {
     console.error('[Main] Initialization failed:', error);

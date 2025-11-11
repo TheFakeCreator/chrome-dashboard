@@ -129,17 +129,21 @@ export class ClockWidget extends BaseWidget {
   }
 
   /**
-   * Render widget content
+   * Override render to remove widget chrome and use pure Tailwind
    * @returns {string} HTML string
    */
-  renderContent() {
+  render() {
     if (!this.data) {
-      return '<p class="text-dark-muted">Loading time...</p>';
+      return `
+        <div class="flex flex-col items-center justify-center py-2" data-widget-id="${this.widgetId}">
+          <p class="text-dark-muted text-sm">Loading time...</p>
+        </div>
+      `;
     }
 
     return `
-      <div class="flex flex-col items-center justify-center gap-1.5 py-3 text-center">
-        <div class="clock-time text-3xl font-bold text-primary-500 tabular-nums tracking-tight cursor-pointer transition-all duration-200 hover:scale-105 hover:text-primary-400 select-none">
+      <div class="flex flex-col items-center justify-center gap-1 py-2 text-center" data-widget-id="${this.widgetId}">
+        <div class="clock-time text-4xl font-bold text-primary-500 tabular-nums tracking-tight cursor-pointer transition-all duration-200 hover:text-primary-400 select-none">
           ${this.data.time}
         </div>
         
@@ -165,15 +169,25 @@ export class ClockWidget extends BaseWidget {
   }
 
   /**
+   * Render widget content (not used since we override render())
+   * @returns {string} HTML string
+   */
+  renderContent() {
+    // This is now handled by render() override
+    return '';
+  }
+
+  /**
    * Widget mounted
    */
   onMount() {
-    super.onMount();
+    // Don't call super.onMount() to avoid BaseWidget's default event listeners
+    // which expect widget header structure
     
     // Setup format toggle on click
-    const timeEl = this.$('.clock-time');
+    const timeEl = this.element.querySelector('.clock-time');
     if (timeEl) {
-      this.on(timeEl, 'click', () => {
+      timeEl.addEventListener('click', () => {
         const newFormat = this.settings.format === '12h' ? '24h' : '12h';
         this.updateSettings({ format: newFormat });
       });
@@ -215,85 +229,5 @@ export class ClockWidget extends BaseWidget {
   onDestroy() {
     this.stopClock();
     super.onDestroy();
-  }
-
-  /**
-   * Add custom styles for clock (REMOVED - using Tailwind now)
-   */
-  addClockStyles() {
-    // No longer needed - using Tailwind CSS
-    /*
-    const styleId = 'clock-widget-styles';
-    
-    // Check if styles already exist
-    if (document.getElementById(styleId)) {
-      return;
-    }
-
-    const style = document.createElement('style');
-    style.id = styleId;
-    style.textContent = `
-      .clock-widget-content {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: var(--space-3);
-        padding: var(--space-6);
-        text-align: center;
-        min-height: 150px;
-      }
-
-      .clock-time {
-        font-size: 3rem;
-        font-weight: var(--font-weight-bold);
-        color: var(--color-primary);
-        font-variant-numeric: tabular-nums;
-        letter-spacing: -0.02em;
-        cursor: pointer;
-        transition: all var(--duration-fast) var(--ease-out);
-        user-select: none;
-      }
-
-      .clock-time:hover {
-        transform: scale(1.05);
-        color: var(--color-primary-light);
-      }
-
-      .clock-day {
-        font-size: var(--font-size-lg);
-        font-weight: var(--font-weight-semibold);
-        color: var(--color-text-primary);
-        text-transform: capitalize;
-      }
-
-      .clock-date {
-        font-size: var(--font-size-md);
-        color: var(--color-text-secondary);
-      }
-
-      .clock-timezone {
-        font-size: var(--font-size-sm);
-        color: var(--color-text-tertiary);
-        margin-top: var(--space-2);
-      }
-
-      @media (max-width: 768px) {
-        .clock-time {
-          font-size: 2.5rem;
-        }
-        
-        .clock-day {
-          font-size: var(--font-size-md);
-        }
-        
-        .clock-date {
-          font-size: var(--font-size-sm);
-        }
-      }
-    `;
-    
-    document.head.appendChild(style);
-    */
   }
 }

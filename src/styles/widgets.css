@@ -153,10 +153,7 @@
   padding-bottom: 0.75rem;
 }
 
-/* Clock widget - extra compact */
-.panel-center .widget-clock .widget-body {
-  padding: 0.5rem 0;
-}
+/* Clock widget - uses custom render with Tailwind, no CSS needed */
 
 /* Weather widget - compact */
 .panel-center .widget-weather .widget-body {

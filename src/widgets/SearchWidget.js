@@ -290,7 +290,7 @@ export class SearchWidget extends BaseWidget {
     const currentEngine = this.engines[this.settings.defaultEngine];
 
     return `
-      <div class="space-y-4">
+      <div class="space-y-4 px-2">
         <!-- Search Input -->
         <div class="space-y-2">
           <!-- Hint for new users (only shown if not dismissed) -->

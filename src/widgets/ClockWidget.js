@@ -10,7 +10,8 @@
  */
 
 import { BaseWidget } from '../widgets/BaseWidget.js';
-
+import { logger as log } from '../utils/logger.js';
+const module = 'ClockWidget';
 export class ClockWidget extends BaseWidget {
   constructor(app, options = {}) {
     super(app, {

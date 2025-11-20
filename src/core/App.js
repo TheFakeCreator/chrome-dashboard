@@ -3,8 +3,12 @@
  * @description Main application controller that initializes and coordinates all systems
  * 
  * @example
- * import { App } from './core/App.js';
+ * // Option 1: Import singleton instance (recommended)
+ * import { app } from './core/App.js';
+ * await app.init();
  * 
+ * // Option 2: Instantiate a new App (advanced usage)
+ * import { App } from './core/App.js';
  * const app = new App();
  * await app.init();
  */
@@ -13,6 +17,11 @@ import { EventBus } from './EventBus.js';
 import { StateManager } from './StateManager.js';
 import { StorageManager } from './StorageManager.js';
 import { ConfigManager } from './ConfigManager.js';
+import { GridManager } from './GridManager.js';
+import { WidgetRegistry } from './WidgetRegistry.js';
+import { WidgetPresets } from './WidgetPresets.js';
+import { logger as log } from '../utils/logger.js';
+const module = 'App';
 
 export class App {
   constructor() {
@@ -24,6 +33,9 @@ export class App {
     this.stateManager = null;
     this.storageManager = null;
     this.configManager = null;
+    this.gridManager = null;
+    this.widgetRegistry = null;
+    this.widgetPresets = null;
     
     // Components registry
     this.components = new Map();
@@ -53,7 +65,7 @@ export class App {
    */
   async _init() {
     try {
-      console.log('[App] Initializing Chrome Dashboard v' + this.version);
+      log.info(module, 'Initializing Chrome Dashboard v' + this.version);
 
       // Phase 1: Initialize core systems
       await this.initCoreSystems();
@@ -70,15 +82,18 @@ export class App {
       // Phase 5: Apply theme
       await this.applyTheme();
 
-      // Phase 6: Load user data
+      // Phase 6: Initialize widget system
+      await this.initWidgetSystem();
+
+      // Phase 7: Load user data
       await this.loadUserData();
 
       this.initialized = true;
       this.eventBus.emit('app:initialized');
       
-      console.log('[App] Initialization complete');
+      log.info(module, 'Initialization complete');
     } catch (error) {
-      console.error('[App] Initialization failed:', error);
+      log.error(module, 'Initialization failed:', error);
       this.eventBus.emit('app:error', { error, phase: 'initialization' });
       throw error;
     }
@@ -90,7 +105,7 @@ export class App {
    * @returns {Promise<void>}
    */
   async initCoreSystems() {
-    console.log('[App] Initializing core systems...');
+    log.info(module, 'Initializing core systems...');
 
     // EventBus - First, as other systems depend on it
     this.eventBus = new EventBus();
@@ -106,7 +121,7 @@ export class App {
     this.configManager = new ConfigManager(this.storageManager);
     await this.configManager.init();
 
-    console.log('[App] Core systems initialized');
+    log.info(module, 'Core systems initialized');
   }
 
   /**
@@ -115,7 +130,7 @@ export class App {
    * @returns {Promise<void>}
    */
   async loadConfiguration() {
-    console.log('[App] Loading configuration...');
+    log.info(module, 'Loading configuration...');
 
     const config = this.configManager.getAll();
     
@@ -127,7 +142,7 @@ export class App {
       'settings.notifications': config.notifications.enabled
     });
 
-    console.log('[App] Configuration loaded');
+    log.info(module, 'Configuration loaded');
   }
 
   /**
@@ -136,7 +151,7 @@ export class App {
    * @returns {Promise<void>}
    */
   async initializeState() {
-    console.log('[App] Initializing state...');
+    log.info(module, 'Initializing state...');
 
     // Set default state
     this.stateManager.set('app', {
@@ -165,7 +180,7 @@ export class App {
       this.eventBus.emit('app:visibility', { visible });
     });
 
-    console.log('[App] State initialized');
+    log.info(module, 'State initialized');
   }
 
   /**
@@ -173,7 +188,7 @@ export class App {
    * @private
    */
   setupEventListeners() {
-    console.log('[App] Setting up event listeners...');
+    log.info(module, 'Setting up event listeners...');
 
     // Config changes
     this.eventBus.on('config:update', async ({ path, value }) => {
@@ -206,7 +221,7 @@ export class App {
       this.handleError(event.reason, 'promise');
     });
 
-    console.log('[App] Event listeners setup complete');
+    log.info(module, 'Event listeners setup complete');
   }
 
   /**
@@ -227,7 +242,117 @@ export class App {
     document.documentElement.setAttribute('data-theme', appliedTheme);
     this.stateManager.set('settings.activeTheme', appliedTheme);
     
-    console.log('[App] Theme applied:', appliedTheme);
+    log.info(module, 'Theme applied:', appliedTheme);
+  }
+
+  /**
+   * Initialize widget system
+   * @private
+   * @returns {Promise<void>}
+   */
+  async initWidgetSystem() {
+    log.info(module, 'Initializing widget system...');
+
+    // Initialize widget registry
+    this.widgetRegistry = new WidgetRegistry(this);
+
+    // Initialize grid manager
+    const gridContainer = document.getElementById('dashboard-grid') || 
+                          document.querySelector('.dashboard-grid') ||
+                          null;
+
+    this.gridManager = new GridManager(this, {
+      container: gridContainer
+    });
+
+    await this.gridManager.init();
+
+    // Initialize widget presets
+    this.widgetPresets = new WidgetPresets(this);
+    await this.widgetPresets.init();
+
+    // Register default widgets
+    await this.registerDefaultWidgets();
+
+    log.info(module, 'Widget system initialized');
+  }
+
+  /**
+   * Register default widgets
+   * @private
+   * @returns {Promise<void>}
+   */
+  async registerDefaultWidgets() {
+    log.info(module, 'Registering default widgets...');
+
+    // Import and register widgets
+    try {
+      // Import widget classes dynamically
+      const { ClockWidget } = await import('../widgets/ClockWidget.js');
+      const { WeatherWidget } = await import('../widgets/WeatherWidget.js');
+      const { SearchWidget } = await import('../widgets/SearchWidget.js');
+      const { QuickLinksWidget } = await import('../widgets/QuickLinksWidget.js');
+      const { ExtensionControlWidget } = await import('../widgets/ExtensionControlWidget.js');
+      const { FocusWidget } = await import('../widgets/FocusWidget.js');
+
+      // Register clock widget
+      this.widgetRegistry.register('clock', ClockWidget, {
+        title: 'Clock',
+        icon: '🕐',
+        description: 'Display current time and date',
+        category: 'time',
+        defaultLayout: { width: 2, height: 1 }
+      });
+
+      // Register weather widget
+      this.widgetRegistry.register('weather', WeatherWidget, {
+        title: 'Weather',
+        icon: '🌤️',
+        description: 'Current weather conditions',
+        category: 'time',
+        defaultLayout: { width: 2, height: 1 }
+      });
+
+      // Register search widget
+      this.widgetRegistry.register('search', SearchWidget, {
+        title: 'Search',
+        icon: '🔍',
+        description: 'Universal search across the web',
+        category: 'productivity',
+        defaultLayout: { width: 12, height: 1 }
+      });
+
+      // Register quick links widget
+      this.widgetRegistry.register('quicklinks', QuickLinksWidget, {
+        title: 'Quick Links',
+        icon: '🔗',
+        description: 'Access your favorite websites quickly',
+        category: 'navigation',
+        defaultLayout: { width: 12, height: 2 }
+      });
+
+      // Register extension control widget
+      this.widgetRegistry.register('extensions', ExtensionControlWidget, {
+        title: 'Extensions',
+        icon: '🔌',
+        description: 'Manage Chrome extensions',
+        category: 'utilities',
+        defaultLayout: { width: 4, height: 3 }
+      });
+
+      // Register focus widget
+      this.widgetRegistry.register('focus', FocusWidget, {
+        title: 'Focus Mode',
+        icon: '🍅',
+        description: 'Pomodoro timer and focus sessions',
+        category: 'productivity',
+        defaultLayout: { width: 3, height: 2 }
+      });
+
+      log.info(module, 'Default widgets registered');
+    } catch (error) {
+      log.error(module, 'Error registering widgets:', error);
+    }
   }
 
   /**
@@ -236,7 +361,7 @@ export class App {
    * @returns {Promise<void>}
    */
   async loadUserData() {
-    console.log('[App] Loading user data...');
+    log.info(module, 'Loading user data...');
 
     try {
       const userData = await this.storageManager.get([
@@ -257,9 +382,9 @@ export class App {
         this.stateManager.set('user', userData.user);
       }
 
-      console.log('[App] User data loaded');
+      log.info(module, 'User data loaded');
     } catch (error) {
-      console.error('[App] Error loading user data:', error);
+      log.error(module, 'Error loading user data:', error);
     }
   }
 
@@ -272,7 +397,7 @@ export class App {
     try {
       await this.storageManager.set({ settings });
     } catch (error) {
-      console.error('[App] Error saving settings:', error);
+      log.error(module, 'Error saving settings:', error);
     }
   }
 
@@ -283,12 +408,12 @@ export class App {
    */
   registerComponent(name, component) {
     if (this.components.has(name)) {
-      console.warn(`[App] Component '${name}' already registered`);
+      log.warn(module, `Component '${name}' already registered`);
       return;
     }
 
     this.components.set(name, component);
-    console.log(`[App] Component registered: ${name}`);
+    log.info(module, `Component registered: ${name}`);
   }
 
   /**
@@ -301,7 +426,7 @@ export class App {
       component.destroy();
     }
     this.components.delete(name);
-    console.log(`[App] Component unregistered: ${name}`);
+    log.info(module, `Component unregistered: ${name}`);
   }
 
   /**
@@ -320,13 +445,13 @@ export class App {
    */
   registerWidget(id, widget) {
     if (this.widgets.has(id)) {
-      console.warn(`[App] Widget '${id}' already registered`);
+      log.warn(module, `Widget '${id}' already registered`);
       return;
     }
 
     this.widgets.set(id, widget);
     this.eventBus.emit('widget:registered', { id, widget });
-    console.log(`[App] Widget registered: ${id}`);
+    log.info(module, `Widget registered: ${id}`);
   }
 
   /**
@@ -340,7 +465,7 @@ export class App {
     }
     this.widgets.delete(id);
     this.eventBus.emit('widget:unregistered', { id });
-    console.log(`[App] Widget unregistered: ${id}`);
+    log.info(module, `Widget unregistered: ${id}`);
   }
 
   /**
@@ -367,7 +492,7 @@ export class App {
    * @param {string} source - Error source
    */
   handleError(error, source) {
-    console.error(`[App] Error from ${source}:`, error);
+    log.error(module, `Error from ${source}:`, error);
     
     this.eventBus.emit('app:error', {
       error,
@@ -383,7 +508,7 @@ export class App {
    * Destroy the application
    */
   destroy() {
-    console.log('[App] Destroying application...');
+    log.info(module, 'Destroying application...');
 
     // Destroy all widgets
     this.widgets.forEach((widget, id) => {
@@ -399,7 +524,7 @@ export class App {
     this.eventBus.clear();
 
     this.initialized = false;
-    console.log('[App] Application destroyed');
+    log.info(module, 'Application destroyed');
   }
 }
 

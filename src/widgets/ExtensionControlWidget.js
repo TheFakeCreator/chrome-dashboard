@@ -8,6 +8,8 @@
 import { BaseWidget } from './BaseWidget.js';
 import { ExtensionCard } from '../components/ExtensionCard.js';
 import extensionManager from '../services/ExtensionManager.js';
+import { logger as log } from '../utils/logger.js';
+const module = 'ExtensionControlWidget';
 
 // Inline SVG icons
 const ICONS = {
@@ -47,7 +49,7 @@ export class ExtensionControlWidget extends BaseWidget {
    */
   async loadData() {
     try {
-      console.log('[ExtensionControlWidget] Loading data...');
+      log.info(module, 'Loading data...');
       
       // Check if chrome.management API is available
       if (!chrome.management) {
@@ -56,25 +58,25 @@ export class ExtensionControlWidget extends BaseWidget {
       
       // Initialize extension manager
       await this.manager.initialize();
-      console.log('[ExtensionControlWidget] Manager initialized');
+      log.info(module, 'Manager initialized');
       
       // Load extensions
       await this.loadExtensions();
-      console.log('[ExtensionControlWidget] Extensions loaded:', this.extensions.length);
+      log.info(module, 'Extensions loaded:', this.extensions.length);
       
       // Setup listeners
       this._setupListeners();
       
       // Render the extension cards now that data is loaded
-      console.log('[ExtensionControlWidget] Data loaded, rendering cards now');
+      log.info(module, 'Data loaded, rendering cards now');
       
       // Manually render the cards since the widget is already mounted
       this._renderExtensionCards();
       this._attachEventListeners();
       
-      console.log('[ExtensionControlWidget] Data load complete');
+      log.info(module, 'Data load complete');
     } catch (error) {
-      console.error('[ExtensionControlWidget] Data load error:', error);
+      log.error(module, 'Data load error:', error);
       this.error = error;
       this.showError('Failed to load Extension Control: ' + error.message);
     }
@@ -85,7 +87,7 @@ export class ExtensionControlWidget extends BaseWidget {
    */
   async loadExtensions() {
     try {
-      console.log('[ExtensionControlWidget] Loading extensions...');
+      log.info(module, 'Loading extensions...');
       const allExtensions = await this.manager.getAllExtensions();
       
       // Whitelist - only show these extensions
@@ -96,11 +98,11 @@ export class ExtensionControlWidget extends BaseWidget {
         whitelist.some(name => ext.name.toLowerCase().includes(name.toLowerCase()))
       );
       
-      console.log('[ExtensionControlWidget] Loaded', this.extensions.length, 'whitelisted extensions:', this.extensions);
+      log.info(module, 'Loaded', this.extensions.length, 'whitelisted extensions:', this.extensions);
       this.filterExtensions();
-      console.log('[ExtensionControlWidget] Filtered to', this.filteredExtensions.length, 'extensions');
+      log.info(module, 'Filtered to', this.filteredExtensions.length, 'extensions');
     } catch (error) {
-      console.error('[ExtensionControlWidget] Error loading extensions:', error);
+      log.error(module, 'Error loading extensions:', error);
     }
   }
 
@@ -209,9 +211,9 @@ export class ExtensionControlWidget extends BaseWidget {
    */
   afterRender() {
     super.afterRender();
-    console.log('[ExtensionControlWidget] afterRender called');
-    console.log('[ExtensionControlWidget] Filtered extensions:', this.filteredExtensions.length);
-    console.log('[ExtensionControlWidget] Element:', this.element);
+    log.info(module, 'afterRender called');
+    log.info(module, 'Filtered extensions:', this.filteredExtensions.length);
+    log.info(module, 'Element:', this.element);
     this._renderExtensionCards();
     this._attachEventListeners();
   }
@@ -221,12 +223,12 @@ export class ExtensionControlWidget extends BaseWidget {
    * @private
    */
   _renderExtensionCards() {
-    console.log('[ExtensionControlWidget] _renderExtensionCards called');
+    log.info(module, '_renderExtensionCards called');
     const container = this.element.querySelector('[data-extensions-list]');
-    console.log('[ExtensionControlWidget] Container found:', container);
+    log.info(module, 'Container found:', container);
     
     if (!container) {
-      console.error('[ExtensionControlWidget] No container found with [data-extensions-list]');
+      log.error(module, 'No container found with [data-extensions-list]');
       return;
     }
 
@@ -234,11 +236,11 @@ export class ExtensionControlWidget extends BaseWidget {
     container.innerHTML = '';
     this.extensionCards.clear();
 
-    console.log('[ExtensionControlWidget] Rendering', this.filteredExtensions.length, 'extension cards');
+    log.info(module, 'Rendering', this.filteredExtensions.length, 'extension cards');
 
     // Render each extension card
     this.filteredExtensions.forEach((extension, index) => {
-      console.log(`[ExtensionControlWidget] Rendering card ${index + 1}:`, extension.name);
+      log.info(module, `Rendering card ${index + 1}:`, extension.name);
       
       const card = new ExtensionCard(extension, {
         app: this.app,
@@ -248,12 +250,12 @@ export class ExtensionControlWidget extends BaseWidget {
       });
 
       const cardElement = card.render();
-      console.log(`[ExtensionControlWidget] Card element created:`, cardElement);
+      log.info(module, `Card element created:`, cardElement);
       container.appendChild(cardElement);
       this.extensionCards.set(extension.id, card);
     });
     
-    console.log('[ExtensionControlWidget] All cards rendered. Container children:', container.children.length);
+    log.info(module, 'All cards rendered. Container children:', container.children.length);
   }
 
   /**
@@ -371,7 +373,7 @@ export class ExtensionControlWidget extends BaseWidget {
       // Update stats
       this.renderUpdate();
     } catch (error) {
-      console.error('[ExtensionControlWidget] Error handling state change:', error);
+      log.error(module, 'Error handling state change:', error);
     }
   }
 
@@ -430,7 +432,7 @@ export class ExtensionControlWidget extends BaseWidget {
       this._renderExtensionCards();
       this._attachEventListeners();
     } catch (error) {
-      console.error('[ExtensionControlWidget] Error toggling extension:', error);
+      log.error(module, 'Error toggling extension:', error);
       this.showError('Failed to toggle extension');
     }
   }
@@ -442,7 +444,7 @@ export class ExtensionControlWidget extends BaseWidget {
     try {
       await this.manager.openExtensionOptions(extensionId);
     } catch (error) {
-      console.error('[ExtensionControlWidget] Error opening options:', error);
+      log.error(module, 'Error opening options:', error);
     }
   }
 
@@ -458,7 +460,7 @@ export class ExtensionControlWidget extends BaseWidget {
         await this.manager.uninstallExtension(extensionId, { showConfirmDialog: false });
       }
     } catch (error) {
-      console.error('[ExtensionControlWidget] Error uninstalling extension:', error);
+      log.error(module, 'Error uninstalling extension:', error);
       this.showError('Failed to uninstall extension');
     }
   }
@@ -474,7 +476,7 @@ export class ExtensionControlWidget extends BaseWidget {
       
       await this.manager.enableExtensions(disabledIds);
     } catch (error) {
-      console.error('[ExtensionControlWidget] Error enabling all:', error);
+      log.error(module, 'Error enabling all:', error);
       this.showError('Failed to enable all extensions');
     }
   }
@@ -493,7 +495,7 @@ export class ExtensionControlWidget extends BaseWidget {
       
       await this.manager.disableExtensions(enabledIds);
     } catch (error) {
-      console.error('[ExtensionControlWidget] Error disabling all:', error);
+      log.error(module, 'Error disabling all:', error);
       this.showError('Failed to disable all extensions');
     }
   }
@@ -506,7 +508,7 @@ export class ExtensionControlWidget extends BaseWidget {
       await this.loadExtensions();
       this.showSuccess('Extensions refreshed');
     } catch (error) {
-      console.error('[ExtensionControlWidget] Error refreshing:', error);
+      log.error(module, 'Error refreshing:', error);
       this.showError('Failed to refresh extensions');
     }
   }
@@ -516,7 +518,7 @@ export class ExtensionControlWidget extends BaseWidget {
    */
   showError(message) {
     // TODO: Implement toast notification
-    console.error(message);
+    log.error(module, message);
     alert(message); // Simple fallback for now
   }
 
@@ -525,7 +527,7 @@ export class ExtensionControlWidget extends BaseWidget {
    */
   showSuccess(message) {
     // TODO: Implement toast notification
-    console.log(message);
+    log.info(module, message);
   }
 
   /**
@@ -533,7 +535,7 @@ export class ExtensionControlWidget extends BaseWidget {
    */
   showNotification(title, message, type = 'info') {
     // TODO: Implement toast notification
-    console.log(`[${type.toUpperCase()}] ${title}: ${message}`);
+    log.info(module, `[${type.toUpperCase()}] ${title}: ${message}`);
     // Simple alert for important notifications
     if (type === 'info') {
       alert(`${title}\n\n${message}`);

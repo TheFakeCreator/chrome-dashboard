@@ -14,7 +14,8 @@
  */
 
 import { BaseWidget } from '../widgets/BaseWidget.js';
-
+import { logger as log } from '../utils/logger.js';
+const module = 'WeatherWidget';
 export class WeatherWidget extends BaseWidget {
   constructor(app, options = {}) {
     super(app, {
@@ -82,13 +83,13 @@ export class WeatherWidget extends BaseWidget {
         this.error = null;
         this.emit('widget:loaded', { widgetId: this.widgetId });
         this.refresh(); // Show loaded data
-        console.log('[WeatherWidget] Data loaded successfully, widget refreshed');
+        log.info(module, 'Data loaded successfully, widget refreshed');
       } catch (error) {
         this.loading = false;
         this.error = error.message;
         this.emit('widget:error', { widgetId: this.widgetId, error: error.message });
         this.refresh(); // Show error state
-        console.error('[WeatherWidget] Error loading data:', error);
+        log.error(module, 'Error loading data:', error);
       }
     }
   }
@@ -111,8 +112,8 @@ export class WeatherWidget extends BaseWidget {
    */
   async fetchWeatherData() {
     // Debug: Log settings
-    console.log('[WeatherWidget] fetchWeatherData - settings:', this.settings);
-    console.log('[WeatherWidget] fetchWeatherData - apiKey:', this.settings?.apiKey);
+    log.info(module, 'fetchWeatherData - settings:', this.settings);
+    log.info(module, 'fetchWeatherData - apiKey:', this.settings?.apiKey);
     
     // Check if API key is configured
     if (!this.settings?.apiKey) {
@@ -121,7 +122,7 @@ export class WeatherWidget extends BaseWidget {
 
     // Get location
     const location = await this.getLocation();
-    console.log('[WeatherWidget] Using location:', location);
+    log.info(module, 'Using location:', location);
     
     // Build URL based on location type (coordinates or city name)
     let weatherUrl, forecastUrl;
@@ -135,16 +136,16 @@ export class WeatherWidget extends BaseWidget {
       forecastUrl = `${this.apiEndpoint}/forecast?q=${location}&appid=${this.settings.apiKey}&units=${this.settings.units}`;
     }
     
-    console.log('[WeatherWidget] Fetching from:', weatherUrl.replace(this.settings.apiKey, 'API_KEY_HIDDEN'));
+    log.info(module, 'Fetching from:', weatherUrl.replace(this.settings.apiKey, 'API_KEY_HIDDEN'));
     
     // Fetch current weather
     const weatherResponse = await fetch(weatherUrl);
     
-    console.log('[WeatherWidget] Weather response status:', weatherResponse.status);
+    log.info(module, 'Weather response status:', weatherResponse.status);
     
     if (!weatherResponse.ok) {
       const errorText = await weatherResponse.text();
-      console.error('[WeatherWidget] API Error:', errorText);
+      log.error(module, 'API Error:', errorText);
       throw new Error(`Weather API error: ${weatherResponse.status} - ${errorText}`);
     }
     
@@ -178,27 +179,27 @@ export class WeatherWidget extends BaseWidget {
    */
   async getLocation() {
     if (this.settings.location) {
-      console.log('[WeatherWidget] Using configured location:', this.settings.location);
+      log.info(module, 'Using configured location:', this.settings.location);
       return this.settings.location;
     }
 
     if (this.settings.autoDetectLocation) {
       try {
         // Try to get location from browser geolocation API
-        console.log('[WeatherWidget] Attempting to get geolocation...');
+        log.info(module, 'Attempting to get geolocation...');
         const position = await this.getCurrentPosition();
         const { latitude, longitude } = position.coords;
         
-        console.log('[WeatherWidget] Geolocation successful:', latitude, longitude);
+        log.info(module, 'Geolocation successful:', latitude, longitude);
         // Use coordinates to get location
         return `lat=${latitude}&lon=${longitude}`;
       } catch (error) {
-        console.warn('[WeatherWidget] Geolocation failed:', error.message, '- using default location');
+        log.warn(module, 'Geolocation failed:', error.message, '- using default location');
       }
     }
 
     // Default location
-    console.log('[WeatherWidget] Using default location: London');
+    log.info(module, 'Using default location: London');
     return 'London';
   }
 
@@ -473,13 +474,13 @@ export class WeatherWidget extends BaseWidget {
     const actionElement = event.target.closest('[data-action]');
     const action = actionElement?.dataset.action;
     
-    console.log('[WeatherWidget] handleEvent - action:', action, 'target:', event.target);
+    log.info(module, 'handleEvent - action:', action, 'target:', event.target);
 
     if (action === 'retry') {
       this.lastFetchTime = null;
       this.loadData();
     } else if (action === 'configure') {
-      console.log('[WeatherWidget] Opening settings for widget:', this.widgetId);
+      log.info(module, 'Opening settings for widget:', this.widgetId);
       this.emit('widget:configure', { widgetId: this.widgetId });
     }
   }

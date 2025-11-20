@@ -1,0 +1,360 @@
+/**
+ * Widget Store Styles
+ * 
+ * Modal UI for browsing and adding widgets
+ */
+
+/* ==================== Modal Container ==================== */
+
+.widget-store-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.widget-store-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+}
+
+.widget-store-container {
+  position: relative;
+  width: 90%;
+  max-width: 900px;
+  max-height: 90vh;
+  background: var(--color-bg-elevated);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-2xl);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideInUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ==================== Header ==================== */
+
+.widget-store-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.widget-store-close {
+  padding: 0.5rem;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  color: var(--color-text-muted);
+  transition: all 0.2s ease;
+}
+
+.widget-store-close:hover {
+  background: var(--color-bg-hover);
+  color: var(--color-text);
+}
+
+/* ==================== Search ==================== */
+
+.widget-store-search-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 2rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.widget-store-search {
+  flex: 1;
+  padding: 0.75rem;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-size: 0.95rem;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.widget-store-search:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-alpha);
+}
+
+.widget-store-shortcut {
+  padding: 0.25rem 0.5rem;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-family: monospace;
+  color: var(--color-text-muted);
+}
+
+/* ==================== Categories ==================== */
+
+.widget-store-categories {
+  display: flex;
+  gap: 0.5rem;
+  padding: 1rem 2rem;
+  border-bottom: 1px solid var(--color-border);
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.widget-store-category {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  color: var(--color-text);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.widget-store-category:hover {
+  background: var(--color-bg-hover);
+  border-color: var(--color-border-hover);
+}
+
+.widget-store-category.active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: white;
+}
+
+/* ==================== Widgets Grid ==================== */
+
+.widget-store-grid {
+  flex: 1;
+  padding: 1.5rem 2rem;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+  align-content: start;
+}
+
+.widget-store-grid::-webkit-scrollbar {
+  width: 8px;
+}
+
+.widget-store-grid::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.widget-store-grid::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+
+.widget-store-grid::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-hover);
+}
+
+/* ==================== Widget Card ==================== */
+
+.widget-store-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.25rem;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  transition: all 0.2s ease;
+}
+
+.widget-store-card:hover {
+  border-color: var(--color-border-hover);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+.widget-store-card-icon {
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
+.widget-store-card-content {
+  flex: 1;
+}
+
+.widget-store-card-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 0.5rem;
+}
+
+.widget-store-card-description {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+  margin-bottom: 0.75rem;
+}
+
+.widget-store-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.widget-store-card-category {
+  padding: 0.25rem 0.5rem;
+  background: var(--color-bg-elevated);
+  border-radius: var(--radius-sm);
+}
+
+.widget-store-card-version {
+  font-family: monospace;
+}
+
+.widget-store-card-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.widget-store-card-add {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+  justify-content: center;
+}
+
+.widget-store-card-add:hover {
+  background: var(--color-primary-hover);
+  transform: translateY(-1px);
+}
+
+.widget-store-card-installed {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--color-success-alpha);
+  color: var(--color-success);
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+  width: 100%;
+  justify-content: center;
+}
+
+/* ==================== Empty State ==================== */
+
+.widget-store-empty {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+/* ==================== Footer ==================== */
+
+.widget-store-footer {
+  padding: 1rem 2rem;
+  border-top: 1px solid var(--color-border);
+  text-align: center;
+}
+
+.widget-store-footer kbd {
+  padding: 0.25rem 0.5rem;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-family: monospace;
+}
+
+/* ==================== Notification ==================== */
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+/* ==================== Responsive ==================== */
+
+@media (max-width: 768px) {
+  .widget-store-container {
+    width: 95%;
+    max-height: 95vh;
+  }
+
+  .widget-store-header,
+  .widget-store-search-container,
+  .widget-store-categories,
+  .widget-store-grid,
+  .widget-store-footer {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .widget-store-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ==================== Accessibility ==================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .widget-store-modal,
+  .widget-store-container,
+  .widget-store-card {
+    animation: none;
+    transition: none;
+  }
+}

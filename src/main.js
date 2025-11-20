@@ -14,7 +14,12 @@ import { QuickLinksWidget } from './widgets/QuickLinksWidget.js';
 import { ExtensionControlWidget } from './widgets/ExtensionControlWidget.js';
 import { FocusWidget } from './widgets/FocusWidget.js';
 import { SettingsModal } from './components/SettingsModal.js';
+import { WidgetStore } from './components/WidgetStore.js';
 import { initIcons } from './utils/icons.js';
+import { logger as log } from './utils/logger.js';
+
+// Logger initialization
+const module = 'Main';
 
 // DOM elements
 let loadingEl;
@@ -111,14 +116,14 @@ async function loadWidgetSettings(widgetId, defaultSettings) {
     const result = await app.storageManager.get([storageKey]);
     
     if (result && result[storageKey]) {
-      console.log('[Main] Loaded saved settings for', widgetId, ':', result[storageKey]);
+      log.info(module, `Loaded saved settings for ${widgetId}:`, result[storageKey]);
       return { ...defaultSettings, ...result[storageKey] };
     }
     
-    console.log('[Main] No saved settings found for', widgetId, ', using defaults');
+    log.info(module, `No saved settings found for ${widgetId}, using defaults`);
     return defaultSettings;
   } catch (error) {
-    console.error('[Main] Error loading widget settings:', error);
+    log.error(module, 'Error loading widget settings:', error);
     return defaultSettings;
   }
 }
@@ -127,14 +132,14 @@ async function loadWidgetSettings(widgetId, defaultSettings) {
  * Initialize Panel System
  */
 function initPanelSystem() {
-  console.log('[Main] Initializing panel system...');
+  log.info(module, 'Initializing panel system...');
   
   // Create Panel Manager
   panelManager = new PanelManager({
     transitionDuration: 500, // Match gesture reset delay
     enabledPanels: ['center', 'top', 'bottom', 'left', 'right'],
     onPanelChange: (to, from) => {
-      console.log('[Main] Panel changed:', from, '→', to);
+      log.info(module, `Panel changed: ${from} → ${to}`);
       updatePanelIndicators();
     }
   });
@@ -142,7 +147,7 @@ function initPanelSystem() {
   // Initialize with container
   const success = panelManager.initialize(panelContainerEl);
   if (!success) {
-    console.error('[Main] Failed to initialize panel system');
+    log.error(module, 'Failed to initialize panel system');
     return false;
   }
 
@@ -188,13 +193,13 @@ function initPanelSystem() {
       
       if (direction) {
         event.preventDefault();
-        console.log(`[Main] Keyboard: ${event.key} -> direction: ${direction}, handled: ${handled}, current panel: ${panelManager.getCurrentPanel()}`);
+        log.info(module, `Keyboard: ${event.key} -> direction: ${direction}, handled: ${handled}, current panel: ${panelManager.getCurrentPanel()}`);
       }
     }
   });
 
-  console.log('[Main] Panel system initialized successfully');
-  console.log('[Main] Keyboard shortcuts: Alt + Arrow keys to navigate panels');
+  log.info(module, 'Panel system initialized successfully');
+  log.info(module, 'Keyboard shortcuts: Alt + Arrow keys to navigate panels');
   return true;
 }
 
@@ -238,9 +243,9 @@ async function createWidgets() {
     if (!initPanelSystem()) {
       throw new Error('Panel system initialization failed');
     }
-
+    log.info(module, 'Panel system initialized successfully');
     // Create Clock widget with fixed ID
-    console.log('[Main] Creating Clock widget...');
+    log.info(module, 'Creating Clock widget...');
     const clockWidgetId = 'widget-clock-main';
     const clockSettings = await loadWidgetSettings(clockWidgetId, {
       format: '24h',
@@ -258,16 +263,16 @@ async function createWidgets() {
     // Create a row container for Clock and Weather
     const topRowContainer = document.createElement('div');
     topRowContainer.className = 'w-full grid grid-cols-2 gap-4 max-w-5xl';
-    
+
     // Mount Clock to row container
     const clockContainer = document.createElement('div');
     clockContainer.className = 'w-full';
     clockWidget.mount(clockContainer);
     topRowContainer.appendChild(clockContainer);
-    console.log('[Main] Clock widget mounted to top row');
+    log.info(module, 'Clock widget mounted to top row');
 
     // Create Weather widget with fixed ID
-    console.log('[Main] Creating Weather widget...');
+    log.info(module, 'Creating Weather widget...');
     const weatherWidgetId = 'widget-weather-main';
     const weatherSettings = await loadWidgetSettings(weatherWidgetId, {
       apiKey: '', // User needs to add their own API key
@@ -298,10 +303,10 @@ async function createWidgets() {
 
     // Add top row (clock + weather) to center panel container
     centerPanelContainer.appendChild(topRowContainer);
-    console.log('[Main] Weather widget added to center panel container');
+    log.info(module, 'Weather widget added to center panel container');
 
     // Create Search widget with fixed ID
-    console.log('[Main] Creating Search widget...');
+    log.info(module, 'Creating Search widget...');
     const searchWidgetId = 'widget-search-main';
     const searchSettings = await loadWidgetSettings(searchWidgetId, {
       defaultEngine: 'google',
@@ -323,10 +328,10 @@ async function createWidgets() {
     searchWidget.mount(searchContainer);
     centerPanelContainer.appendChild(searchContainer);
     
-    console.log('[Main] Search widget added to center panel container');
+    log.info(module, 'Search widget added to center panel container');
 
     // Create Quick Links widget with fixed ID
-    console.log('[Main] Creating Quick Links widget...');
+    log.info(module, 'Creating Quick Links widget...');
     const quickLinksWidgetId = 'widget-quicklinks-main';
     const quickLinksSettings = await loadWidgetSettings(quickLinksWidgetId, {
       viewMode: 'grid',
@@ -347,10 +352,10 @@ async function createWidgets() {
     const quickLinksContainer = document.createElement('div');
     quickLinksWidget.mount(quickLinksContainer);
     panelManager.mountWidget('bottom', quickLinksContainer, quickLinksWidget.widgetId);
-    console.log('[Main] Quick Links widget mounted to bottom panel');
+    log.info(module, 'Quick Links widget mounted to bottom panel');
 
     // Create Extension Control widget with fixed ID
-    console.log('[Main] Creating Extension Control widget...');
+    log.info(module, 'Creating Extension Control widget...');
     const extensionControlWidgetId = 'widget-extension-control-main';
     const extensionControlSettings = await loadWidgetSettings(extensionControlWidgetId, {});
     
@@ -364,14 +369,13 @@ async function createWidgets() {
     extensionControlContainer.className = 'w-full max-w-4xl';
     extensionControlWidget.mount(extensionControlContainer);
     panelManager.mountWidget('top', extensionControlContainer, extensionControlWidget.widgetId);
-    console.log('[Main] Extension Control widget mounted to top panel');
-
+    log.info(module, 'Extension Control widget mounted to top panel');
     // Mount the complete center panel container
     panelManager.mountWidget('center', centerPanelContainer, 'center-panel-container');
-    console.log('[Main] All center panel widgets mounted (clock, weather, search)');
+    log.info(module, 'All center panel widgets mounted (clock, weather, search)');
 
     // Create Focus widget with fixed ID
-    console.log('[Main] Creating Focus widget...');
+    log.info(module, 'Creating Focus widget...');
     const focusWidgetId = 'widget-focus-main';
     const focusSettings = await loadWidgetSettings(focusWidgetId, {});
     
@@ -385,10 +389,9 @@ async function createWidgets() {
     focusContainer.className = 'w-full';
     focusWidget.mount(focusContainer);
     panelManager.mountWidget('left', focusContainer, focusWidget.widgetId);
-    console.log('[Main] Focus widget mounted to left panel');
-
+    log.info(module, 'Focus widget mounted to left panel');
     // Create Settings Modal
-    console.log('[Main] Creating Settings Modal...');
+    log.info(module, 'Creating Settings Modal...');
     const settingsModal = new SettingsModal(app);
     
     // Register widgets with settings modal
@@ -399,11 +402,17 @@ async function createWidgets() {
     settingsModal.registerWidget(extensionControlWidget.widgetId, extensionControlWidget);
     settingsModal.registerWidget(focusWidget.widgetId, focusWidget);
     
-    console.log('[Main] Settings Modal created');
+    log.info(module, 'Settings Modal created');
 
+    // Create Widget Store
+    log.info(module, 'Creating Widget Store...');
+    const widgetStore = new WidgetStore(app);
+    // Note: WidgetStore uses onInit() lifecycle, not init()
+    // The keyboard listener is set up automatically in onInit
+    log.info(module, 'Widget Store created');
     // Listen for widget configure events
     app.eventBus.on('widget:configure', ({ widgetId }) => {
-      console.log('[Main] Opening settings for widget:', widgetId);
+      log.info(module, `Opening settings for widget: ${widgetId}`);
       settingsModal.open('widgets');
     });
 
@@ -448,7 +457,7 @@ async function createWidgets() {
     });
 
   } catch (error) {
-    console.error('[Main] Error creating widgets:', error);
+    log.error(module, 'Error creating widgets:', error);
   }
 }
 
@@ -479,7 +488,7 @@ function setupEventListeners() {
   const settingsBtn = document.getElementById('btn-settings');
   if (settingsBtn) {
     settingsBtn.addEventListener('click', () => {
-      console.log('Settings button clicked');
+      log.info(module, 'Settings button clicked');
       if (window.__settingsModal) {
         window.__settingsModal.open();
       }
@@ -653,8 +662,8 @@ function addInlineStyles() {
  */
 async function initialize() {
   try {
-    console.log('[Main] Starting Chrome Dashboard v2.0');
-    console.log('[Main] Initialization sequence started');
+    log.info(module, '[Main] Starting Chrome Dashboard v2.0');
+    log.info(module, '[Main] Initialization sequence started');
 
     // Initialize DOM
     initDOMReferences();
@@ -669,41 +678,40 @@ async function initialize() {
     setupEventListeners();
 
     // Initialize the app
-    console.log('[Main] Initializing app core...');
+    log.info(module, '[Main] Initializing app core...');
     await app.init();
 
-    console.log('[Main] App core initialized successfully');
-    console.log('[Main] Core systems:');
-    console.log('  - EventBus: ✓');
-    console.log('  - StateManager: ✓');
-    console.log('  - StorageManager: ✓');
-    console.log('  - ConfigManager: ✓');
+    log.info(module, '[Main] App core initialized successfully');
+    log.info(module, '[Main] Core systems:');
+    log.info(module, '  - EventBus: ✓');
+    log.info(module, '  - StateManager: ✓');
+    log.info(module, '  - StorageManager: ✓');
+    log.info(module, '  - ConfigManager: ✓');
 
     // Log current state
     const currentTheme = app.configManager.get('theme');
-    console.log(`[Main] Current theme: ${currentTheme}`);
-
+    log.info(module, `[Main] Current theme: ${currentTheme}`);
     // Setup app event listeners (now that app is initialized)
     app.eventBus.on('app:error', ({ error }) => {
-      console.error('[Main] App error:', error);
+      log.error(module, '[Main] App error:', error);
       showError(error.message || 'An unexpected error occurred');
     });
 
     app.eventBus.on('config:updated', ({ path, value }) => {
       if (path === 'theme') {
-        console.log('[Main] Theme changed to:', value);
+        log.info(module, `[Main] Theme changed to: ${value}`);
       }
     });
 
     // Create and mount widgets
-    console.log('[Main] Creating widgets...');
+    log.info(module, '[Main] Creating widgets...');
     await createWidgets();
     
     // Show the dashboard
     showDashboard()
     
   } catch (error) {
-    console.error('[Main] Initialization failed:', error);
+    log.error(module, '[Main] Initialization failed:', error);
     showError(error.message || 'Failed to initialize dashboard');
   }
 }
@@ -721,4 +729,4 @@ window.__dashboard = {
   version: '2.0.0-alpha'
 };
 
-console.log('[Main] Dashboard module loaded');
+log.info(module, '[Main] Dashboard module loaded');

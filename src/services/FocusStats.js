@@ -11,6 +11,10 @@
  * @class FocusStats
  */
 
+import { logger as log } from '../utils/logger.js';
+
+const module = 'FocusStats';
+
 export class FocusStats {
   /**
    * Storage keys
@@ -32,7 +36,7 @@ export class FocusStats {
     this.streaks = null;
     this.initialized = false;
 
-    console.log('[FocusStats] Instance created');
+    log.info(module, 'Instance created');
   }
 
   /**
@@ -58,9 +62,9 @@ export class FocusStats {
       }
 
       this.initialized = true;
-      console.log('[FocusStats] Initialized:', this.stats);
+      log.info(module, 'Initialized:', this.stats);
     } catch (error) {
-      console.error('[FocusStats] Initialization error:', error);
+      log.error(module, 'Initialization error:', error);
       this.stats = this._getDefaultStats();
       this.sessions = [];
       this.streaks = this._getDefaultStreaks();
@@ -142,7 +146,7 @@ export class FocusStats {
     await this._saveStats();
     await this._saveSessions();
 
-    console.log('[FocusStats] Session recorded:', session);
+    log.info(module, 'Session recorded:', session);
   }
 
   /**
@@ -172,7 +176,7 @@ export class FocusStats {
     }
 
     await this.storageManager.set(FocusStats.STORAGE_KEYS.STREAKS, this.streaks);
-    console.log('[FocusStats] Streak updated:', this.streaks);
+    log.info(module, 'Streak updated:', this.streaks);
   }
 
   /**
@@ -333,7 +337,7 @@ export class FocusStats {
     await this._saveSessions();
     await this.storageManager.set(FocusStats.STORAGE_KEYS.STREAKS, this.streaks);
 
-    console.log('[FocusStats] All stats reset');
+    log.info(module, 'All stats reset');
   }
 
   /**
@@ -368,7 +372,7 @@ export class FocusStats {
     
     if (this.sessions.length < originalLength) {
       await this._saveSessions();
-      console.log(`[FocusStats] Cleaned ${originalLength - this.sessions.length} old sessions`);
+      log.info(module, `Cleaned ${originalLength - this.sessions.length} old sessions`);
     }
   }
 

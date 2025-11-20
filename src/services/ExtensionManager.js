@@ -11,13 +11,17 @@
  * await manager.toggleExtension(extensionId);
  */
 
+import { logger as log } from '../utils/logger.js';
+
+const module = 'ExtensionManager';
+
 export class ExtensionManager {
   constructor() {
     this.extensions = [];
     this.listeners = new Map();
     this.initialized = false;
     
-    console.log('[ExtensionManager] Initialized');
+    log.info(module, 'Initialized');
   }
 
   /**
@@ -35,9 +39,9 @@ export class ExtensionManager {
       this._setupListeners();
 
       this.initialized = true;
-      console.log('[ExtensionManager] Initialized with', this.extensions.length, 'extensions');
+      log.info(module, 'Initialized with', this.extensions.length, 'extensions');
     } catch (error) {
-      console.error('[ExtensionManager] Initialization error:', error);
+      log.error(module, 'Initialization error:', error);
       throw error;
     }
   }
@@ -64,7 +68,7 @@ export class ExtensionManager {
 
       return this.extensions;
     } catch (error) {
-      console.error('[ExtensionManager] Error getting extensions:', error);
+      log.error(module, 'Error getting extensions:', error);
       return [];
     }
   }
@@ -86,7 +90,7 @@ export class ExtensionManager {
     try {
       return await chrome.management.get(extensionId);
     } catch (error) {
-      console.error('[ExtensionManager] Error getting extension:', error);
+      log.error(module, 'Error getting extension:', error);
       return null;
     }
   }
@@ -104,10 +108,10 @@ export class ExtensionManager {
       const newState = !extension.enabled;
       await chrome.management.setEnabled(extensionId, newState);
       
-      console.log(`[ExtensionManager] Toggled ${extension.name} to ${newState ? 'ON' : 'OFF'}`);
+      log.info(module, `Toggled ${extension.name} to ${newState ? 'ON' : 'OFF'}`);
       return newState;
     } catch (error) {
-      console.error('[ExtensionManager] Error toggling extension:', error);
+      log.error(module, 'Error toggling extension:', error);
       throw error;
     }
   }
@@ -119,9 +123,9 @@ export class ExtensionManager {
   async enableExtension(extensionId) {
     try {
       await chrome.management.setEnabled(extensionId, true);
-      console.log(`[ExtensionManager] Enabled extension ${extensionId}`);
+      log.info(module, `Enabled extension ${extensionId}`);
     } catch (error) {
-      console.error('[ExtensionManager] Error enabling extension:', error);
+      log.error(module, 'Error enabling extension:', error);
       throw error;
     }
   }
@@ -133,9 +137,9 @@ export class ExtensionManager {
   async disableExtension(extensionId) {
     try {
       await chrome.management.setEnabled(extensionId, false);
-      console.log(`[ExtensionManager] Disabled extension ${extensionId}`);
+      log.info(module, `Disabled extension ${extensionId}`);
     } catch (error) {
-      console.error('[ExtensionManager] Error disabling extension:', error);
+      log.error(module, 'Error disabling extension:', error);
       throw error;
     }
   }
@@ -171,10 +175,10 @@ export class ExtensionManager {
         // Open options page in new tab
         chrome.tabs.create({ url: extension.optionsUrl });
       } else {
-        console.warn('[ExtensionManager] Extension has no options page');
+        log.warn(module, 'Extension has no options page');
       }
     } catch (error) {
-      console.error('[ExtensionManager] Error opening options:', error);
+      log.error(module, 'Error opening options:', error);
     }
   }
 
@@ -188,10 +192,10 @@ export class ExtensionManager {
     try {
       const { showConfirmDialog = true } = options;
       await chrome.management.uninstall(extensionId, { showConfirmDialog });
-      console.log(`[ExtensionManager] Uninstalled extension ${extensionId}`);
+      log.info(module, `Uninstalled extension ${extensionId}`);
       return true;
     } catch (error) {
-      console.error('[ExtensionManager] Error uninstalling extension:', error);
+      log.error(module, 'Error uninstalling extension:', error);
       return false;
     }
   }
@@ -280,28 +284,28 @@ export class ExtensionManager {
   _setupListeners() {
     // Listen for extension enabled
     chrome.management.onEnabled.addListener((info) => {
-      console.log('[ExtensionManager] Extension enabled:', info.name);
+      log.info(module, 'Extension enabled:', info.name);
       this._notifyListeners('enabled', info);
       this.refreshExtensions();
     });
 
     // Listen for extension disabled
     chrome.management.onDisabled.addListener((info) => {
-      console.log('[ExtensionManager] Extension disabled:', info.name);
+      log.info(module, 'Extension disabled:', info.name);
       this._notifyListeners('disabled', info);
       this.refreshExtensions();
     });
 
     // Listen for extension installed
     chrome.management.onInstalled.addListener((info) => {
-      console.log('[ExtensionManager] Extension installed:', info.name);
+      log.info(module, 'Extension installed:', info.name);
       this._notifyListeners('installed', info);
       this.refreshExtensions();
     });
 
     // Listen for extension uninstalled
     chrome.management.onUninstalled.addListener((extensionId) => {
-      console.log('[ExtensionManager] Extension uninstalled:', extensionId);
+      log.info(module, 'Extension uninstalled:', extensionId);
       this._notifyListeners('uninstalled', { id: extensionId });
       this.refreshExtensions();
     });
@@ -341,7 +345,7 @@ export class ExtensionManager {
         try {
           callback(data);
         } catch (error) {
-          console.error('[ExtensionManager] Listener error:', error);
+          log.error(module, 'Listener error:', error);
         }
       });
     }
@@ -361,7 +365,7 @@ export class ExtensionManager {
     this.removeAllListeners();
     this.extensions = [];
     this.initialized = false;
-    console.log('[ExtensionManager] Destroyed');
+    log.info(module, 'Destroyed');
   }
 }
 

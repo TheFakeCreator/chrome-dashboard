@@ -1,3 +1,5 @@
+import { logger as log } from "../utils/logger";
+const module = 'GestureDetector';
 /**
  * GestureDetector - Detects trackpad and touch gestures
  * Supports two-finger swipe for panel navigation
@@ -36,7 +38,7 @@ export class GestureDetector {
     this._touchMoveHandler = this._handleTouchMove.bind(this);
     this._touchEndHandler = this._handleTouchEnd.bind(this);
 
-    console.log('[GestureDetector] Initialized with threshold:', this.threshold);
+    log.info(module, 'Initialized with threshold:', this.threshold);
   }
 
   /**
@@ -45,14 +47,14 @@ export class GestureDetector {
    */
   initialize(element) {
     if (!element) {
-      console.error('[GestureDetector] Element not provided');
+      log.error(module, 'Element not provided');
       return false;
     }
 
     this.element = element;
     this._attachListeners();
 
-    console.log('[GestureDetector] Gesture detection active');
+    log.info(module, 'Gesture detection active');
     return true;
   }
 
@@ -93,7 +95,7 @@ export class GestureDetector {
       this.startTime = Date.now();
       this.isTracking = true;
       this.hasTriggered = false; // Flag to ensure only one trigger per gesture
-      console.log('[GestureDetector] Starting new gesture');
+      log.info(module, 'Starting new gesture');
     }
 
     // If already triggered in this gesture, ignore further deltas
@@ -135,7 +137,7 @@ export class GestureDetector {
     clearTimeout(this._resetTimer);
     this._resetTimer = setTimeout(() => {
       if (this.isTracking) {
-        console.log('[GestureDetector] Gesture complete, resetting');
+        log.info(module, 'Gesture complete, resetting');
       }
       this._resetTracking();
     }, 500); // Wait 500ms after last wheel event to consider gesture complete
@@ -223,7 +225,7 @@ export class GestureDetector {
    * @param {Event} event - Original event
    */
   _triggerSwipe(direction, event) {
-    console.log('[GestureDetector] Swipe detected:', direction);
+    log.info(module, 'Swipe detected:', direction);
 
     // Prevent default scrolling
     if (event.preventDefault) {
@@ -286,6 +288,6 @@ export class GestureDetector {
     }
 
     this.element = null;
-    console.log('[GestureDetector] Destroyed');
+    log.info(module, '[GestureDetector] Destroyed');
   }
 }

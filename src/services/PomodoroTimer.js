@@ -9,6 +9,10 @@
  * @class PomodoroTimer
  */
 
+import { logger as log } from '../utils/logger.js';
+
+const module = 'PomodoroTimer';
+
 export class PomodoroTimer {
   /**
    * Timer states
@@ -65,7 +69,7 @@ export class PomodoroTimer {
       sessionStart: []
     };
 
-    console.log('[PomodoroTimer] Initialized with durations:', this.durations);
+    log.info(module, 'Initialized with durations:', this.durations);
   }
 
   /**
@@ -73,7 +77,7 @@ export class PomodoroTimer {
    */
   start() {
     if (this.state === PomodoroTimer.STATE.RUNNING) {
-      console.warn('[PomodoroTimer] Timer already running');
+      log.warn(module, 'Timer already running');
       return;
     }
 
@@ -96,7 +100,7 @@ export class PomodoroTimer {
     this.intervalId = setInterval(() => this._tick(), 1000);
     this.emit('stateChange', { state: this.state, sessionType: this.sessionType });
     
-    console.log('[PomodoroTimer] Started:', this.sessionType);
+    log.info(module, 'Started:', this.sessionType);
   }
 
   /**
@@ -104,7 +108,7 @@ export class PomodoroTimer {
    */
   pause() {
     if (this.state !== PomodoroTimer.STATE.RUNNING) {
-      console.warn('[PomodoroTimer] Timer not running');
+      log.warn(module, 'Timer not running');
       return;
     }
 
@@ -117,7 +121,7 @@ export class PomodoroTimer {
     }
 
     this.emit('stateChange', { state: this.state, sessionType: this.sessionType });
-    console.log('[PomodoroTimer] Paused');
+    log.info(module, 'Paused');
   }
 
   /**
@@ -138,7 +142,7 @@ export class PomodoroTimer {
     this.emit('stateChange', { state: this.state, sessionType: this.sessionType });
     this.emit('tick', { timeRemaining: this.timeRemaining, progress: 0 });
     
-    console.log('[PomodoroTimer] Stopped');
+    log.info(module, 'Stopped');
   }
 
   /**
@@ -153,7 +157,7 @@ export class PomodoroTimer {
     this.emit('stateChange', { state: this.state, sessionType: this.sessionType });
     this.emit('tick', { timeRemaining: this.timeRemaining, progress: 0 });
     
-    console.log('[PomodoroTimer] Reset');
+    log.info(module, 'Reset');
   }
 
   /**
@@ -162,7 +166,7 @@ export class PomodoroTimer {
   skipSession() {
     this.stop();
     this._nextSession();
-    console.log('[PomodoroTimer] Skipped to next session:', this.sessionType);
+    log.info(module, 'Skipped to next session:', this.sessionType);
   }
 
   /**
@@ -208,7 +212,7 @@ export class PomodoroTimer {
       duration: this.getDuration()
     });
 
-    console.log('[PomodoroTimer] Session completed:', completedSessionType);
+    log.info(module, 'Session completed:', completedSessionType);
 
     // Move to next session
     this._nextSession();
@@ -284,7 +288,7 @@ export class PomodoroTimer {
       this.emit('tick', { timeRemaining: this.timeRemaining, progress: 0 });
     }
 
-    console.log('[PomodoroTimer] Durations updated:', this.durations);
+    log.info(module, 'Durations updated:', this.durations);
   }
 
   /**
@@ -293,7 +297,7 @@ export class PomodoroTimer {
    */
   updateSessionsBeforeLongBreak(count) {
     this.sessionsBeforeLongBreak = count;
-    console.log('[PomodoroTimer] Sessions before long break updated:', count);
+    log.info(module, 'Sessions before long break updated:', count);
   }
 
   /**
@@ -341,7 +345,7 @@ export class PomodoroTimer {
         try {
           callback(data);
         } catch (error) {
-          console.error(`[PomodoroTimer] Error in ${event} listener:`, error);
+          log.error(module, `Error in ${event} listener:`, error);
         }
       });
     }
@@ -363,7 +367,7 @@ export class PomodoroTimer {
       sessionStart: []
     };
 
-    console.log('[PomodoroTimer] Destroyed');
+    log.info(module, 'Destroyed');
   }
 }
 

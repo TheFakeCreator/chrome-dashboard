@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Chrome Dashboard - Your Productivity Hub">
-  <title>New Tab - Chrome Dashboard</title>
-  
+  <title>Aura - New Tab</title>
+
   <!-- Tailwind CSS -->
   <link rel="stylesheet" href="src/styles/tailwind.css">
 </head>
+
 <body>
   <!-- App Container -->
   <div id="app">
@@ -30,18 +32,23 @@
 
     <!-- Header Actions (Floating) -->
     <div id="header-actions" class="fixed top-6 right-6 z-50 flex items-center gap-2" style="display: none;">
-      <button id="btn-theme" class="p-2.5 rounded-xl bg-dark-surface/80 backdrop-blur-lg border border-dark-border hover:bg-dark-elevated transition-all shadow-lg" title="Toggle Theme">
+      <button id="btn-theme"
+        class="p-2.5 rounded-xl bg-dark-surface/80 backdrop-blur-lg border border-dark-border hover:bg-dark-elevated transition-all shadow-lg"
+        title="Toggle Theme">
         <i data-lucide="sun" class="w-5 h-5 text-dark-text"></i>
       </button>
-      
-      <button id="btn-settings" class="p-2.5 rounded-xl bg-dark-surface/80 backdrop-blur-lg border border-dark-border hover:bg-dark-elevated transition-all shadow-lg" title="Settings">
+
+      <button id="btn-settings"
+        class="p-2.5 rounded-xl bg-dark-surface/80 backdrop-blur-lg border border-dark-border hover:bg-dark-elevated transition-all shadow-lg"
+        title="Settings">
         <i data-lucide="settings" class="w-5 h-5 text-dark-text"></i>
       </button>
     </div>
 
     <!-- Panel Navigation Indicators -->
     <div id="panel-indicators" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50" style="display: none;">
-      <div class="flex items-center gap-3 px-4 py-2 rounded-full bg-dark-surface/80 backdrop-blur-lg border border-dark-border shadow-lg">
+      <div
+        class="flex items-center gap-3 px-4 py-2 rounded-full bg-dark-surface/80 backdrop-blur-lg border border-dark-border shadow-lg">
         <!-- Indicators will be dynamically updated -->
       </div>
     </div>
@@ -71,4 +78,5 @@
   <!-- Main Script -->
   <script type="module" src="src/main.js"></script>
 </body>
+
 </html>

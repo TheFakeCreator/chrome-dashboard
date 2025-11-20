@@ -11,6 +11,7 @@ export default {
       colors: {
         // Brand colors
         primary: {
+          DEFAULT: '#3b82f6',
           50: '#eff6ff',
           100: '#dbeafe',
           200: '#bfdbfe',
@@ -22,11 +23,29 @@ export default {
           800: '#1e40af',
           900: '#1e3a8a',
         },
+        // Semantic colors
+        success: {
+          DEFAULT: '#10b981',
+          light: '#34d399',
+          dark: '#059669',
+        },
+        error: {
+          DEFAULT: '#ef4444',
+          light: '#f87171',
+          dark: '#dc2626',
+        },
+        warning: {
+          DEFAULT: '#f59e0b',
+          light: '#fbbf24',
+          dark: '#d97706',
+        },
         // Dark theme colors
         dark: {
-          bg: '#0f172a',
-          surface: '#1e293b',
-          elevated: '#334155',
+          bg: {
+            primary: '#0f172a',
+            secondary: '#1e293b',
+            tertiary: '#334155',
+          },
           border: '#475569',
           text: '#e2e8f0',
           muted: '#94a3b8',
@@ -38,13 +57,21 @@ export default {
       },
       animation: {
         'fade-in': 'fadeIn 0.2s ease-in-out',
+        'fadeIn': 'fadeIn 0.2s ease-in-out',
         'slide-up': 'slideUp 0.3s ease-out',
+        'slideUp': 'slideUp 0.3s ease-out',
         'slide-down': 'slideDown 0.3s ease-out',
+        'slideDown': 'slideDown 0.3s ease-out',
+        'fadeOut': 'fadeOut 0.3s ease-out',
       },
       keyframes: {
         fadeIn: {
           '0%': { opacity: '0' },
           '100%': { opacity: '1' },
+        },
+        fadeOut: {
+          '0%': { opacity: '1' },
+          '100%': { opacity: '0' },
         },
         slideUp: {
           '0%': { transform: 'translateY(10px)', opacity: '0' },

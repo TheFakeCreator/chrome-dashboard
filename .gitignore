@@ -75,3 +75,6 @@ releases/*.crx
 
 # Old files
 style.css
+
+# Design and UI
+design/

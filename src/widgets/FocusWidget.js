@@ -15,6 +15,8 @@
 import { BaseWidget } from './BaseWidget.js';
 import { PomodoroTimer } from '../services/PomodoroTimer.js';
 import { FocusStats } from '../services/FocusStats.js';
+import { logger as log } from '../utils/logger.js';
+const module = 'FocusWidget';
 
 export class FocusWidget extends BaseWidget {
   constructor(app, options = {}) {
@@ -40,7 +42,7 @@ export class FocusWidget extends BaseWidget {
     this.view = 'timer'; // 'timer' or 'stats'
     
     this._setupTimerListeners();
-    console.log('[FocusWidget] Initialized with settings:', this.settings);
+    log.info(module, 'Initialized with settings:', this.settings);
   }
 
   /**
@@ -77,7 +79,7 @@ export class FocusWidget extends BaseWidget {
     });
 
     this.timer.on('sessionStart', (data) => {
-      console.log('[FocusWidget] Session started:', data);
+      log.info(module, 'Session started:', data);
     });
   }
 
@@ -88,9 +90,9 @@ export class FocusWidget extends BaseWidget {
     try {
       await this.stats.initialize();
       const summary = await this.stats.getSummary();
-      console.log('[FocusWidget] Stats loaded:', summary);
+      log.info(module, 'Stats loaded:', summary);
     } catch (error) {
-      console.error('[FocusWidget] Error loading data:', error);
+      log.error(module, 'Error loading data:', error);
     }
   }
 
@@ -360,7 +362,7 @@ export class FocusWidget extends BaseWidget {
    * @private
    */
   async _handleSessionComplete(data) {
-    console.log('[FocusWidget] Session completed:', data);
+    log.info(module, 'Session completed:', data);
 
     // Record stats
     await this.stats.recordSession(data);
@@ -579,7 +581,7 @@ export class FocusWidget extends BaseWidget {
       }
     });
 
-    console.log('[FocusWidget] Event listeners attached');
+    log.info(module, 'Event listeners attached');
   }
 
   /**
@@ -687,7 +689,7 @@ export class FocusWidget extends BaseWidget {
    * Handle settings update
    */
   async onSettingsUpdate(newSettings) {
-    console.log('[FocusWidget] Settings updated:', newSettings);
+    log.info(module, 'Settings updated:', newSettings);
     
     // Update timer durations (convert minutes to seconds)
     if (newSettings.workDuration !== undefined) {

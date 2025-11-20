@@ -2,7 +2,7 @@
   "name": "chrome-dashboard",
   "version": "2.0.0-alpha",
   "description": "A modern, productivity-focused new tab dashboard for Chrome with customizable sections, focus mode, task management, and smart widgets",
-  "main": "src/core/main.js",
+  "main": "src/main.js",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -14,6 +14,8 @@
     "format:check": "prettier --check \"**/*.{js,json,css,html,md}\"",
     "prepare": "husky",
     "test": "echo \"Tests will be added soon\" && exit 0"
+    ,
+    "watch:build": "nodemon --watch src --ext js,css,html --exec \"pnpm build\""
   },
   "lint-staged": {
     "*.js": [
@@ -55,6 +57,7 @@
     "eslint": "^9.39.1",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.6",
+    "nodemon": "^3.1.11",
     "postcss": "^8.5.6",
     "prettier": "^3.6.2",
     "tailwindcss": "^3.4.18",

@@ -14,6 +14,8 @@
  */
 
 import { BaseWidget } from '../widgets/BaseWidget.js';
+import { logger as log } from '../utils/logger.js';
+const module = 'SearchWidget';
 
 export class SearchWidget extends BaseWidget {
   constructor(app, options = {}) {
@@ -120,7 +122,7 @@ export class SearchWidget extends BaseWidget {
 
     // Ensure engines are initialized (they're set in constructor, this is just a safety check)
     if (!this.engines) {
-      console.warn('[SearchWidget] Engines not yet initialized, skipping loadData');
+      log.warn(module, 'Engines not yet initialized, skipping loadData');
       return;
     }
 
@@ -139,7 +141,7 @@ export class SearchWidget extends BaseWidget {
    */
   search(query, engine = null) {
     if (!query || !query.trim()) {
-      console.log('[SearchWidget] Search called with empty query');
+      log.info(module, 'Search called with empty query');
       return;
     }
 
@@ -147,19 +149,19 @@ export class SearchWidget extends BaseWidget {
     const engineConfig = this.engines[searchEngine];
 
     if (!engineConfig) {
-      console.error(`[SearchWidget] Unknown engine: ${searchEngine}`);
+      log.error(module, `Unknown engine: ${searchEngine}`);
       return;
     }
 
     const searchUrl = engineConfig.url + encodeURIComponent(query.trim());
-    console.log('[SearchWidget] Searching:', query.trim(), 'on', searchEngine, 'URL:', searchUrl);
+    log.info(module, `Searching: ${query.trim()} on ${searchEngine}, URL: ${searchUrl}`);
 
     // Open in new tab or current tab
     if (this.settings.openInNewTab) {
-      console.log('[SearchWidget] Opening in new tab');
+      log.info(module, 'Opening in new tab');
       chrome.tabs.create({ url: searchUrl });
     } else {
-      console.log('[SearchWidget] Opening in current tab');
+      log.info(module, 'Opening in current tab');
       chrome.tabs.update({ url: searchUrl });
     }
 
@@ -171,7 +173,7 @@ export class SearchWidget extends BaseWidget {
 
     // Keep the query for potential re-search with different engine
     // Don't clear input after search
-    console.log('[SearchWidget] Search completed successfully');
+    log.info(module, 'Search completed successfully');
   }
 
   /**
@@ -225,7 +227,7 @@ export class SearchWidget extends BaseWidget {
         this.updateSuggestions();
       }
     } catch (error) {
-      console.warn('[SearchWidget] Failed to fetch suggestions:', error);
+      log.warn(module, 'Failed to fetch suggestions:', error);
       this.suggestions = [];
     }
   }
@@ -372,13 +374,13 @@ export class SearchWidget extends BaseWidget {
     const actionElement = event.target.closest('[data-action]');
     const action = actionElement?.dataset.action;
     
-    console.log('[SearchWidget] handleEvent - action:', action, 'target:', event.target);
+    log.info(module, 'handleEvent - action:', action, 'target:', event.target);
 
     if (action === 'search') {
       this.search(this.query);
     } else if (action === 'set-engine') {
       const engine = event.target.closest('[data-engine]')?.dataset.engine;
-      console.log('[SearchWidget] Setting engine to:', engine);
+      log.info(module, 'Setting engine to:', engine);
       if (engine) {
         this.setEngine(engine);
       }
@@ -394,7 +396,7 @@ export class SearchWidget extends BaseWidget {
   async setEngine(engine) {
     if (!this.engines[engine]) return;
 
-    console.log('[SearchWidget] Engine changed from', this.settings.defaultEngine, 'to', engine);
+    log.info(module, 'Engine changed from', this.settings.defaultEngine, 'to', engine);
     
     // Update settings (this will save and refresh automatically)
     await this.updateSettings({ defaultEngine: engine });
@@ -419,7 +421,7 @@ export class SearchWidget extends BaseWidget {
     }
     
     const nextEngine = engineKeys[nextIndex];
-    console.log('[SearchWidget] Cycling engine:', direction, '->', nextEngine);
+    log.info(module, 'Cycling engine:', direction, '->', nextEngine);
     
     await this.setEngine(nextEngine);
     
@@ -436,7 +438,7 @@ export class SearchWidget extends BaseWidget {
    * Show engine menu
    */
   async showEngineMenu() {
-    console.log('[SearchWidget] Show engine menu');
+    log.info(module, 'Show engine menu');
     
     // Create a temporary dropdown overlay
     const dropdown = document.createElement('div');
@@ -652,7 +654,7 @@ export class SearchWidget extends BaseWidget {
       document.addEventListener('keydown', this.keyboardHandler);
     }
 
-    console.log('[SearchWidget] Mounted and ready');
+    log.info(module, '[SearchWidget] Mounted and ready');
   }
 
   /**

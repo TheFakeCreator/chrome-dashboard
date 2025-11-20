@@ -13,6 +13,12 @@
 /* Carousel Component Styles */
 @import './carousel.css';
 
+/* Grid System Styles */
+@import './grid.css';
+
+/* Widget Store Styles */
+@import './widget-store.css';
+
 /* Custom Base Styles */
 @layer base {
   * {
@@ -20,7 +26,7 @@
   }
   
   body {
-    @apply bg-dark-bg text-dark-text font-sans antialiased;
+    @apply bg-dark-bg-primary text-dark-text font-sans antialiased;
   }
 
   /* Scrollbar Styles */
@@ -29,11 +35,11 @@
   }
 
   ::-webkit-scrollbar-track {
-    @apply bg-dark-surface;
+    @apply bg-dark-bg-secondary;
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-dark-border rounded-full hover:bg-dark-elevated;
+    @apply bg-dark-border rounded-full hover:bg-dark-bg-tertiary;
   }
 }
 
@@ -41,7 +47,7 @@
 @layer components {
   /* Card Component */
   .card {
-    @apply bg-dark-surface rounded-xl border border-dark-border p-6 shadow-lg;
+    @apply bg-dark-bg-secondary rounded-xl border border-dark-border p-6 shadow-lg;
   }
 
   .card-hover {
@@ -50,7 +56,7 @@
 
   /* Button Components */
   .btn {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-dark-bg;
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-dark-bg-primary;
   }
 
   .btn-primary {
@@ -58,11 +64,11 @@
   }
 
   .btn-secondary {
-    @apply bg-dark-elevated text-dark-text hover:bg-dark-border focus:ring-dark-border;
+    @apply bg-dark-bg-tertiary text-dark-text hover:bg-dark-border focus:ring-dark-border;
   }
 
   .btn-ghost {
-    @apply bg-transparent text-dark-text hover:bg-dark-elevated focus:ring-dark-border;
+    @apply bg-transparent text-dark-text hover:bg-dark-bg-tertiary focus:ring-dark-border;
   }
 
   .btn-sm {
@@ -75,7 +81,7 @@
 
   /* Input Components */
   .input {
-    @apply w-full px-4 py-2 bg-dark-elevated border border-dark-border rounded-lg text-dark-text placeholder-dark-muted focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200;
+    @apply w-full px-4 py-2 bg-dark-bg-tertiary border border-dark-border rounded-lg text-dark-text placeholder-dark-muted focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200;
   }
 
   .input-error {
@@ -109,7 +115,7 @@
   }
 
   .modal-content {
-    @apply bg-dark-surface rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden transform scale-95 transition-transform duration-200;
+    @apply bg-dark-bg-secondary rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden transform scale-95 transition-transform duration-200;
   }
 
   .modal-overlay.show .modal-content {

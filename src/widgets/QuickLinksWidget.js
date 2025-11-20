@@ -16,6 +16,8 @@
 
 import { BaseWidget } from './BaseWidget.js';
 import { InfiniteCarousel } from '../components/InfiniteCarousel.js';
+import { logger as log } from '../utils/logger.js';
+const module = 'QuickLinksWidget';
 
 export class QuickLinksWidget extends BaseWidget {
   constructor(app, options = {}) {
@@ -97,10 +99,10 @@ export class QuickLinksWidget extends BaseWidget {
         // Save migrated links
         if (needsMigration) {
           await this.saveLinks();
-          console.log('[QuickLinksWidget] Migrated favicon URLs to Clearbit Logo API');
+          log.info(module, 'Migrated favicon URLs to Clearbit Logo API');
         }
         
-        console.log('[QuickLinksWidget] Loaded', this.links.length, 'links');
+        log.info(module, 'Loaded', this.links.length, 'links');
       } else {
         // Initialize with default links
         this.links = this.getDefaultLinks();
@@ -118,7 +120,7 @@ export class QuickLinksWidget extends BaseWidget {
       this.loading = false;
       this.error = error.message;
       this.emit('widget:error', { widgetId: this.widgetId, error: error.message });
-      console.error('[QuickLinksWidget] Error loading data:', error);
+      log.error(module, 'Error loading data:', error);
     }
   }
 
@@ -179,7 +181,7 @@ export class QuickLinksWidget extends BaseWidget {
   async saveLinks() {
     const storageKey = `widget.${this.widgetId}.links`;
     await this.app.storageManager.set({ [storageKey]: this.links });
-    console.log('[QuickLinksWidget] Saved', this.links.length, 'links');
+    log.info(module, 'Saved', this.links.length, 'links');
   }
 
   /**
@@ -205,7 +207,7 @@ export class QuickLinksWidget extends BaseWidget {
     this.refresh();
     
     this.emit('link:added', { link: newLink });
-    console.log('[QuickLinksWidget] Added link:', newLink.title);
+    log.info(module, 'Added link:', newLink.title);
   }
 
   /**
@@ -223,7 +225,7 @@ export class QuickLinksWidget extends BaseWidget {
     this.refresh();
     
     this.emit('link:updated', { link });
-    console.log('[QuickLinksWidget] Updated link:', link.title);
+    log.info(module, 'Updated link:', link.title);
   }
 
   /**
@@ -241,7 +243,7 @@ export class QuickLinksWidget extends BaseWidget {
     this.refresh();
     
     this.emit('link:deleted', { linkId });
-    console.log('[QuickLinksWidget] Deleted link:', link.title);
+    log.info(module, 'Deleted link:', link.title);
   }
 
   /**
@@ -257,7 +259,7 @@ export class QuickLinksWidget extends BaseWidget {
     await this.saveLinks();
     this.refresh();
     
-    console.log('[QuickLinksWidget] Toggled pin for:', link.title, '→', link.pinned);
+    log.info(module, 'Toggled pin for:', link.title, '→', link.pinned);
   }
 
   /**
@@ -273,7 +275,7 @@ export class QuickLinksWidget extends BaseWidget {
     link.lastUsed = Date.now();
     await this.saveLinks();
     
-    console.log('[QuickLinksWidget] Tracked usage for:', link.title, '→', link.usageCount);
+    log.info(module, 'Tracked usage for:', link.title, '→', link.usageCount);
   }
 
   /**
@@ -375,7 +377,7 @@ export class QuickLinksWidget extends BaseWidget {
     const sortedLinks = this.getSortedLinks();
     const viewMode = this.settings.viewMode;
     
-    console.log('[QuickLinksWidget] render() - viewMode:', viewMode);
+    log.info(module, 'render() - viewMode:', viewMode);
 
     return `
       <div class="space-y-4">
@@ -1096,14 +1098,14 @@ export class QuickLinksWidget extends BaseWidget {
    * @private
    */
   initializeCarousel() {
-    console.log('[QuickLinksWidget] initializeCarousel called');
-    console.log('[QuickLinksWidget] element:', this.element);
+    log.info(module, 'initializeCarousel called');
+    log.info(module, 'element:', this.element);
     
     const mountPoint = this.element?.querySelector('[data-carousel-mount]');
-    console.log('[QuickLinksWidget] mountPoint found:', mountPoint);
+    log.info(module, 'mountPoint found:', mountPoint);
     
     if (!mountPoint) {
-      console.error('[QuickLinksWidget] No carousel mount point found!');
+      log.error(module, 'No carousel mount point found!');
       return;
     }
 
@@ -1144,7 +1146,7 @@ export class QuickLinksWidget extends BaseWidget {
       initIcons(carouselEl);
     });
 
-    console.log('[QuickLinksWidget] Futuristic carousel initialized with', sortedLinks.length, 'items');
+    log.info(module, 'Futuristic carousel initialized with', sortedLinks.length, 'items');
   }
 
   /**
@@ -1153,11 +1155,11 @@ export class QuickLinksWidget extends BaseWidget {
   onAfterRender() {
     super.onAfterRender();
     
-    console.log('[QuickLinksWidget] onAfterRender - viewMode:', this.settings.viewMode);
+    log.info(module, 'onAfterRender - viewMode:', this.settings.viewMode);
     
     // Initialize carousel if in carousel mode
     if (this.settings.viewMode === 'carousel') {
-      console.log('[QuickLinksWidget] Carousel mode detected, initializing...');
+      log.info(module, 'Carousel mode detected, initializing...');
       // Use setTimeout to ensure DOM is ready
       setTimeout(() => {
         this.initializeCarousel();
@@ -1173,7 +1175,7 @@ export class QuickLinksWidget extends BaseWidget {
    */
   onMount() {
     super.onMount();
-    console.log('[QuickLinksWidget] Mounted and ready');
+    log.info(module, 'Mounted and ready');
   }
 
   /**

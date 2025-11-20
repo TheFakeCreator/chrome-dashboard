@@ -1,3 +1,5 @@
+import { logger as log } from '../utils/logger.js';
+const module = 'PanelManager';
 /**
  * PanelManager - Manages multi-panel navigation system
  * Handles 5 panels: center (main), top, bottom, left, right
@@ -29,7 +31,7 @@ export class PanelManager {
     this.onPanelTransitionStart = options.onPanelTransitionStart || null;
     this.onPanelTransitionEnd = options.onPanelTransitionEnd || null;
 
-    console.log('[PanelManager] Initialized with panels:', this.enabledPanels);
+    log.info(module, 'Initialized with panels:', this.enabledPanels);
   }
 
   /**
@@ -38,7 +40,7 @@ export class PanelManager {
    */
   initialize(container) {
     if (!container) {
-      console.error('[PanelManager] Container element not provided');
+      log.error(module, 'Container element not provided');
       return false;
     }
 
@@ -46,7 +48,7 @@ export class PanelManager {
     this._setupPanelStructure();
     this._updatePanelPosition();
 
-    console.log('[PanelManager] Panel system initialized');
+    log.info(module, 'Panel system initialized');
     return true;
   }
 
@@ -150,22 +152,21 @@ export class PanelManager {
    */
   navigateToPanel(panelId, animate = true) {
     if (this.isTransitioning) {
-      console.log('[PanelManager] Transition in progress, ignoring navigation');
+      log.info(module, 'Transition in progress, ignoring navigation');
       return false;
     }
 
     if (!this.enabledPanels.includes(panelId)) {
-      console.warn('[PanelManager] Panel not enabled:', panelId);
+      log.warn(module, 'Panel not enabled:', panelId);
       return false;
     }
 
     if (panelId === this.currentPanel) {
-      console.log('[PanelManager] Already on panel:', panelId);
+      log.info(module, 'Already on panel:', panelId);
       return false;
     }
 
-    console.log('[PanelManager] Navigating from', this.currentPanel, 'to', panelId);
-
+    log.info(module, `Navigating from ${this.currentPanel} to ${panelId}`);
     const previousPanel = this.currentPanel;
     this.currentPanel = panelId;
 
@@ -204,7 +205,7 @@ export class PanelManager {
 
     const delta = directionMap[direction];
     if (!delta) {
-      console.warn('[PanelManager] Invalid direction:', direction);
+      log.warn(module, 'Invalid direction:', direction);
       return false;
     }
 
@@ -221,7 +222,7 @@ export class PanelManager {
     });
 
     if (!targetPanel) {
-      console.log('[PanelManager] No panel in direction:', direction);
+      log.info(module, 'No panel in direction:', direction);
       return false;
     }
 
@@ -252,7 +253,7 @@ export class PanelManager {
    * @param {string} to - Current panel
    */
   _onTransitionComplete(from, to) {
-    console.log('[PanelManager] Transition complete:', from, '→', to);
+    log.info(module, `Transition complete: ${from} → ${to}`);
 
     if (this.onPanelTransitionEnd) {
       this.onPanelTransitionEnd(from, to);
@@ -282,14 +283,14 @@ export class PanelManager {
   mountWidget(panelId, widgetElement, widgetId) {
     const panelContent = this.getPanelContent(panelId);
     if (!panelContent) {
-      console.error('[PanelManager] Panel not found:', panelId);
+      log.error(module, 'Panel not found:', panelId);
       return false;
     }
 
     panelContent.appendChild(widgetElement);
     this.panels[panelId].widgets.push(widgetId);
     
-    console.log('[PanelManager] Mounted widget', widgetId, 'to panel', panelId);
+    log.info(module, `Mounted widget ${widgetId} to panel ${panelId}`);
     return true;
   }
 
@@ -348,6 +349,6 @@ export class PanelManager {
     this.viewport = null;
     this.panelsContainer = null;
 
-    console.log('[PanelManager] Destroyed');
+    log.info(module, '[PanelManager] Destroyed');
   }
 }

@@ -1,4 +1,3 @@
-
 <div align="center">
   <img src="src/assets/icons/icon128.png" alt="Aura New Tab Logo" width="128" height="128" />
   
@@ -14,6 +13,26 @@
 </div>
 
 ---
+
+## 📑 Table of Contents
+
+1. [Features](#-features)
+2. [Quick Start](#-quick-start)
+3. [Keyboard Shortcuts](#️-keyboard-shortcuts)
+4. [Usage Guide](#-usage-guide)
+5. [Architecture](#-architecture)
+6. [Development](#️-development)
+7. [Customization](#-customization)
+8. [Privacy & Security](#-privacy--security)
+9. [Troubleshooting](#-troubleshooting)
+10. [Tech Stack](#-tech-stack)
+11. [Roadmap](#-roadmap)
+12. [Contributing](#-contributing)
+13. [License](#-license)
+14. [Acknowledgments](#-acknowledgments)
+15. [Support & Community](#-support--community)
+16. [Show Your Support](#-show-your-support)
+
 
 ## ✨ Features
 

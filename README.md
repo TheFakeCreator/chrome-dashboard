@@ -1,10 +1,17 @@
-# 🚀 Chrome Dashboard v2.0
 
-> A modern, productivity-focused Chrome extension that transforms your new tab into a powerful, customizable dashboard.
+<div align="center">
+  <img src="src/assets/icon128.png" alt="Aura New Tab Logo" width="128" height="128" />
+  
+  <h1 style="margin-top: 0.5em; font-size: 2.5em; font-weight: bold; letter-spacing: 0.05em;">Aura New Tab</h1>
+  
+  <p style="font-size: 1.25em; color: #555; margin-top: 0.5em;">
+    A modern, productivity-focused Chrome extension that transforms your new tab into a powerful, customizable dashboard.
+  </p>
 
-![Chrome Dashboard](https://img.shields.io/badge/version-2.0.0--alpha-blue.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
-![Chrome](https://img.shields.io/badge/chrome-v120+-brightgreen.svg)
+  <img src="https://img.shields.io/badge/version-2.0.0--alpha-blue.svg" alt="Version" />
+  <img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License" />
+  <img src="https://img.shields.io/badge/chrome-v120+-brightgreen.svg" alt="Chrome Version" />
+</div>
 
 ---
 

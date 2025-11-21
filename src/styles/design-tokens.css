@@ -206,31 +206,31 @@
    ======================================== */
 
 [data-theme="dark"] {
-  /* Background Colors */
-  --color-background: #0f172a;
-  --color-surface: #1e293b;
-  --color-surface-elevated: #334155;
-  --color-border: #334155;
-  --color-divider: #475569;
-  
-  /* Text Colors */
-  --color-text-primary: #f1f5f9;
-  --color-text-secondary: #cbd5e1;
-  --color-text-tertiary: #64748b;
-  --color-text-inverse: #0f172a;
-  
-  /* Glassmorphism */
-  --glass-background: rgba(30, 41, 59, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-  
-  /* Adjust shadows for dark theme */
-  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
-  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+   /* Background Colors */
+   --color-background: #353535;
+   --color-surface: #232323;
+   --color-surface-elevated: #444444;
+   --color-border: #444444;
+   --color-divider: #5a5a5a;
+
+   /* Text Colors */
+   --color-text-primary: #f3f3f3;
+   --color-text-secondary: #bdbdbd;
+   --color-text-tertiary: #888888;
+   --color-text-inverse: #232323;
+
+   /* Glassmorphism */
+   --glass-background: rgba(53, 53, 53, 0.7);
+   --glass-border: rgba(255, 255, 255, 0.08);
+   --glass-shadow: 0 8px 32px 0 rgba(53, 53, 53, 0.25);
+
+   /* Adjust shadows for dark theme */
+   --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.25);
+   --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.32), 0 1px 2px 0 rgba(0, 0, 0, 0.22);
+   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.32), 0 2px 4px -1px rgba(0, 0, 0, 0.22);
+   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.32), 0 4px 6px -2px rgba(0, 0, 0, 0.22);
+   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.38), 0 10px 10px -5px rgba(0, 0, 0, 0.22);
+   --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.45);
 }
 
 /* ========================================
@@ -248,18 +248,25 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme]) {
-    /* Auto dark mode when system preference is dark */
-    --color-background: #0f172a;
-    --color-surface: #1e293b;
-    --color-surface-elevated: #334155;
-    --color-border: #334155;
-    --color-divider: #475569;
-    --color-text-primary: #f1f5f9;
-    --color-text-secondary: #cbd5e1;
-    --color-text-tertiary: #64748b;
-    --color-text-inverse: #0f172a;
-    --glass-background: rgba(30, 41, 59, 0.7);
-    --glass-border: rgba(255, 255, 255, 0.1);
-  }
+   :root:not([data-theme]) {
+      /* Auto dark mode when system preference is dark */
+      --color-background: #353535;
+      --color-surface: #232323;
+      --color-surface-elevated: #444444;
+      --color-border: #444444;
+      --color-divider: #5a5a5a;
+      --color-text-primary: #f3f3f3;
+      --color-text-secondary: #bdbdbd;
+      --color-text-tertiary: #888888;
+      --color-text-inverse: #232323;
+      --glass-background: rgba(53, 53, 53, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.08);
+   }
 }
+
+
+/* #31C6FF */
+/* #925EFF */
+/* #F042CB */
+/* #F03A85 */
+/* #FFBB42 */

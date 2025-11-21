@@ -4,6 +4,7 @@
  */
 
 /* Panel Viewport - Fixed, No Scrolling */
+@import './design-tokens.css';
 .panel-viewport {
   position: fixed;
   top: 0;
@@ -11,7 +12,7 @@
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  background: var(--color-bg);
+  background: var(--color-background);
 }
 
 /* Panels Container - Holds all 5 panels in 3x3 grid */
@@ -113,28 +114,30 @@
   align-self: start;
 }
 
+
 .panel-top .panel-content {
-  background: linear-gradient(to bottom, var(--color-surface) 0%, var(--color-bg) 100%);
+  background: linear-gradient(to bottom, var(--color-surface) 0%, var(--color-background) 100%);
 }
 
 .panel-bottom .panel-content {
-  background: linear-gradient(to top, var(--color-surface) 0%, var(--color-bg) 100%);
+  background: linear-gradient(to top, var(--color-surface) 0%, var(--color-background) 100%);
 }
 
 .panel-left .panel-content {
-  background: linear-gradient(to right, var(--color-surface) 0%, var(--color-bg) 100%);
+  background: linear-gradient(to right, var(--color-surface) 0%, var(--color-background) 100%);
 }
 
 .panel-right .panel-content {
-  background: linear-gradient(to left, var(--color-surface) 0%, var(--color-bg) 100%);
+  background: linear-gradient(to left, var(--color-surface) 0%, var(--color-background) 100%);
 }
 
 /* Panel Indicators */
+
 .panel-indicator {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--color-muted);
+  background: var(--color-border);
   transition: all 200ms ease;
   cursor: pointer;
 }
@@ -145,11 +148,12 @@
 }
 
 .panel-indicator:hover {
-  background: var(--color-text);
+  background: var(--color-text-primary);
   transform: scale(1.1);
 }
 
 /* Direction Arrows */
+
 .direction-arrow {
   width: 32px;
   height: 32px;
@@ -159,7 +163,7 @@
   border-radius: 50%;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  color: var(--color-text);
+  color: var(--color-text-primary);
   cursor: pointer;
   transition: all 200ms ease;
   opacity: 0.6;
@@ -167,7 +171,7 @@
 
 .direction-arrow:hover {
   opacity: 1;
-  background: var(--color-elevated);
+  background: var(--color-surface-elevated);
   transform: scale(1.1);
 }
 
@@ -282,14 +286,15 @@
   margin-bottom: 1.5rem;
 }
 
+
 .panel-title {
   font-size: 1.5rem;
   font-weight: 600;
-  color: var(--color-text);
+  color: var(--color-text-primary);
 }
 
 .panel-subtitle {
   font-size: 0.875rem;
-  color: var(--color-muted);
+  color: var(--color-text-secondary);
   margin-top: 0.25rem;
 }

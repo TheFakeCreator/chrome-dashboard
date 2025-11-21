@@ -1,6 +1,6 @@
 
 <div align="center">
-  <img src="src/assets/icon128.png" alt="Aura New Tab Logo" width="128" height="128" />
+  <img src="src/assets/icons/icon128.png" alt="Aura New Tab Logo" width="128" height="128" />
   
   <h1 style="margin-top: 0.5em; font-size: 2.5em; font-weight: bold; letter-spacing: 0.05em;">Aura New Tab</h1>
   
